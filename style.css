@@ -1,0 +1,86 @@
+@font-face { font-family: Iosevka; font-weight: 900; font-display: swap; src: url(fonts/iosevka-heavy.woff2) format('woff2'); }
+@font-face { font-family: JetBrains; font-weight: 400; font-display: swap; src: url(fonts/jetbrains-Regular.woff2) format('woff2'); }
+@font-face { font-family: JetBrains; font-weight: 700; font-display: swap; src: url(fonts/jetbrains-Bold.woff2) format('woff2'); }
+@font-face { font-family: Inter; font-weight: 400; font-display: swap; src: url(fonts/inter-Regular.woff2) format('woff2'); }
+@font-face { font-family: Inter; font-weight: 600; font-display: swap; src: url(fonts/inter-SemiBold.woff2) format('woff2'); }
+
+:root {
+  --bg: #07040f; --surface: #120a22; --overlay: #2c1b4d; --text: #eaf6ff; --muted: #9184bc;
+  --cyan: #00f0ff; --pink: #ff2a6d; --yellow: #f9f002; --green: #05ffa1; --violet: #b44cff;
+  --display: Iosevka, ui-monospace, monospace; --ui: Inter, system-ui, sans-serif; --mono: JetBrains, ui-monospace, monospace;
+  --cut: 14px; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 400 16px/1.55 var(--ui); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+#contour { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -1; }
+main { width: min(1120px, 100%); margin: 0 auto; padding: 0 16px; display: grid; gap: clamp(64px, 11vw, 120px); }
+section { min-width: 0; }
+h1, h2, p { margin: 0; }
+h2 { font: 900 clamp(30px, 5vw, 52px)/1.05 var(--display); margin: 6px 0 22px; }
+.label { font: 700 12px/1.3 var(--mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.dim { color: var(--muted); }
+.split { text-shadow: -2px 0 0 rgb(255 42 109 / 0.85), 2px 0 0 rgb(0 240 255 / 0.85); }
+code { font: 400 0.92em var(--mono); color: var(--cyan); }
+.cut { clip-path: polygon(0 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% 100%, var(--cut) 100%, 0 calc(100% - var(--cut))); }
+
+.hero { min-height: 100svh; display: grid; align-content: center; justify-items: start; gap: 14px; padding: 48px 0; }
+.hero h1 { font: 900 clamp(68px, 19vw, 210px)/0.92 var(--display); letter-spacing: -0.01em; }
+.lead { max-width: 46ch; font-size: clamp(17px, 2.2vw, 21px); color: var(--text); margin-bottom: 18px; }
+
+.btn { --c: 8px; display: inline-block; border: 0; cursor: pointer; padding: 12px 18px; text-decoration: none; text-align: center;
+  background: color-mix(in srgb, var(--cyan) 9%, var(--surface)); color: var(--cyan); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--cyan) 55%, transparent);
+  font: 700 13px/1.1 var(--mono); letter-spacing: 0.1em; text-transform: uppercase;
+  clip-path: polygon(0 0, calc(100% - var(--c)) 0, 100% var(--c), 100% 100%, var(--c) 100%, 0 calc(100% - var(--c))); }
+.btn:hover { background: var(--cyan); color: var(--bg); }
+.btn.primary { background: var(--cyan); color: var(--bg); }
+.btn.primary:hover { background: var(--text); }
+.btn:focus-visible { outline: 0; background: var(--text); color: var(--bg); box-shadow: inset 0 0 0 2px var(--bg); }
+
+/* The ticket: two pieces joined along a perforated edge. */
+.ticket { --hole: 11px; width: min(760px, 100%); display: grid; grid-template-columns: minmax(0, 1fr) 216px; filter: drop-shadow(0 0 1px var(--cyan)) drop-shadow(0 0 16px rgb(0 240 255 / 0.3)); }
+.stub-main, .stub-tear { background: var(--surface); padding: 22px 24px; transition: transform 700ms cubic-bezier(0.2, 0.7, 0.2, 1), opacity 700ms ease-in; }
+.stub-main { clip-path: polygon(0 0, 100% 0, 100% 100%, 16px 100%, 0 calc(100% - 16px)); display: grid; gap: 4px; align-content: start; }
+.stub-main h2 { font-size: clamp(26px, 4vw, 40px); margin: 2px 0 0; overflow-wrap: anywhere; }
+.stub-tear { clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%); border-left: 2px dashed var(--overlay); display: grid; gap: 10px; align-content: center; }
+.admit { font: 900 24px/1.05 var(--display); color: var(--yellow); overflow-wrap: anywhere; }
+dl { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px 18px; margin: 14px 0 0; }
+dt { font: 700 11px/1.3 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
+.ticket.torn .stub-tear { transform: translate(34px, 26px) rotate(7deg); opacity: 0; pointer-events: none; }
+
+.theatre { display: grid; gap: 10px; scroll-margin-top: 16px; }
+video { width: 100%; display: block; background: #000; }
+
+.showcase { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap: 20px; }
+.show { background: var(--surface); padding-bottom: 16px; }
+.show img { display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: cover; object-position: top; background: var(--bg); }
+.show.tall img { object-fit: contain; }
+.show h3 { font: 700 15px/1.3 var(--mono); margin: 14px 16px 4px; color: var(--cyan); }
+.show p { margin: 0 16px; color: var(--muted); font-size: 15px; }
+
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; }
+.facts b { display: block; font: 900 26px/1.1 var(--display); margin-bottom: 4px; }
+.facts p { color: var(--muted); }
+
+form { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; margin-top: 18px; background: var(--surface); padding: 20px; }
+label { display: grid; gap: 5px; font: 700 12px/1.3 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+input { width: 100%; border: 1px solid var(--overlay); background: var(--bg); color: var(--text); padding: 11px 12px; font: 400 15px/1.2 var(--mono); letter-spacing: 0; }
+input:focus { outline: 2px solid var(--cyan); outline-offset: 1px; }
+.wide { grid-column: 1 / -1; }
+.warn { color: var(--yellow); min-height: 1.4em; font-size: 14px; }
+.row { display: flex; flex-wrap: wrap; gap: 10px; }
+.get { display: grid; justify-items: start; gap: 12px; }
+.get h2 { margin-bottom: 4px; }
+footer { padding: 0 0 40px; }
+
+@media (max-width: 620px) {
+  .ticket { grid-template-columns: minmax(0, 1fr); }
+  .stub-main { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); padding: 18px; }
+  .stub-tear { border-left: 0; border-top: 2px dashed var(--overlay); padding: 18px; clip-path: polygon(0 0, 100% 0, 100% 100%, 16px 100%, 0 calc(100% - 16px)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .stub-main, .stub-tear { transition: none; }
+}

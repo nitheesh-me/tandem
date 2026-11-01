@@ -1,0 +1,27 @@
+{
+  "ticket": {
+    "show": "Tandem: The Trailer",
+    "line": "Watch together, in lockstep",
+    "venue": "Your screen, and theirs",
+    "date": "Tonight",
+    "time": "Any time",
+    "seat": "Any seat",
+    "admit": "Admit everyone"
+  },
+  "trailer": { "src": "media/trailer.mp4", "poster": "media/trailer-poster.jpg", "shape": "1920 / 600" },
+  "showcase": [
+    { "image": "media/room.webp", "title": "One room, one frame", "text": "Everyone plays the same frame at the same moment, and the Stations panel shows how close each one is." },
+    { "image": "media/tracks.webp", "title": "Your language, your subtitles", "text": "Pick your own audio, subtitles and picture size. The room stays together." },
+    { "image": "media/chat.webp", "title": "Chat and react", "text": "Reactions rise over the picture, and people who join late can read the chat so far." },
+    { "image": "media/queue.webp", "title": "Download ahead", "text": "Fetch a whole film before the party, so a slow connection does not matter on the night." },
+    { "image": "media/home.webp", "title": "Rooms that are really live", "text": "The home screen shows only rooms someone is in, with the real film and position." },
+    { "image": "media/phone.webp", "title": "Phone, tablet and TV", "text": "The same engine runs on Android, with remote control navigation on Android TV.", "tall": true }
+  ],
+  "facts": [
+    ["No server", "Stations talk directly. Nothing holds your session or your files."],
+    ["No account", "An invite is all anyone needs."],
+    ["Any file", "Share a video from your device, and others stream it from you as they watch."],
+    ["Stays in sync", "A slow connection gets a smaller picture instead of pausing everyone."]
+  ],
+  "download": { "note": "Tandem is in private testing. Downloads will appear here.", "links": [] }
+}

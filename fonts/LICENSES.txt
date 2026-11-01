@@ -1,0 +1,3 @@
+Subsets of the following fonts, all under the SIL Open Font License 1.1:
+Iosevka Nerd Font (Be5invis, Nerd Fonts), JetBrains Mono Nerd Font (JetBrains,
+Nerd Fonts), Inter (The Inter Project Authors), Noto Sans CJK JP (Google, Adobe).

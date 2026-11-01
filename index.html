@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tandem: watch together, in lockstep</title>
+<meta name="description" content="Tandem plays the same frame at the same moment for everyone, with no server in the middle.">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#07040F">
+<link rel="icon" href="media/icon.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="contour" aria-hidden="true"></canvas>
+<main>
+  <section class="hero">
+    <p class="label">// Watch together, in lockstep</p>
+    <h1 class="split">TANDEM</h1>
+    <p class="lead">Everyone plays the same frame at the same moment, with no server in the middle.</p>
+
+    <article class="ticket" id="ticket" aria-label="Ticket">
+      <div class="stub-main">
+        <p class="label">// Ticket</p>
+        <h2 id="t-show"></h2>
+        <p class="dim" id="t-line"></p>
+        <dl>
+          <div><dt>Venue</dt><dd id="t-venue"></dd></div>
+          <div><dt>Date</dt><dd id="t-date"></dd></div>
+          <div><dt>Time</dt><dd id="t-time"></dd></div>
+          <div><dt>Seat</dt><dd id="t-seat"></dd></div>
+        </dl>
+      </div>
+      <div class="stub-tear">
+        <p class="admit" id="t-admit"></p>
+        <button class="btn primary" id="tear">Tear to enter</button>
+        <a class="btn" id="join" hidden>Open in Tandem</a>
+      </div>
+    </article>
+  </section>
+
+  <section class="theatre" id="theatre" hidden aria-label="Trailer">
+    <p class="label">// Now showing</p>
+    <video id="trailer" controls playsinline preload="none"></video>
+  </section>
+
+  <section aria-labelledby="showcase-title">
+    <p class="label">// Showcase</p>
+    <h2 id="showcase-title" class="split">What is playing</h2>
+    <div class="showcase" id="showcase"></div>
+  </section>
+
+  <section class="facts" id="facts" aria-label="Why Tandem"></section>
+
+  <section class="maker" aria-labelledby="maker-title">
+    <p class="label">// Box office</p>
+    <h2 id="maker-title" class="split">Make a ticket</h2>
+    <p class="dim">Name the show and paste your room invite. Chat apps often will not open a <code>tandem://</code> link, but they will open this page. Everything stays in the link itself and is never sent to this site.</p>
+    <form id="maker">
+      <label>Show<input name="show" maxlength="80" autocomplete="off"></label>
+      <label>Date<input name="date" maxlength="40" autocomplete="off"></label>
+      <label>Time<input name="time" maxlength="40" autocomplete="off"></label>
+      <label>Seat<input name="seat" maxlength="40" autocomplete="off"></label>
+      <label class="wide">Room invite<input name="invite" placeholder="tandem://join/..." autocomplete="off" spellcheck="false"></label>
+      <p class="wide warn" id="maker-note" role="status"></p>
+      <div class="wide row">
+        <button class="btn primary" type="submit">Copy ticket link</button>
+        <a class="btn" id="preview" href="#">Preview</a>
+      </div>
+    </form>
+  </section>
+
+  <section class="get" aria-labelledby="get-title">
+    <p class="label">// Get Tandem</p>
+    <h2 id="get-title" class="split">Take your seat</h2>
+    <p class="dim" id="get-note"></p>
+    <div class="row" id="get-links"></div>
+  </section>
+  <footer class="label">// Tandem</footer>
+</main>
+<script src="contour.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
