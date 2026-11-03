@@ -26,9 +26,9 @@
 <header class="top">
   <a class="brand" href="#doors" aria-label="Tandem, back to the top">TANDEM<span aria-hidden="true">//LIVE</span></a>
   <nav aria-label="Sections">
-    <a href="#stage">Stage</a>
+    <a href="#stage">Premiere</a>
     <a href="#setlist">Setlist</a>
-    <a href="#box-office">Box office</a>
+    <a href="#crowd">Crowd</a>
     <a href="#encore">Encore</a>
   </nav>
   <button class="sound" type="button" data-sound>
@@ -122,13 +122,23 @@
   <section class="stage" id="stage" aria-labelledby="stage-title">
     <div class="sec-head">
       <p class="label">// Main stage</p>
-      <h2 id="stage-title" class="split">Now showing</h2>
-      <p class="dim">Every screen in the room shows this frame at the same moment.</p>
+      <h2 id="stage-title" class="split">World premiere</h2>
+      <p class="dim" id="stage-note">The music video for the anthem is on its way to this stage.</p>
     </div>
     <div class="screen" data-lit>
       <div class="pillar" aria-hidden="true"></div>
       <div class="screen-glass">
-        <video id="trailer" controls playsinline preload="none" aria-label="Tandem trailer"></video>
+        <div class="premiere" id="premiere">
+          <img src="media/art-premiere.webp" width="1600" height="900" loading="lazy" decoding="async" alt="">
+          <div class="premiere-card">
+            <p class="premiere-tag"><span class="rec" aria-hidden="true"></span>World premiere</p>
+            <p class="premiere-title">The music video</p>
+            <p class="premiere-song">DOKI-DOKI★FRAME-BY-FRAME!</p>
+            <p class="premiere-when">Coming to this stage soon</p>
+            <button class="btn primary" type="button" data-sound data-show><span class="sound-label">Play the anthem</span></button>
+          </div>
+        </div>
+        <video id="trailer" controls playsinline preload="none" aria-label="The music video" hidden></video>
         <div class="shutter" aria-hidden="true"><span></span><span></span></div>
       </div>
       <div class="pillar" aria-hidden="true"></div>
@@ -154,52 +164,52 @@
       <p class="label">// Setlist</p>
       <h2 id="showcase-title" class="split">Tonight's setlist</h2>
     </div>
-    <ol class="setlist" id="showcase"></ol>
-    <div class="bsides">
-      <h3 class="label">// B-sides</h3>
-      <ul id="bsides"></ul>
+    <div class="board" data-lit>
+      <p class="board-head" aria-hidden="true"><span>Tandem</span><span>World tour</span><span>Tonight</span></p>
+      <ol class="setlist" id="showcase"></ol>
+      <p class="board-foot"><a href="#encore">Encore: take Tandem home</a></p>
     </div>
   </section>
 
-  <section class="chants" aria-labelledby="chants-title">
+  <section class="chants" id="crowd" aria-labelledby="chants-title">
     <div class="sec-head">
       <p class="label">// The crowd</p>
       <h2 id="chants-title" class="split">Sing it back</h2>
+      <p class="dim">The crowd calls it. Tandem answers.</p>
     </div>
     <ul class="facts" id="facts"></ul>
   </section>
 
-  <section class="maker" id="box-office" aria-labelledby="maker-title">
-    <div class="sec-head">
-      <p class="label">// Box office</p>
-      <h2 id="maker-title" class="split">Print a pass</h2>
-      <p class="dim">Name the show and paste your room invite. Opening the pass opens the room in the app, or in the browser where the app is not installed. Everything stays in the link itself and is never sent to this site.</p>
-    </div>
-    <form id="maker">
-      <label>Show<input name="show" maxlength="80" autocomplete="off"></label>
-      <label>Date<input name="date" maxlength="40" autocomplete="off"></label>
-      <label>Time<input name="time" maxlength="40" autocomplete="off"></label>
-      <label>Seat<input name="seat" maxlength="40" autocomplete="off"></label>
-      <label class="wide">Room invite<input name="invite" placeholder="https://nitheesh-me.github.io/tandem/join/#..." autocomplete="off" spellcheck="false"></label>
-      <p class="wide warn" id="maker-note" role="status"></p>
-      <div class="wide row">
-        <button class="btn primary" type="submit">Copy pass link</button>
-        <a class="btn" id="preview" href="#">Preview</a>
-      </div>
-    </form>
-  </section>
-
-  <section class="get encore" id="encore" aria-labelledby="get-title">
+  <section class="encore" id="encore" aria-labelledby="get-title">
     <p class="encore-word led" aria-hidden="true" data-text="ENCORE">ENCORE</p>
     <div class="encore-row">
       <div class="encore-copy">
         <p class="label">// Encore</p>
-        <h2 id="get-title" class="split">Take your seat</h2>
-        <p class="dim" id="get-note"></p>
-        <div class="row" id="get-links"></div>
-        <div class="row">
-          <button class="btn" type="button" data-sound><span class="sound-label">Play the anthem</span></button>
-        </div>
+        <h2 id="get-title" class="split">One more for the road</h2>
+        <ul class="encore-list">
+          <li>
+            <a class="encore-card" href="watch/">
+              <span class="encore-n" aria-hidden="true">E1</span>
+              <span class="encore-title">Watch in this browser</span>
+              <span class="encore-line">Have an invite? Join the room right here, with nothing to install.</span>
+            </a>
+          </li>
+          <li>
+            <div class="encore-card static">
+              <span class="encore-n" aria-hidden="true">E2</span>
+              <h3 class="encore-title">Get the app</h3>
+              <p class="encore-line" id="get-note"></p>
+              <div class="row" id="get-links"></div><p class="soon">Opening soon</p>
+            </div>
+          </li>
+          <li>
+            <button class="encore-card" type="button" data-sound data-show>
+              <span class="encore-n" aria-hidden="true">E3</span>
+              <span class="encore-title sound-label">Play the anthem</span>
+              <span class="encore-line">One more time, from the top, with the lights.</span>
+            </button>
+          </li>
+        </ul>
       </div>
       <figure class="encore-art holo" data-lit>
         <img src="media/art-poster.webp" width="760" height="1247" loading="lazy" decoding="async" alt="Three rooms at night: someone on a bus with a phone, someone at a laptop, two people on a sofa before a TV, all joined by one line of light.">
@@ -210,9 +220,33 @@
 
 <footer class="credits">
   <p class="label">// <a href="#doors">Tandem</a> // free, peer to peer, no account</p>
+  <p class="host"><a href="#make" id="make-link">Hosting a show? Make a pass</a></p>
   <p class="dim" id="credits">The anthem, "DOKI-DOKI★FRAME-BY-FRAME! (The Tandem Anthem)", and the key art were made with Google Gemini by the project owner.</p>
   <p class="dim fine">Fonts: Iosevka, JetBrains Mono and Inter, under the SIL Open Font License. QR codes: qrcode-generator, MIT. <a href="vendor/LICENSES.txt">Licences</a>.</p>
 </footer>
+
+<dialog class="maker-dialog" id="make" aria-labelledby="maker-title">
+  <div class="maker-head">
+    <div>
+      <p class="label">// Box office, for hosts</p>
+      <h2 id="maker-title" class="split">Make a pass</h2>
+    </div>
+    <form method="dialog"><button class="btn" type="submit">Close</button></form>
+  </div>
+  <p class="dim">Name the show and paste your room invite. Opening the pass opens the room in the app, or in the browser where the app is not installed. Everything stays in the link itself and is never sent to this site.</p>
+  <form id="maker">
+    <label>Show<input name="show" maxlength="80" autocomplete="off" autofocus></label>
+    <label>Date<input name="date" maxlength="40" autocomplete="off"></label>
+    <label>Time<input name="time" maxlength="40" autocomplete="off"></label>
+    <label>Seat<input name="seat" maxlength="40" autocomplete="off"></label>
+    <label class="wide">Room invite<input name="invite" placeholder="https://nitheesh-me.github.io/tandem/join/#..." autocomplete="off" spellcheck="false"></label>
+    <p class="wide warn" id="maker-note" role="status"></p>
+    <div class="wide row">
+      <button class="btn primary" type="submit">Copy pass link</button>
+      <a class="btn" id="preview" href="#">Preview</a>
+    </div>
+  </form>
+</dialog>
 
 <audio id="anthem" preload="none"></audio>
 <script src="app.js"></script>

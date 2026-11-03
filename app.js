@@ -106,42 +106,45 @@ function showTicket(ticket) {
   for (const key of FIELDS) $(`t-${key}`).textContent = ticket[key] ?? '';
 }
 
-/** The showcase, as tonight's setlist: numbered LED panels that light up on scroll. */
+/** Small line glyphs for the setlist, drawn in the current colour. */
+const GLYPHS = {
+  sync: '<path d="M7 7v18M16 7v18M25 7v18"/><path class="g-move" d="M3 16h26"/>',
+  clock: '<circle cx="16" cy="18" r="10"/><path d="M12 4h8"/><path class="g-move" d="M16 18v-6"/>',
+  heart: '<path class="g-move" d="M16 26S5 19 5 12a5.5 5.5 0 0 1 11-1.5A5.5 5.5 0 0 1 27 12c0 7-11 14-11 14z"/>',
+  bars: '<path d="M6 26V16M11 26V9M16 26V13M21 26V6M26 26V18"/>',
+  down: '<path class="g-move" d="M16 4v15M10 13l6 6 6-6"/><path d="M5 27h22"/>',
+  subs: '<rect x="4" y="7" width="24" height="18"/><path d="M8 16h6M17 16h7M8 21h10M21 21h3"/>',
+  live: '<circle cx="16" cy="16" r="3"/><path class="g-move" d="M10 10a8.5 8.5 0 0 0 0 12M22 10a8.5 8.5 0 0 1 0 12M6 6a14 14 0 0 0 0 20M26 6a14 14 0 0 1 0 20"/>',
+  screens: '<rect x="3" y="6" width="19" height="13"/><path d="M8 25h9M12.5 19v6"/><rect x="23" y="11" width="7" height="14"/>',
+};
+
+/** The setlist: numbered songs, each a feature with one true line and its glyph. */
 function showcase(items) {
   const box = $('showcase');
   items.forEach((item, i) => {
-    const track = Object.assign(document.createElement('li'), { className: `track${item.tall ? ' tall' : ''}` });
-    track.dataset.lit = '';
-    const number = Object.assign(document.createElement('span'), { className: 'track-n', textContent: String(i + 1).padStart(2, '0') });
+    const song = Object.assign(document.createElement('li'), { className: 'song' });
+    song.style.setProperty('--i', i);
+    const number = Object.assign(document.createElement('span'), { className: 'song-n', textContent: String(i + 1).padStart(2, '0') });
     number.setAttribute('aria-hidden', 'true');
-    const panel = Object.assign(document.createElement('div'), { className: 'panel' });
-    panel.append(Object.assign(document.createElement('img'), { src: item.image, alt: item.alt ?? item.title, loading: 'lazy', decoding: 'async' }));
-    const title = Object.assign(document.createElement('h3'), { textContent: item.title });
-    const text = Object.assign(document.createElement('p'), { textContent: item.text });
-    track.append(number, panel, title, text);
-    box.append(track);
+    const glyph = Object.assign(document.createElement('span'), { className: 'glyph' });
+    glyph.setAttribute('aria-hidden', 'true');
+    glyph.innerHTML = `<svg viewBox="0 0 32 32">${GLYPHS[item.glyph] ?? GLYPHS.sync}</svg>`;
+    const words = document.createElement('div');
+    words.append(Object.assign(document.createElement('h3'), { textContent: item.title }), Object.assign(document.createElement('p'), { textContent: item.text }));
+    song.append(number, glyph, words);
+    box.append(song);
   });
 }
 
-/** Short extras under the setlist. */
-function bsides(list) {
-  for (const name of list) $('bsides').append(Object.assign(document.createElement('li'), { textContent: name }));
-  $('bsides').closest('.bsides').hidden = !list.length;
-}
-
-/** The facts, as crowd chants: a banner that rolls past, and the plain words under it. */
+/** The facts, as call and response: the crowd's chant, then Tandem's plain answer. */
 function facts(list) {
   list.forEach(([name, text], i) => {
     const row = Object.assign(document.createElement('li'), { className: `chant c${i % 4}` });
     row.dataset.lit = '';
-    const roll = Object.assign(document.createElement('div'), { className: 'roll' });
-    roll.setAttribute('aria-hidden', 'true');
-    const line = document.createElement('p');
-    line.textContent = `${name.toUpperCase()}! `.repeat(6);
-    roll.append(line, line.cloneNode(true));
-    const words = document.createElement('div');
-    words.append(Object.assign(document.createElement('h3'), { textContent: name }), Object.assign(document.createElement('p'), { textContent: text }));
-    row.append(roll, words);
+    row.append(
+      Object.assign(document.createElement('h3'), { className: 'call', textContent: `${name}!` }),
+      Object.assign(document.createElement('p'), { className: 'answer', textContent: text }),
+    );
     $('facts').append(row);
   });
 }
@@ -182,18 +185,23 @@ function maker(ticket) {
 }
 
 /**
- * The main stage screen. The video and its poster load only when the screen
- * comes near, so the first visit stays light. config.json's trailer.sources (a
- * list of { src, type }) wins over trailer.src, which makes a new cut a one-line swap.
+ * The main stage. Until config.json lists the music video in trailer.sources,
+ * it is a premiere card. With a source it becomes a player again: the video and
+ * its poster load only when the screen comes near, so the first visit stays light.
  */
 function stage(trailer) {
+  const sources = (trailer.sources ?? []).filter((s) => s?.src);
+  if (!sources.length) return null;
   const video = $('trailer');
+  $('premiere').hidden = true;
+  video.hidden = false;
+  if (trailer.title) $('stage-title').textContent = trailer.title;
+  if (trailer.note) $('stage-note').textContent = trailer.note;
   if (trailer.shape) video.style.aspectRatio = trailer.shape;
   const load = () => {
     if (video.dataset.loaded) return;
     video.dataset.loaded = '1';
     if (trailer.poster) video.poster = trailer.poster;
-    const sources = trailer.sources?.length ? trailer.sources : [{ src: trailer.src }];
     for (const { src, type } of sources) {
       const source = document.createElement('source');
       source.src = src;
@@ -213,12 +221,19 @@ function stage(trailer) {
   return load;
 }
 
-/** Without an invite, the pass leads to the main stage and starts the trailer. */
+/**
+ * Without an invite, the pass leads to the main stage: the video plays if there
+ * is one, and otherwise the premiere's "Play the anthem" waits for a press.
+ */
 function enter(loadTrailer) {
   $('ticket').classList.add('admitted');
+  $('stage').scrollIntoView({ block: 'center' });
+  if (!loadTrailer) {
+    document.querySelector('#premiere [data-sound]')?.focus({ preventScroll: true });
+    return;
+  }
   loadTrailer();
   const video = $('trailer');
-  $('stage').scrollIntoView({ block: 'center' });
   video.focus({ preventScroll: true });
   video.play().catch(() => {});
 }
@@ -236,12 +251,11 @@ async function start() {
   for (const key of FIELDS) if (link.get(key)) ticket[key] = link.get(key).slice(0, 80);
   const trailer = { ...programme.trailer };
   const fromLink = safeVideo(link.get('trailer'));
-  if (fromLink) Object.assign(trailer, { src: fromLink, sources: null, poster: '', shape: '' });
+  if (fromLink) Object.assign(trailer, { sources: [{ src: fromLink }], poster: '', shape: '' });
   const invite = inviteFrom(link.get('invite'));
 
   showTicket(ticket);
   showcase(programme.showcase ?? []);
-  bsides(programme.bsides ?? []);
   facts(programme.facts ?? []);
   downloads(programme.download ?? {});
   maker(ticket);

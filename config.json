@@ -9,15 +9,11 @@
     "admit": "Admit everyone"
   },
   "trailer": {
-    "src": "media/trailer-v2.mp4",
-    "poster": "media/trailer-v2-poster.jpg",
+    "title": "Now showing",
+    "note": "Every screen in the room shows this frame at the same moment.",
+    "poster": "",
     "shape": "16 / 9",
-    "sources": [
-      {
-        "src": "media/trailer-v2.mp4",
-        "type": "video/mp4"
-      }
-    ]
+    "sources": []
   },
   "anthem": {
     "title": "DOKI-DOKI★FRAME-BY-FRAME!",
@@ -37,49 +33,45 @@
   },
   "showcase": [
     {
-      "image": "media/set-sync.webp",
-      "title": "One room, one frame",
-      "text": "Everyone plays the same frame at the same moment. Three Stations, one timecode.",
-      "alt": "Three Stations, Ada, Bo and Cy, each showing the timecode 00:00:05.967 over the same picture."
+      "glyph": "sync",
+      "title": "Same frame, every screen",
+      "text": "Every Station plays the same frame at the same moment."
     },
     {
-      "image": "media/set-countdown.webp",
-      "title": "Showtime countdowns",
-      "text": "Set a start time and every Station counts down to it together, then plays at once.",
-      "alt": "The showtime screen for Night Signal: 4:59 to go, starts at 10:45 PM, with You, Bo and Cy ready."
+      "glyph": "clock",
+      "title": "Showtime",
+      "text": "Set a start time and the whole room counts down together."
     },
     {
-      "image": "media/set-react.webp",
-      "title": "Chat and react",
-      "text": "Reactions rise over the picture, and people who join late can read the chat so far.",
-      "alt": "A heart and a smiley rising over the film, beside the chat with two messages and the reaction buttons."
+      "glyph": "heart",
+      "title": "Hearts and fire",
+      "text": "Reactions rise over the picture, and the chat waits for late arrivals."
     },
     {
-      "image": "media/set-stations.webp",
-      "title": "Station to station",
-      "text": "Stations talk directly, with no server in the middle. The Stations panel shows how close each one is.",
-      "alt": "The Stations panel: Bo, Ada and Cy, each with Same file and In sync, and their offsets in milliseconds."
+      "glyph": "bars",
+      "title": "Same song, same beat",
+      "text": "Play music for the room, with the lyrics and a visualiser."
     },
     {
-      "image": "media/set-phone.webp",
-      "title": "Phone, tablet and TV",
-      "text": "The same engine runs on Android, with remote control navigation on Android TV.",
-      "alt": "A room on a TV and on a phone, the phone showing five Stations in sync."
+      "glyph": "down",
+      "title": "Download ahead",
+      "text": "Fetch the whole film before the night, so a slow link never shows."
     },
     {
-      "image": "media/set-song.webp",
-      "title": "Songs, with lyrics",
-      "text": "Play a song for the room: the cover, a visualiser and the lyrics, line by line.",
-      "alt": "Now playing Second Wind by Neon Grid, with the visualiser and the lyric line Lights along the water."
+      "glyph": "subs",
+      "title": "Your language",
+      "text": "Pick your own audio and subtitles. The room stays together."
+    },
+    {
+      "glyph": "live",
+      "title": "Really live",
+      "text": "The home screen lists only rooms someone is in, at the real position."
+    },
+    {
+      "glyph": "screens",
+      "title": "Every screen",
+      "text": "Android, Android TV with a remote, desktop, and a browser version."
     }
-  ],
-  "bsides": [
-    "Your own audio and subtitles",
-    "Download ahead",
-    "Rooms that are really live",
-    "Smaller pictures on slow links",
-    "Remote control on Android TV",
-    "Invites by link"
   ],
   "facts": [
     [
@@ -100,7 +92,7 @@
     ]
   ],
   "download": {
-    "note": "Tandem is in private testing. Downloads will appear here.",
+    "note": "Android, Android TV and desktop are in their final rehearsal. Public downloads open soon.",
     "links": []
   }
 }

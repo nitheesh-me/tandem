@@ -3,11 +3,16 @@
 Live at <https://nitheesh-me.github.io/tandem/>. Everything on it comes from `config.json`.
 
 - `ticket`: the show, date, time, seat and the rest of the VIP pass.
-- `trailer`: the main stage video, its poster and its shape. To swap in a new cut, change `src`, or list
-  `sources` as `{ "src", "type" }` pairs (they win over `src`).
+- `trailer`: the main stage. While `sources` is empty the stage is a premiere card for the music video.
+  List the video as `{ "src": "media/….mp4", "type": "video/mp4" }` in `sources` and the stage becomes a
+  player again, with `title`, `note`, `poster` and `shape` (for example `"16 / 9"`).
 - `anthem`: the song behind "Sound on": its sources, art and the timed lyrics in `media/anthem-lyrics.json`.
-- `showcase`: the setlist, each with an image, a title and text. `bsides` is the short list under it.
-- `facts` and `download`: the crowd chants and the encore's download links.
+- `showcase`: the setlist, each song with a `title`, one line of `text` and a `glyph`
+  (`sync`, `clock`, `heart`, `bars`, `down`, `subs`, `live` or `screens`).
+- `facts`: the crowd's call and Tandem's answer. `download`: the encore's note and download links; the
+  "Opening soon" tag shows until `links` has an entry.
+
+The pass maker is for hosts, so it sits behind the footer link "Hosting a show? Make a pass" and at `#make`.
 
 A link can change a ticket without editing anything, after the `#`:
 `#show=Friday%20Film&date=Friday&time=21:00&seat=Sofa&invite=tandem://join/tandem1...`

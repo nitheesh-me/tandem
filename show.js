@@ -211,9 +211,35 @@ function onSoundState() {
 }
 
 function wireSound() {
-  for (const b of $$('[data-sound]')) b.addEventListener('click', () => (playing ? stopSound() : startSound()));
+  for (const b of $$('[data-sound]')) b.addEventListener('click', () => {
+    if (playing) { stopSound(); return; }
+    startSound();
+    // From further down the page, the anthem brings you back to the lights.
+    if (b.hasAttribute('data-show')) hero.scrollIntoView({ behavior: calm ? 'auto' : 'smooth' });
+  });
   for (const type of ['play', 'playing', 'pause', 'ended']) audio.addEventListener(type, onSoundState);
-  addEventListener('keydown', (e) => { if (e.key === 'Escape' && playing) stopSound(); });
+  // Escape stops the song, unless it is closing the pass maker.
+  addEventListener('keydown', (e) => { if (e.key === 'Escape' && playing && !$('dialog[open]')) stopSound(); });
+}
+
+/* ---------- The pass maker, for hosts: a dialog from the footer, or the address #make. ---------- */
+function boxOffice() {
+  const dialog = $('#make');
+  if (!dialog?.showModal) return;
+  const open = () => { if (!dialog.open) dialog.showModal(); };
+  $('#make-link')?.addEventListener('click', (e) => { e.preventDefault(); history.replaceState(null, '', '#make'); open(); });
+  dialog.addEventListener('close', () => {
+    if (location.hash === '#make') history.replaceState(null, '', location.pathname + location.search);
+  });
+  // A click on the backdrop closes it too.
+  dialog.addEventListener('click', (e) => {
+    const r = dialog.getBoundingClientRect();
+    const outside = e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom;
+    if (e.target === dialog && outside) dialog.close();
+  });
+  const check = () => { if (location.hash === '#make') open(); };
+  addEventListener('hashchange', check);
+  check();
 }
 
 /** One audio frame: levels from the analyser, the beat grid from the song's tempo. */
@@ -391,6 +417,7 @@ function begin() {
   lightUp();
   pass();
   wireSound();
+  boxOffice();
   if ('IntersectionObserver' in window) {
     new IntersectionObserver(([e]) => { heroVisible = e.isIntersecting; wake(); }, { threshold: 0.02 }).observe(hero);
   }
