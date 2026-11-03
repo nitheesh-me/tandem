@@ -62,10 +62,14 @@ vec3 phones(vec2 p, float cell, float r, float density, float top, float bottom,
   float h2 = hash(id + 7.1);
   // Phones sway in slow waves across the crowd, and jump a little on the kick.
   vec2 jitter = vec2(h2 - 0.5, hash(id + 3.3) - 0.5) * 0.5;
-  jitter.x += sin(t * 1.3 + id.x * 0.25 + id.y) * 0.18;
-  jitter.y += uKick * 0.12 * (0.5 + h2);
+  float energy = clamp(uBass * 1.4, 0.0, 1.0) * (1.0 - uBlack);
+  // Idle: a slow drift. With the music: the whole crowd sways with the bar, in a wave.
+  float sway = sin(uBar * 6.2832 * 0.5 + id.x * 0.12 + h2 * 0.6);
+  jitter.x += mix(sin(t * 1.3 + id.x * 0.25 + id.y) * 0.18, sway * 0.38, energy);
+  jitter.y += uKick * 0.16 * (0.5 + h2) + uDrop * 0.35 * (0.6 + 0.4 * h2);
   float d = length(fract(q) - 0.5 - jitter);
   float twinkle = 0.55 + 0.45 * sin(t * (1.5 + h2 * 3.0) + h * 40.0);
+  twinkle *= 1.0 + uKick * 0.9 * energy + uDrop * 0.8;
   float core = smoothstep(r, r * 0.3, d);
   float glow = exp(-d * 9.0) * 0.35;
   vec3 c = mix(vec3(1.0, 0.95, 0.85), h2 > 0.82 ? PINK : h2 > 0.64 ? CYAN : vec3(1.0, 0.95, 0.85), 0.75);
@@ -78,9 +82,21 @@ float crowdLine(vec2 p, float base, float scale, float seed) {
   float id = floor(x);
   float fx = fract(x) - 0.5;
   float h = hash(vec2(id, seed));
+  float energy = clamp(uBass * 1.4, 0.0, 1.0) * (1.0 - uBlack);
+  // Each person bounces on the beat (four to a bar), a little early or late, more with the bass.
+  float beat = fract(uBar * 4.0 + (h - 0.5) * 0.18);
+  float bounce = pow(1.0 - beat, 3.0) * energy * (0.5 + 0.5 * h);
+  float jump = uDrop * (0.7 + 0.3 * h);
+  float lift = (bounce * 0.9 + jump * 2.2) / scale;
+  // Arms: a few up when quiet, most up when it is loud, all up on the big hits.
+  float armsUp = 0.7 - energy * 0.35 - uDrop * 0.6;
+  float armSide = h > 0.85 ? -0.25 : 0.25;
+  // A raised arm: a short thick forearm with a hand on top, pumping a little on the kick.
+  float reach = 0.55 + uKick * 0.2 * energy + uDrop * 0.15;
+  float ax = abs(fx - armSide);
+  float arm = h > armsUp ? (smoothstep(0.075, 0.035, ax) * reach + smoothstep(0.09, 0.05, ax) * 0.12) / scale : 0.0;
   float head = sqrt(max(0.0, 0.16 - fx * fx)) * (0.6 + 0.4 * h) / scale;
-  float arm = (h > 0.7 ? smoothstep(0.08, 0.0, abs(fx - 0.25)) * 0.9 : 0.0) / scale;
-  float line = base + head * 1.3 + arm * 2.4 + noise(vec2(p.x * 40.0, seed)) * 0.004;
+  float line = base + lift + head * 1.3 + arm * 1.6 + noise(vec2(p.x * 40.0, seed)) * 0.004;
   return smoothstep(line + 0.002, line - 0.002, p.y);
 }
 
