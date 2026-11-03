@@ -92,6 +92,7 @@ void main() {
   float horizon = -0.12;
   // Phones in portrait get tighter, dimmer beams so the haze does not wash the screen.
   float narrow = clamp(aspect, 0.45, 1.0);
+  float dim = mix(0.42, 1.0, smoothstep(0.55, 1.1, aspect));
 
   // Haze drifting through the hall, which the beams light up.
   float haze = noise(p * 3.0 + vec2(t * 0.05, -t * 0.02)) * 0.6 + noise(p * 7.0 - vec2(t * 0.08, 0.0)) * 0.4;
@@ -109,21 +110,23 @@ void main() {
 
   // The LED wall's spill behind the title.
   float wall = exp(-pow(p.y - 0.12, 2.0) * 18.0) * exp(-p.x * p.x * 1.4);
-  c += mix(VIOLET, CYAN, 0.5 + 0.5 * sin(t * 0.3)) * wall * (0.1 + 0.18 * lit + 0.25 * uKick * lit);
+  c += mix(VIOLET, CYAN, 0.5 + 0.5 * sin(t * 0.3)) * wall * (0.1 + 0.18 * lit + 0.25 * uKick * lit) * dim;
 
   // Spotlights from the truss, sweeping, one of them chasing the pointer.
   vec3 light = vec3(0.0);
   for (int i = 0; i < 6; i++) {
     float fi = float(i);
     float on = smoothstep(fi / 6.0, fi / 6.0 + 0.2, uIntro);
-    vec2 o = vec2((fi / 5.0 - 0.5) * aspect * 0.95, 0.62);
+    // On a portrait screen, four beams from beyond the edges cross instead of six piling up.
+    if (aspect < 0.8 && (i == 1 || i == 4)) continue;
+    vec2 o = vec2((fi / 5.0 - 0.5) * max(aspect, 0.8) * 0.95, 0.62);
     float sweep = sin(t * (0.25 + fi * 0.04) + fi * 1.7 + uBar * 0.9) * 0.55;
     vec2 aim = normalize(vec2(sweep - o.x * 0.25, -1.0));
     if (i == 2) aim = normalize(uPtr - o);
-    float b = beam(p, o, aim, (i == 2 ? 0.09 : 0.14) * narrow) * (0.55 + 0.45 * narrow);
+    float b = beam(p, o, aim, (i == 2 ? 0.07 : 0.1) * narrow * narrow * narrow + 0.008) * dim;
     light += tint(fi + floor(uBar * 0.25)) * b * on;
   }
-  float hazeLit = 0.45 + 0.75 * haze;
+  float hazeLit = (0.45 + 0.75 * haze) * mix(0.75, 1.0, dim);
   c += light * hazeLit * lit * (0.55 + 0.35 * uBass + 0.6 * uDrop) + light * rain * 0.9 * lit;
 
   // Laser fans from both wings: quiet without the music, alive with it.
@@ -131,10 +134,10 @@ void main() {
   float spin = sin(t * 0.6) * 0.35 + uBar * 0.5;
   for (int k = 0; k < 7; k++) {
     float fk = float(k) / 6.0 - 0.5;
-    fan += laser(p, vec2(-aspect * 0.46, horizon + 0.02), 0.55 + fk * 0.9 + spin * 0.4);
-    fan += laser(p, vec2(aspect * 0.46, horizon + 0.02), -0.55 + fk * 0.9 - spin * 0.4);
+    fan += laser(p, vec2(-max(aspect, 0.9) * 0.46, horizon + 0.02), 0.55 + fk * 0.9 + spin * 0.4);
+    fan += laser(p, vec2(max(aspect, 0.9) * 0.46, horizon + 0.02), -0.55 + fk * 0.9 - spin * 0.4);
   }
-  float laserAmt = lit * (0.12 + 0.55 * uKick + 0.9 * uDrop + 0.15 * uHigh);
+  float laserAmt = dim * dim * lit * (0.12 + 0.55 * uKick + 0.9 * uDrop + 0.15 * uHigh);
   c += mix(GREEN, tint(floor(uBar) + 1.0), 0.5) * fan * laserAmt;
 
   // The stage edge: a bright strip along the horizon.

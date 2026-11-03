@@ -32,40 +32,46 @@
   },
   "showcase": [
     {
-      "image": "media/room.webp",
+      "image": "media/set-sync.webp",
       "title": "One room, one frame",
-      "text": "Everyone plays the same frame at the same moment, and the Stations panel shows how close each one is."
+      "text": "Everyone plays the same frame at the same moment. Three Stations, one timecode.",
+      "alt": "Three Stations, Ada, Bo and Cy, each showing the timecode 00:00:05.967 over the same picture."
     },
     {
-      "image": "media/tracks.webp",
-      "title": "Your language, your subtitles",
-      "text": "Pick your own audio, subtitles and picture size. The room stays together."
+      "image": "media/set-countdown.webp",
+      "title": "Showtime countdowns",
+      "text": "Set a start time and every Station counts down to it together, then plays at once.",
+      "alt": "The showtime screen for Night Signal: 4:59 to go, starts at 10:45 PM, with You, Bo and Cy ready."
     },
     {
-      "image": "media/chat.webp",
+      "image": "media/set-react.webp",
       "title": "Chat and react",
-      "text": "Reactions rise over the picture, and people who join late can read the chat so far."
+      "text": "Reactions rise over the picture, and people who join late can read the chat so far.",
+      "alt": "A heart and a smiley rising over the film, beside the chat with two messages and the reaction buttons."
     },
     {
-      "image": "media/queue.webp",
-      "title": "Download ahead",
-      "text": "Fetch a whole film before the party, so a slow connection does not matter on the night."
+      "image": "media/set-stations.webp",
+      "title": "Station to station",
+      "text": "Stations talk directly, with no server in the middle. The Stations panel shows how close each one is.",
+      "alt": "The Stations panel: Bo, Ada and Cy, each with Same file and In sync, and their offsets in milliseconds."
     },
     {
-      "image": "media/home.webp",
-      "title": "Rooms that are really live",
-      "text": "The home screen shows only rooms someone is in, with the real film and position."
-    },
-    {
-      "image": "media/phone.webp",
+      "image": "media/set-phone.webp",
       "title": "Phone, tablet and TV",
       "text": "The same engine runs on Android, with remote control navigation on Android TV.",
-      "tall": true
+      "alt": "A room on a TV and on a phone, the phone showing five Stations in sync."
+    },
+    {
+      "image": "media/set-song.webp",
+      "title": "Songs, with lyrics",
+      "text": "Play a song for the room: the cover, a visualiser and the lyrics, line by line.",
+      "alt": "Now playing Second Wind by Neon Grid, with the visualiser and the lyric line Lights along the water."
     }
   ],
   "bsides": [
-    "Songs with lyrics and a visualiser",
-    "Showtime countdowns",
+    "Your own audio and subtitles",
+    "Download ahead",
+    "Rooms that are really live",
     "Smaller pictures on slow links",
     "Remote control on Android TV",
     "Invites by link"

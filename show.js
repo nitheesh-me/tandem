@@ -128,17 +128,20 @@ async function passCode(ticket) {
 }
 
 /* ---------- Things light up as they come into view. ---------- */
+// Chants roll only while on screen; everything else stays lit once lit.
+const seen = 'IntersectionObserver' in window && !calm ? new IntersectionObserver((entries) => {
+  for (const e of entries) {
+    if (e.target.classList.contains('chant')) e.target.classList.toggle('lit', e.isIntersecting);
+    else if (e.isIntersecting) { e.target.classList.add('lit'); seen.unobserve(e.target); }
+  }
+}, { threshold: 0.2 }) : null;
+
+/** Watches everything marked data-lit. Runs again once app.js has built the setlist and chants. */
 function lightUp() {
-  const all = $$('[data-lit]');
-  if (calm || !('IntersectionObserver' in window)) { all.forEach((el) => el.classList.add('lit')); return; }
-  const seen = new IntersectionObserver((entries) => {
-    for (const e of entries) {
-      // Chants roll only while on screen; everything else stays lit once lit.
-      if (e.target.classList.contains('chant')) e.target.classList.toggle('lit', e.isIntersecting);
-      else if (e.isIntersecting) { e.target.classList.add('lit'); seen.unobserve(e.target); }
-    }
-  }, { threshold: 0.2 });
-  all.forEach((el) => seen.observe(el));
+  for (const el of $$('[data-lit]:not([data-watched])')) {
+    el.dataset.watched = '';
+    if (seen) seen.observe(el); else el.classList.add('lit');
+  }
 }
 
 /* ---------- The anthem. Never automatic: only a press starts it. ---------- */
@@ -355,6 +358,7 @@ function begin() {
 
 function ready() {
   if (!window.tandem) return;
+  lightUp();
   const later = window.requestIdleCallback ?? ((fn) => setTimeout(fn, 300));
   later(() => passCode(window.tandem.ticket), { timeout: 2000 });
 }
