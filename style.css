@@ -74,6 +74,15 @@ input:focus { outline: 2px solid var(--cyan); outline-offset: 1px; }
 .get { display: grid; justify-items: start; gap: 12px; }
 .get h2 { margin-bottom: 4px; }
 footer { padding: 0 0 40px; }
+footer a { color: inherit; }
+
+/* The two ways into a room: the app, and the browser version. */
+.ways { display: grid; gap: 10px; width: min(760px, 100%); }
+.ways .btn, .join .btn { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
+#ways-status { min-height: 1.55em; }
+.join .hero { min-height: 70svh; }
+.join .hero h2 { margin: 0; font-size: clamp(24px, 4vw, 38px); }
+.fine { font-size: 14px; max-width: 60ch; }
 
 @media (max-width: 620px) {
   .ticket { grid-template-columns: minmax(0, 1fr); }

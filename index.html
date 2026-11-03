@@ -33,9 +33,17 @@
       <div class="stub-tear">
         <p class="admit" id="t-admit"></p>
         <button class="btn primary" id="tear">Tear to enter</button>
-        <a class="btn" id="join" hidden>Open in Tandem</a>
       </div>
     </article>
+
+    <div class="ways" id="ways" hidden>
+      <p class="label">// Two ways in</p>
+      <div class="row">
+        <a class="btn primary" id="join">Open in the app</a>
+        <a class="btn" id="watch">Watch in this browser</a>
+      </div>
+      <p class="dim" id="ways-status" role="status" aria-live="polite"></p>
+    </div>
   </section>
 
   <section class="theatre" id="theatre" hidden aria-label="Trailer">
@@ -54,13 +62,13 @@
   <section class="maker" aria-labelledby="maker-title">
     <p class="label">// Box office</p>
     <h2 id="maker-title" class="split">Make a ticket</h2>
-    <p class="dim">Name the show and paste your room invite. Chat apps often will not open a <code>tandem://</code> link, but they will open this page. Everything stays in the link itself and is never sent to this site.</p>
+    <p class="dim">Name the show and paste your room invite. Opening the ticket opens the room in the app, or in the browser where the app is not installed. Everything stays in the link itself and is never sent to this site.</p>
     <form id="maker">
       <label>Show<input name="show" maxlength="80" autocomplete="off"></label>
       <label>Date<input name="date" maxlength="40" autocomplete="off"></label>
       <label>Time<input name="time" maxlength="40" autocomplete="off"></label>
       <label>Seat<input name="seat" maxlength="40" autocomplete="off"></label>
-      <label class="wide">Room invite<input name="invite" placeholder="tandem://join/..." autocomplete="off" spellcheck="false"></label>
+      <label class="wide">Room invite<input name="invite" placeholder="https://nitheesh-me.github.io/tandem/join/#..." autocomplete="off" spellcheck="false"></label>
       <p class="wide warn" id="maker-note" role="status"></p>
       <div class="wide row">
         <button class="btn primary" type="submit">Copy ticket link</button>

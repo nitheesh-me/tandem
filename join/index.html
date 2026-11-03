@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tandem: you are invited</title>
+<meta name="description" content="Someone has saved you a seat in a Tandem room.">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#07040F">
+<link rel="icon" href="../media/icon.png">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body data-page="join">
+<canvas id="contour" aria-hidden="true"></canvas>
+<main class="join">
+  <section class="hero">
+    <p class="label">// Invite</p>
+    <h1 class="split">TANDEM</h1>
+    <h2 id="j-title">You have a seat in a room</h2>
+    <p class="lead">Everyone plays the same frame at the same moment. Open the room in the app, or watch in this browser.</p>
+    <div class="ways" id="ways" hidden>
+      <div class="row">
+        <a class="btn primary" id="join">Open in the app</a>
+        <a class="btn" id="watch">Watch in this browser</a>
+      </div>
+    </div>
+    <p class="dim" id="ways-status" role="status" aria-live="polite"></p>
+    <p class="dim fine">The invite stays in this link after the #, and is never sent to this site. Anyone who has it can join, so share it only with the people you are watching with.</p>
+  </section>
+
+  <section class="get" aria-labelledby="get-title">
+    <p class="label">// Get Tandem</p>
+    <h2 id="get-title" class="split">Take your seat</h2>
+    <p class="dim" id="get-note"></p>
+    <div class="row" id="get-links"></div>
+  </section>
+  <footer class="label">// <a href="../">Tandem</a></footer>
+</main>
+<script src="../contour.js"></script>
+<script src="../app.js"></script>
+</body>
+</html>
