@@ -124,10 +124,11 @@ a { color: var(--cyan); }
 .karaoke { min-height: 2.9em; width: 100%; display: none; justify-items: center; align-content: start; gap: 4px; text-align: center; }
 .playing .karaoke { display: grid; }
 .k-now { position: relative; display: block; font: 900 clamp(17px, 2.5vw, 30px)/1.15 var(--display); max-width: 30ch; }
-/* The wipe: a clipped yellow copy slides in while its text slides back, so only transforms change. */
-.k-base { color: rgb(234 246 255 / 0.4); }
-.k-fill { position: absolute; inset: 0; overflow: hidden; transform: translateX(-100%); will-change: transform; }
-.k-ink { display: block; color: var(--yellow); transform: translateX(100%); will-change: transform; text-shadow: 0 0 14px rgb(249 240 2 / 0.45); }
+/* The fill runs word by word in reading order, so a line that wraps fills its first row
+   before its second. Each word wipes from its own left edge. */
+.k-w { --p: 0%; color: transparent; -webkit-background-clip: text; background-clip: text;
+  background-image: linear-gradient(90deg, var(--yellow) var(--p), rgb(234 246 255 / 0.4) var(--p)); }
+.k-w.done { filter: drop-shadow(0 0 8px rgb(249 240 2 / 0.45)); }
 .k-next { font: 700 12px/1.3 var(--mono); color: var(--muted); letter-spacing: 0.06em; max-width: 60ch; }
 .k-now.scream { font-style: italic; text-transform: uppercase; }
 
@@ -302,5 +303,4 @@ main > section:not(.hero) { padding: clamp(72px, 11vw, 140px) 0 0; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
   .ticket { transform: none !important; }
   .roll { animation: none; }
-  .k-fill, .k-ink { transform: none !important; }
 }

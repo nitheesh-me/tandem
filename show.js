@@ -147,7 +147,7 @@ function lightUp() {
 /* ---------- The anthem. Never automatic: only a press starts it. ---------- */
 const audio = $('#anthem');
 let audioCtx = null, analyser = null, bins = null, song = null, playing = false;
-let level = { bass: 0, kick: 0, drop: 0, high: 0, black: 0 }, bassAvg = 0.3, lastKick = 0, lastT = 0, lineIndex = -1, songPhase = '';
+let level = { bass: 0, kick: 0, drop: 0, high: 0, black: 0 }, bassAvg = 0.3, lastKick = 0, lastT = 0, lineIndex = -1, songPhase = '', kWords = [];
 
 function soundButtons(on) {
   for (const b of $$('[data-sound]')) {
@@ -261,8 +261,19 @@ function karaoke(t) {
   if (i < 0 || t < lines[i][0] || (lines[i + 1] && t >= lines[i + 1][0])) {
     i = lines.findLastIndex((l) => l[0] <= t);
   }
-  const now = $('.k-now'), next = $('.k-next'), base = $('.k-base'), ink = $('.k-ink'), fillBox = $('.k-fill');
-  const say = (text) => { base.textContent = text; ink.textContent = text; };
+  const now = $('.k-now'), next = $('.k-next');
+  const say = (text) => {
+    now.replaceChildren();
+    kWords = [];
+    text.split(/\s+/).filter(Boolean).forEach((word, n) => {
+      if (n) now.append(' ');
+      const w = document.createElement('span');
+      w.className = 'k-w';
+      w.textContent = word;
+      now.append(w);
+      kWords.push({ el: w, len: word.length, p: -1 });
+    });
+  };
   if (i !== lineIndex) {
     lineIndex = i;
     const line = lines[i];
@@ -272,22 +283,29 @@ function karaoke(t) {
   }
   const line = lines[i];
   if (!line) return;
-  if (t > line[1] + 1.5 && base.textContent) say('');
-  let p;
-  if (line[4]) {
-    // Word times: fill word by word.
-    const words = line[4];
-    const k = words.findLastIndex((w) => w <= t);
-    const end = words[k + 1] ?? line[1];
-    p = (k + Math.min(1, (t - words[k]) / Math.max(0.05, end - words[k]))) / words.length;
+  if (t > line[1] + 1.5 && kWords.length) { say(''); return; }
+  // How far each word is filled, from 0 to 1, in reading order.
+  const times = line[4];
+  let fillOf;
+  if (times && times.length === kWords.length) {
+    const k = times.findLastIndex((w) => w <= t);
+    const end = times[k + 1] ?? line[1];
+    const part = k < 0 ? 0 : Math.min(1, (t - times[k]) / Math.max(0.05, end - times[k]));
+    fillOf = (n) => (n < k ? 1 : n === k ? part : 0);
   } else {
-    p = (t - line[0]) / Math.max(0.1, line[1] - line[0]);
+    // No word times: spread the line's time over its letters, word after word.
+    const total = kWords.reduce((sum, w) => sum + w.len, 0) || 1;
+    let left = Math.max(0, Math.min(1, (t - line[0]) / Math.max(0.1, line[1] - line[0]))) * total;
+    const parts = kWords.map((w) => { const f = Math.max(0, Math.min(1, left / w.len)); left -= w.len; return f; });
+    fillOf = (n) => parts[n];
   }
-  const fill = Math.round(Math.max(0, Math.min(1, p)) * 100);
-  if (fillBox.dataset.p === String(fill)) return;
-  fillBox.dataset.p = fill;
-  fillBox.style.transform = `translateX(${fill - 100}%)`;
-  ink.style.transform = `translateX(${100 - fill}%)`;
+  kWords.forEach((w, n) => {
+    const p = Math.round(fillOf(n) * 100);
+    if (p === w.p) return;
+    w.p = p;
+    w.el.style.setProperty('--p', `${p}%`);
+    w.el.classList.toggle('done', p >= 100);
+  });
 }
 
 /** The song has its own count-in. Every screen counts with it. */
