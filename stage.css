@@ -126,11 +126,24 @@ a { color: var(--cyan); }
 .k-now { position: relative; display: block; font: 900 clamp(17px, 2.5vw, 30px)/1.15 var(--display); max-width: 30ch; }
 /* The fill runs word by word in reading order, so a line that wraps fills its first row
    before its second. Each word wipes from its own left edge. */
-.k-w { --p: 0%; color: transparent; -webkit-background-clip: text; background-clip: text;
-  background-image: linear-gradient(90deg, var(--yellow) var(--p), rgb(234 246 255 / 0.4) var(--p)); }
-.k-w.done { filter: drop-shadow(0 0 8px rgb(249 240 2 / 0.45)); }
+.k-w { --p: 0%; --ink: linear-gradient(var(--yellow), var(--yellow)); --glow: rgb(249 240 2 / 0.45);
+  color: transparent; -webkit-background-clip: text; background-clip: text;
+  background-image: linear-gradient(90deg, transparent var(--p), rgb(234 246 255 / 0.4) var(--p)), var(--ink); }
+/* Who sings it: her, him, or both at once (both colours, one over the other). */
+.k-w.f { --ink: linear-gradient(var(--pink), var(--pink)); --glow: rgb(255 42 109 / 0.55); }
+.k-w.m { --ink: linear-gradient(var(--yellow), var(--yellow)); --glow: rgb(249 240 2 / 0.45); }
+.k-w.b { --ink: linear-gradient(90deg, var(--pink), var(--yellow)); --glow: rgb(255 140 60 / 0.5); }
+.k-w.done { filter: drop-shadow(0 0 8px var(--glow)); }
+.k-who { display: none; gap: 6px; align-items: center; font: 700 10px/1 var(--mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.karaoke.voices .k-who { display: inline-flex; }
+.k-who i { width: 9px; height: 9px; display: inline-block; margin-inline: 6px 2px; }
+.k-who i.f { background: var(--pink); } .k-who i.m { background: var(--yellow); }
+.k-who i.b { background: linear-gradient(90deg, var(--pink), var(--yellow)); }
 .k-next { font: 700 12px/1.3 var(--mono); color: var(--muted); letter-spacing: 0.06em; max-width: 60ch; }
 .k-now.scream { font-style: italic; text-transform: uppercase; }
+/* Two lanes: when the two singers overlap with different words, both lines show and fill together. */
+.k-now:empty { display: none; }
+.k-alt { font-size: clamp(14px, 2vw, 24px); }
 
 /* The side screens: holograms either side of the wall. */
 .side-screen { position: relative; display: grid; gap: 8px; padding: 18px 16px; min-width: 0; max-width: 220px; justify-self: end;

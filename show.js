@@ -147,7 +147,7 @@ function lightUp() {
 /* ---------- The anthem. Never automatic: only a press starts it. ---------- */
 const audio = $('#anthem');
 let audioCtx = null, analyser = null, bins = null, song = null, playing = false;
-let level = { bass: 0, kick: 0, drop: 0, high: 0, black: 0 }, bassAvg = 0.3, lastKick = 0, lastT = 0, lineIndex = -1, songPhase = '', kWords = [];
+let level = { bass: 0, kick: 0, drop: 0, high: 0, black: 0 }, bassAvg = 0.3, lastKick = 0, lastT = 0, lineIndex = -1, songPhase = '';
 
 function soundButtons(on) {
   for (const b of $$('[data-sound]')) {
@@ -205,6 +205,7 @@ function onSoundState() {
   glow(0);
   for (const bar of $$('.eq i')) bar.style.transform = '';
   lineIndex = -1;
+  lanes.forEach((lane, n) => { lane.i = -1; laneSay(lane, document.querySelectorAll('.k-now')[n], null); });
   if (songPhase) { songPhase = ''; goLive(false); }
 }
 
@@ -255,57 +256,80 @@ function glow(v) {
   for (const p of $$('.lit .pillar')) p.style.opacity = (0.6 + q * 0.4).toFixed(2);
 }
 
-function karaoke(t) {
-  const lines = song.lines;
-  let i = lineIndex;
-  if (i < 0 || t < lines[i][0] || (lines[i + 1] && t >= lines[i + 1][0])) {
-    i = lines.findLastIndex((l) => l[0] <= t);
-  }
-  const now = $('.k-now'), next = $('.k-next');
-  const say = (text) => {
-    now.replaceChildren();
-    kWords = [];
-    text.split(/\s+/).filter(Boolean).forEach((word, n) => {
-      if (n) now.append(' ');
-      const w = document.createElement('span');
-      w.className = 'k-w';
-      w.textContent = word;
-      now.append(w);
-      kWords.push({ el: w, len: word.length, p: -1 });
-    });
-  };
-  if (i !== lineIndex) {
-    lineIndex = i;
-    const line = lines[i];
-    say(line && t < line[1] + 1.5 ? line[2] : '');
-    now.classList.toggle('scream', !!line && (line[3] === 'scream' || line[3] === 'gang'));
-    next.textContent = lines[i + 1]?.[2] ?? '';
-  }
-  const line = lines[i];
+// Lines may overlap when the two singers sing different words at once; each shown
+// line gets a lane of its own and fills on its own word times.
+const lanes = [{ i: -1, words: [] }, { i: -1, words: [] }];
+
+function laneSay(lane, el, line) {
+  el.replaceChildren();
+  lane.words = [];
   if (!line) return;
-  if (t > line[1] + 1.5 && kWords.length) { say(''); return; }
-  // How far each word is filled, from 0 to 1, in reading order.
-  const times = line[4];
+  const who = line[5] ?? '';  // f her, m him, b both: one letter for the line, or one per word
+  line[2].split(/\s+/).filter(Boolean).forEach((word, n) => {
+    if (n) el.append(' ');
+    const w = document.createElement('span');
+    w.className = 'k-w';
+    const v = who.length > 1 ? who[n] : who;
+    if (v) w.classList.add(v);
+    w.textContent = word;
+    el.append(w);
+    lane.words.push({ el: w, len: word.length, p: -1 });
+  });
+  el.classList.toggle('scream', line[3] === 'scream' || line[3] === 'gang');
+}
+
+function laneFill(lane, line, t) {
+  const words = lane.words, times = line[4];
   let fillOf;
-  if (times && times.length === kWords.length) {
+  if (times && times.length === words.length) {
     const k = times.findLastIndex((w) => w <= t);
     const end = times[k + 1] ?? line[1];
     const part = k < 0 ? 0 : Math.min(1, (t - times[k]) / Math.max(0.05, end - times[k]));
     fillOf = (n) => (n < k ? 1 : n === k ? part : 0);
   } else {
     // No word times: spread the line's time over its letters, word after word.
-    const total = kWords.reduce((sum, w) => sum + w.len, 0) || 1;
+    const total = words.reduce((sum, w) => sum + w.len, 0) || 1;
     let left = Math.max(0, Math.min(1, (t - line[0]) / Math.max(0.1, line[1] - line[0]))) * total;
-    const parts = kWords.map((w) => { const f = Math.max(0, Math.min(1, left / w.len)); left -= w.len; return f; });
+    const parts = words.map((w) => { const f = Math.max(0, Math.min(1, left / w.len)); left -= w.len; return f; });
     fillOf = (n) => parts[n];
   }
-  kWords.forEach((w, n) => {
+  words.forEach((w, n) => {
     const p = Math.round(fillOf(n) * 100);
     if (p === w.p) return;
     w.p = p;
     w.el.style.setProperty('--p', `${p}%`);
     w.el.classList.toggle('done', p >= 100);
   });
+}
+
+function karaoke(t) {
+  const lines = song.lines;
+  const last = lines.findLastIndex((l) => l[0] <= t);
+  // Shown: the newest line (held 1.5 s after it ends), and an older one still being sung.
+  const shown = [];
+  for (let j = last; j >= 0 && j > last - 4; j--) {
+    const l = lines[j];
+    if (j === last ? t < l[1] + 1.5 : t < l[1] - 0.05 && l[1] > lines[last][0] + 0.1) shown.unshift(j);
+  }
+  const want = shown.slice(-2);
+  const els = document.querySelectorAll('.k-now');
+  // Keep a line in the lane it started in; put new lines in a free lane, the top one first.
+  lanes.forEach((lane, n) => {
+    if (lane.i >= 0 && !want.includes(lane.i)) { lane.i = -1; laneSay(lane, els[n], null); }
+  });
+  for (const j of want) {
+    if (lanes.some((lane) => lane.i === j)) continue;
+    const n = lanes[0].i < 0 ? 0 : 1;
+    if (lanes[n].i >= 0) continue;
+    lanes[n].i = j;
+    laneSay(lanes[n], els[n], lines[j]);
+  }
+  if (last !== lineIndex) {
+    lineIndex = last;
+    document.querySelector('.karaoke').classList.toggle('voices', lines.some((l) => l[5]));
+    document.querySelector('.k-next').textContent = lines[last + 1]?.[2] ?? '';
+  }
+  lanes.forEach((lane) => { if (lane.i >= 0) laneFill(lane, lines[lane.i], t); });
 }
 
 /** The song has its own count-in. Every screen counts with it. */
