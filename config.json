@@ -9,10 +9,15 @@
     "admit": "Admit everyone"
   },
   "trailer": {
-    "src": "media/trailer.mp4",
-    "poster": "media/trailer-poster.jpg",
-    "shape": "1920 / 600",
-    "sources": []
+    "src": "media/trailer-v2.mp4",
+    "poster": "media/trailer-v2-poster.jpg",
+    "shape": "16 / 9",
+    "sources": [
+      {
+        "src": "media/trailer-v2.mp4",
+        "type": "video/mp4"
+      }
+    ]
   },
   "anthem": {
     "title": "DOKI-DOKI★FRAME-BY-FRAME!",

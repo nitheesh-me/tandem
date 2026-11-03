@@ -206,6 +206,7 @@ function onSoundState() {
   for (const bar of $$('.eq i')) bar.style.transform = '';
   lineIndex = -1;
   lanes.forEach((lane, n) => { lane.i = -1; laneSay(lane, document.querySelectorAll('.k-now')[n], null); });
+  laneSay({ words: [] }, document.querySelector('.k-prev'), null);
   if (songPhase) { songPhase = ''; goLive(false); }
 }
 
@@ -326,6 +327,14 @@ function karaoke(t) {
   }
   if (last !== lineIndex) {
     lineIndex = last;
+    // The line before, dimmed and already filled, unless it is still being sung in a lane.
+    const prevEl = document.querySelector('.k-prev');
+    const p = last - 1;
+    if (prevEl) {
+      const lane = { words: [] };
+      laneSay(lane, prevEl, p >= 0 && !want.includes(p) && t < lines[p][1] + 12 ? lines[p] : null);
+      lane.words.forEach((w) => { w.el.style.setProperty('--p', '100%'); });
+    }
     document.querySelector('.karaoke').classList.toggle('voices', lines.some((l) => l[5]));
     document.querySelector('.k-next').textContent = lines[last + 1]?.[2] ?? '';
   }
