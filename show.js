@@ -265,7 +265,7 @@ function laneSay(lane, el, line) {
   el.replaceChildren();
   lane.words = [];
   if (!line) return;
-  const who = line[5] ?? '';  // f her, m him, b both: one letter for the line, or one per word
+  const who = line[5] ?? '';  // c cute, s scream, g gang: one letter for the line, or one per word
   line[2].split(/\s+/).filter(Boolean).forEach((word, n) => {
     if (n) el.append(' ');
     const w = document.createElement('span');
