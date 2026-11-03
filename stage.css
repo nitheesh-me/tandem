@@ -1,0 +1,303 @@
+/* The landing page as a live show. join/ and watch/ keep style.css. */
+@font-face { font-family: Iosevka; font-weight: 900; font-display: swap; src: url(fonts/iosevka-heavy.woff2) format('woff2'); }
+@font-face { font-family: JetBrains; font-weight: 700; font-display: swap; src: url(fonts/jetbrains-Bold.woff2) format('woff2'); }
+@font-face { font-family: Inter; font-weight: 400; font-display: swap; src: url(fonts/inter-Regular.woff2) format('woff2'); }
+@font-face { font-family: Inter; font-weight: 600; font-display: swap; src: url(fonts/inter-SemiBold.woff2) format('woff2'); }
+
+:root {
+  --bg: #07040f; --surface: #120a22; --overlay: #2c1b4d; --text: #eaf6ff; --muted: #a99bd6;
+  --cyan: #00f0ff; --pink: #ff2a6d; --yellow: #f9f002; --green: #05ffa1; --violet: #b44cff;
+  --display: Iosevka, ui-monospace, monospace; --ui: Inter, system-ui, sans-serif; --mono: JetBrains, ui-monospace, monospace;
+  --cut: 14px; --wrap: min(1180px, calc(100% - 32px));
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { scroll-behavior: smooth; scroll-padding-top: 64px; overflow-x: clip; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 400 16px/1.55 var(--ui); -webkit-font-smoothing: antialiased; overflow-x: clip; }
+h1, h2, h3, p, figure, ul, ol { margin: 0; }
+ul, ol { padding: 0; list-style: none; }
+img { max-width: 100%; }
+a { color: var(--cyan); }
+.label { font: 700 12px/1.3 var(--mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.dim { color: var(--muted); }
+.fine { font-size: 13px; }
+.split { text-shadow: -2px 0 0 rgb(255 42 109 / 0.85), 2px 0 0 rgb(0 240 255 / 0.85); }
+.row { display: flex; flex-wrap: wrap; gap: 10px; }
+.cut { clip-path: polygon(0 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% 100%, var(--cut) 100%, 0 calc(100% - var(--cut))); }
+
+.skip { position: fixed; left: 12px; top: -60px; z-index: 50; padding: 10px 14px; background: var(--yellow); color: var(--bg); font: 700 13px var(--mono); text-decoration: none; }
+.skip:focus { top: 12px; }
+:focus-visible { outline: 2px solid var(--yellow); outline-offset: 3px; }
+
+/* Buttons keep the brand's clipped corners. */
+.btn { --c: 8px; display: inline-flex; align-items: center; justify-content: center; min-height: 44px; border: 0; cursor: pointer; padding: 12px 18px; text-decoration: none; text-align: center;
+  background: color-mix(in srgb, var(--cyan) 9%, var(--surface)); color: var(--cyan); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--cyan) 55%, transparent);
+  font: 700 13px/1.1 var(--mono); letter-spacing: 0.1em; text-transform: uppercase;
+  clip-path: polygon(0 0, calc(100% - var(--c)) 0, 100% var(--c), 100% 100%, var(--c) 100%, 0 calc(100% - var(--c))); }
+.btn:hover { background: var(--cyan); color: var(--bg); }
+.btn.primary { background: var(--cyan); color: var(--bg); }
+.btn.primary:hover { background: var(--text); }
+.btn:focus-visible { outline: 0; background: var(--yellow); color: var(--bg); }
+.btn[data-on] { background: var(--pink); color: var(--bg); box-shadow: none; }
+
+/* ---------- The header: the brand, the sections, and the sound switch. ---------- */
+.top { position: fixed; inset: 0 0 auto; z-index: 20; height: 56px; display: flex; align-items: center; gap: 18px; padding: 0 16px;
+  background: rgb(7 4 15 / 0.78); border-bottom: 1px solid rgb(180 76 255 / 0.25); }
+.brand { font: 900 22px/1 var(--display); color: var(--text); text-decoration: none; letter-spacing: 0.02em; text-shadow: -1px 0 var(--pink), 1px 0 var(--cyan); }
+.brand span { font: 700 10px var(--mono); color: var(--pink); margin-left: 6px; letter-spacing: 0.14em; vertical-align: 3px; text-shadow: none; }
+.top nav { display: flex; gap: 4px; margin-left: auto; }
+.top nav a { font: 700 12px/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); text-decoration: none; padding: 16px 10px; }
+.top nav a:hover { color: var(--cyan); }
+.sound { --c: 7px; margin-left: 8px; display: inline-flex; align-items: center; gap: 10px; min-height: 40px; padding: 0 14px; border: 0; cursor: pointer;
+  background: var(--surface); color: var(--yellow); box-shadow: inset 0 0 0 1px rgb(249 240 2 / 0.6);
+  font: 700 12px/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase;
+  clip-path: polygon(0 0, calc(100% - var(--c)) 0, 100% var(--c), 100% 100%, var(--c) 100%, 0 calc(100% - var(--c))); }
+.sound:hover { background: var(--yellow); color: var(--bg); }
+.sound[data-on] { background: var(--pink); color: var(--bg); box-shadow: none; }
+.eq { display: inline-flex; align-items: flex-end; gap: 2px; height: 14px; }
+.eq i { will-change: transform; width: 3px; height: 100%; background: currentColor; transform-origin: bottom; transform: scaleY(0.25); }
+@media (max-width: 760px) { .top nav { display: none; } .sound { margin-left: auto; } }
+
+/* ---------- The hero: the arena, the LED wall, the pass. ---------- */
+.hero { position: relative; isolation: isolate; min-height: 100svh; display: grid; align-content: center; gap: clamp(20px, 3.4vh, 36px); padding: 84px 0 72px; overflow: hidden; }
+.arena { position: absolute; inset: 0; z-index: -1; background: var(--bg); }
+.arena canvas { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 1.2s ease; }
+.gl .arena canvas { opacity: 1; }
+.arena::after { content: ''; position: absolute; inset: auto 0 0; height: 22%; background: linear-gradient(transparent, var(--bg)); pointer-events: none; }
+/* The still version: beams, a stage edge and phone lights, drawn with gradients. */
+.arena-still { position: absolute; inset: 0;
+  background:
+    radial-gradient(60% 18% at 50% 64%, rgb(180 76 255 / 0.28), transparent 70%),
+    linear-gradient(transparent 61.6%, rgb(0 240 255 / 0.7) 62%, transparent 62.4%),
+    conic-gradient(from 168deg at 18% -8%, transparent 0deg, rgb(0 240 255 / 0.16) 4deg, transparent 9deg, transparent 18deg, rgb(255 42 109 / 0.14) 22deg, transparent 27deg),
+    conic-gradient(from 160deg at 82% -8%, transparent 0deg, rgb(180 76 255 / 0.16) 5deg, transparent 10deg, transparent 22deg, rgb(5 255 161 / 0.12) 26deg, transparent 31deg),
+    conic-gradient(from 172deg at 50% -8%, transparent 0deg, rgb(249 240 2 / 0.1) 6deg, transparent 12deg),
+    var(--bg); }
+.arena-still::after { content: ''; position: absolute; inset: 64% 0 0;
+  background: radial-gradient(circle, rgb(255 244 220 / 0.75) 0 1px, transparent 1.6px) 0 0 / 17px 13px, radial-gradient(circle, rgb(0 240 255 / 0.6) 0 1.2px, transparent 2px) 7px 5px / 29px 21px;
+  -webkit-mask-image: linear-gradient(#000, transparent 85%); mask-image: linear-gradient(#000, transparent 85%); }
+.gl .arena-still { opacity: 0; transition: opacity 1.2s ease 0.4s; }
+
+.wall-row { width: min(1320px, calc(100% - 32px)); margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 880px) minmax(0, 1fr); align-items: center; gap: 22px; }
+.wall { grid-column: 2; position: relative; display: grid; justify-items: center; padding: 14px clamp(12px, 3vw, 34px) 18px; overflow: hidden;
+  background: linear-gradient(rgb(7 4 15 / 0.55), rgb(18 10 34 / 0.62)); box-shadow: inset 0 0 0 1px rgb(0 240 255 / 0.35), inset 0 0 60px rgb(180 76 255 / 0.18);
+  clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 22px, 100% 100%, 22px 100%, 0 calc(100% - 22px)); }
+.wall::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(transparent 0 2px, rgb(0 0 0 / 0.28) 2px 3px); }
+
+.ticker { width: 100%; overflow: hidden; border-block: 1px solid rgb(249 240 2 / 0.25); padding: 5px 0; }
+.ticker p { display: flex; width: max-content; font: 700 11px/1.2 var(--mono); letter-spacing: 0.22em; text-transform: uppercase; color: var(--yellow); white-space: pre; animation: roll 38s linear infinite; }
+
+/* LED wall type: a gradient through a dot grid, with a red and blue split that kicks with the bass. */
+.led { position: relative; font: 900 clamp(88px, 17vw, 250px)/0.92 var(--display); letter-spacing: 0.01em; color: transparent;
+  background: linear-gradient(100deg, var(--cyan) 10%, var(--violet) 50%, var(--pink) 90%); -webkit-background-clip: text; background-clip: text;
+  -webkit-mask: radial-gradient(circle, #000 58%, rgb(0 0 0 / 0.55) 64%, transparent 72%) 0 0 / 5px 5px; mask: radial-gradient(circle, #000 58%, rgb(0 0 0 / 0.55) 64%, transparent 72%) 0 0 / 5px 5px; }
+.led::before, .led::after { content: attr(data-text); position: absolute; inset: 0; background: none; mix-blend-mode: screen; pointer-events: none; }
+.led::before { color: rgb(255 42 109 / 0.65); transform: translateX(-3px); }
+.led::after { color: rgb(0 240 255 / 0.55); transform: translateX(3px); }
+/* The beat: a glow layer behind the title, changed by opacity only so it never repaints. */
+.wall-glow { position: absolute; inset: 0; pointer-events: none; opacity: 0; will-change: opacity;
+  background: radial-gradient(55% 50% at 50% 42%, rgb(0 240 255 / 0.3), rgb(180 76 255 / 0.18) 45%, rgb(255 42 109 / 0.08) 65%, transparent 80%); }
+#headline { margin: 10px 0 2px; }
+.hit #headline::before { animation: glitch-a 0.6s steps(2) 1; }
+.hit #headline::after { animation: glitch-b 0.6s steps(2) 1; }
+@keyframes glitch-a { 0% { clip-path: inset(10% 0 70% 0); transform: translateX(-16px); } 25% { clip-path: inset(55% 0 20% 0); transform: translateX(12px); } 50% { clip-path: inset(30% 0 45% 0); transform: translateX(-8px); } 75% { clip-path: inset(80% 0 4% 0); transform: translateX(10px); } 100% { clip-path: inset(0); } }
+@keyframes glitch-b { 0% { clip-path: inset(60% 0 15% 0); transform: translateX(14px); } 25% { clip-path: inset(5% 0 75% 0); transform: translateX(-12px); } 50% { clip-path: inset(40% 0 35% 0); transform: translateX(9px); } 75% { clip-path: inset(15% 0 60% 0); transform: translateX(-10px); } 100% { clip-path: inset(0); } }
+
+/* The countdown and the doors, shown only while the intro runs (or the song counts in). */
+.count, .doors { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; pointer-events: none; }
+.count { opacity: 0; background: radial-gradient(closest-side, rgb(7 4 15 / 0.9), rgb(7 4 15 / 0.65)); }
+.count-label { font: 700 clamp(12px, 1.6vw, 16px)/1 var(--mono); letter-spacing: 0.3em; text-transform: uppercase; color: var(--cyan); }
+.count-n { font: 900 clamp(110px, 20vw, 260px)/0.95 var(--display); color: var(--yellow); text-shadow: 0 0 30px rgb(249 240 2 / 0.6);
+  -webkit-mask: radial-gradient(circle, #000 58%, transparent 72%) 0 0 / 6px 6px; mask: radial-gradient(circle, #000 58%, transparent 72%) 0 0 / 6px 6px; }
+[data-phase='count'] .count { opacity: 1; }
+[data-phase='count'] #headline, [data-phase='doors'] #headline, [data-phase='count'] .karaoke { visibility: hidden; }
+.count-n.flip { animation: flip 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
+@keyframes flip { from { transform: scale(1.5); opacity: 0; filter: blur(6px); } to { transform: none; opacity: 1; filter: none; } }
+.doors { grid-template-columns: 1fr 1fr; place-content: stretch; justify-items: stretch; z-index: 2; }
+.doors span { display: grid; place-items: center end; padding: 0 12px; font: 900 clamp(28px, 6vw, 72px)/1 var(--display); text-transform: uppercase; color: var(--text); text-shadow: 0 2px 0 var(--bg), 0 0 18px var(--bg);
+  background: repeating-linear-gradient(-45deg, var(--yellow) 0 18px, #1b1530 18px 36px); transform: translateX(-101%); transition: transform 0.7s cubic-bezier(0.7, 0, 0.3, 1); }
+.doors span + span { place-items: center start; transform: translateX(101%); }
+[data-phase='doors'] .doors span { transform: none; }
+
+.karaoke { min-height: 2.9em; width: 100%; display: none; justify-items: center; align-content: start; gap: 4px; text-align: center; }
+.playing .karaoke { display: grid; }
+.k-now { position: relative; display: block; font: 900 clamp(17px, 2.5vw, 30px)/1.15 var(--display); max-width: 30ch; }
+/* The wipe: a clipped yellow copy slides in while its text slides back, so only transforms change. */
+.k-base { color: rgb(234 246 255 / 0.4); }
+.k-fill { position: absolute; inset: 0; overflow: hidden; transform: translateX(-100%); will-change: transform; }
+.k-ink { display: block; color: var(--yellow); transform: translateX(100%); will-change: transform; text-shadow: 0 0 14px rgb(249 240 2 / 0.45); }
+.k-next { font: 700 12px/1.3 var(--mono); color: var(--muted); letter-spacing: 0.06em; max-width: 60ch; }
+.k-now.scream { font-style: italic; text-transform: uppercase; }
+
+/* The side screens: holograms either side of the wall. */
+.side-screen { position: relative; display: grid; gap: 8px; padding: 18px 16px; min-width: 0; max-width: 220px; justify-self: end;
+  background: linear-gradient(160deg, rgb(0 240 255 / 0.12), rgb(180 76 255 / 0.08) 60%, rgb(7 4 15 / 0.4)); box-shadow: inset 0 0 0 1px rgb(0 240 255 / 0.4);
+  transform: perspective(700px) rotateY(22deg); clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px)); }
+.side-screen.right { justify-self: start; transform: perspective(700px) rotateY(-22deg); box-shadow: inset 0 0 0 1px rgb(255 42 109 / 0.45); }
+.side-screen::after { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(transparent 0 2px, rgb(0 0 0 / 0.3) 2px 3px); pointer-events: none; }
+.ss-label { font: 700 11px/1.2 var(--mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.ss-big { font: 900 clamp(22px, 2.1vw, 34px)/1 var(--display); color: var(--cyan); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.right .ss-big { color: var(--pink); font-size: clamp(34px, 3.4vw, 54px); }
+@media (max-width: 620px) {
+  .led { -webkit-mask-size: 4px 4px; mask-size: 4px 4px; }
+  #headline { font-size: 25vw; }
+}
+@media (max-width: 1100px) {
+  .wall-row { grid-template-columns: minmax(0, 1fr); }
+  .wall { grid-column: 1; }
+  .side-screen { display: none; }
+}
+
+.hero-row { width: var(--wrap); margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 590px); align-items: center; gap: clamp(24px, 4vw, 56px); }
+.hero-copy { display: grid; gap: 14px; justify-items: start; }
+.lead { max-width: 42ch; font-size: clamp(17px, 1.7vw, 21px); line-height: 1.45; text-shadow: 0 1px 12px var(--bg); }
+.ways { display: grid; gap: 10px; }
+#ways-status { min-height: 1.55em; }
+@media (max-width: 980px) { .hero-row { grid-template-columns: minmax(0, 1fr); } }
+
+/* The VIP pass: a holographic foil that follows the pointer or the phone's tilt. */
+.pass-wrap { perspective: 1000px; filter: drop-shadow(0 0 1px var(--cyan)) drop-shadow(0 10px 28px rgb(0 240 255 / 0.25)); }
+.ticket { --rx: 0deg; --ry: 0deg; --mx: 0.5; --my: 0.5; position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 178px; cursor: pointer;
+  background: linear-gradient(135deg, #1a0f33, #0d0820 55%, #1b0b2b); transform: rotateX(var(--rx)) rotateY(var(--ry)); transition: transform 0.25s ease-out;
+  clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 18px 100%, 0 calc(100% - 18px)); }
+.ticket:hover { --glow: 1; }
+.foil { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: color-dodge; opacity: 0.55;
+  background:
+    linear-gradient(115deg, transparent 25%, rgb(0 240 255 / 0.5) 38%, rgb(255 42 109 / 0.45) 46%, rgb(249 240 2 / 0.4) 54%, rgb(5 255 161 / 0.4) 62%, transparent 75%) calc(var(--mx) * 100%) calc(var(--my) * 100%) / 260% 260% no-repeat,
+    repeating-linear-gradient(60deg, rgb(255 255 255 / 0.05) 0 2px, transparent 2px 7px); }
+.ticket::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(circle at calc(var(--mx) * 100%) calc(var(--my) * 100%), rgb(255 255 255 / 0.16), transparent 45%); }
+.pass-main { position: relative; display: grid; gap: 6px; align-content: start; padding: 20px 22px; min-width: 0; }
+.pass-top { display: flex; gap: 10px; align-items: center; font: 700 11px/1 var(--mono); letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
+.pass-top span:first-child { background: var(--yellow); color: var(--bg); padding: 4px 7px; }
+.pass-count { margin-left: auto; color: var(--cyan); }
+.ticket h2 { font: 900 clamp(24px, 3vw, 36px)/1.05 var(--display); margin-top: 6px; overflow-wrap: anywhere; text-shadow: -1px 0 rgb(255 42 109 / 0.8), 1px 0 rgb(0 240 255 / 0.8); }
+.pass-line { color: var(--muted); }
+.ticket dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 18px; margin: 10px 0 0; }
+.ticket dt { font: 700 10px/1.3 var(--mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.ticket dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
+.pass-stub { position: relative; display: grid; gap: 8px; align-content: center; justify-items: start; padding: 18px 16px; border-left: 2px dashed rgb(180 76 255 / 0.5); }
+.admit-all { font: 900 26px/0.95 var(--display); text-transform: uppercase; color: var(--yellow); }
+.admit { font: 700 11px/1.3 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); overflow-wrap: anywhere; }
+.qr { width: 92px; aspect-ratio: 1; background: var(--text); padding: 5px; }
+.qr:empty { background: repeating-linear-gradient(90deg, var(--text) 0 2px, transparent 2px 4px, var(--text) 4px 7px, transparent 7px 9px); opacity: 0.5; }
+.qr svg { display: block; width: 100%; height: 100%; }
+#tear { width: 100%; }
+.stamp { position: absolute; right: 22%; top: 38%; padding: 6px 14px; border: 3px solid var(--pink); color: var(--pink); font: 900 28px/1 var(--display); text-transform: uppercase;
+  transform: rotate(-12deg) scale(1.6); opacity: 0; pointer-events: none; transition: transform 0.35s cubic-bezier(0.2, 1.4, 0.4, 1), opacity 0.2s; background: rgb(7 4 15 / 0.7); }
+.admitted .stamp { opacity: 1; transform: rotate(-12deg); }
+@media (max-width: 620px) {
+  .ticket { grid-template-columns: minmax(0, 1fr); }
+  .pass-stub { border-left: 0; border-top: 2px dashed rgb(180 76 255 / 0.5); grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+  .pass-stub .qr { grid-row: span 2; grid-column: 2; width: 84px; }
+  .pass-stub #tear { grid-column: 1 / -1; }
+}
+
+.scroll-cue { position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); display: grid; justify-items: center; gap: 6px; font: 700 11px/1 var(--mono); letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); text-decoration: none; padding: 6px; }
+.scroll-cue::after { content: ''; width: 1px; height: 28px; background: linear-gradient(var(--cyan), transparent); animation: drip 1.6s ease-in-out infinite; transform-origin: top; }
+@keyframes drip { 0% { transform: scaleY(0); } 60% { transform: scaleY(1); opacity: 1; } 100% { transform: scaleY(1); opacity: 0; } }
+@media (max-height: 760px), (max-width: 980px) { .scroll-cue { display: none; } }
+
+/* ---------- Sections after the hero. ---------- */
+main > section:not(.hero) { padding: clamp(72px, 11vw, 140px) 0 0; }
+.sec-head { width: var(--wrap); margin: 0 auto 28px; display: grid; gap: 8px; }
+.sec-head h2, .act h2, .encore h2 { font: 900 clamp(38px, 6.4vw, 80px)/0.98 var(--display); letter-spacing: -0.01em; }
+.sec-head .dim { max-width: 62ch; }
+
+/* The main stage: the trailer between two LED pillars, behind shutters that open on arrival. */
+.screen { width: min(1320px, calc(100% - 32px)); margin: 0 auto; display: grid; grid-template-columns: 12px minmax(0, 1fr) 12px; gap: clamp(8px, 1.4vw, 18px); }
+.screen-glass { position: relative; padding: clamp(6px, 1vw, 12px); background: linear-gradient(135deg, rgb(0 240 255 / 0.35), rgb(180 76 255 / 0.25), rgb(255 42 109 / 0.35));
+  clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px)); box-shadow: 0 0 80px rgb(180 76 255 / 0.3); }
+.screen video { display: block; width: 100%; background: #000; aspect-ratio: 16 / 5; }
+.shutter { position: absolute; inset: 0; display: grid; grid-template-columns: 1fr 1fr; pointer-events: none; }
+.shutter span { background: repeating-linear-gradient(0deg, #170f2b 0 6px, #0c0717 6px 8px); transition: transform 1s cubic-bezier(0.7, 0, 0.25, 1) 0.15s; box-shadow: inset 0 0 0 1px rgb(0 240 255 / 0.2); }
+.lit .shutter span:first-child { transform: translateX(-101%); }
+.lit .shutter span:last-child { transform: translateX(101%); }
+.screen { overflow: hidden; }
+.pillar { background: repeating-linear-gradient(0deg, var(--cyan) 0 6px, transparent 6px 9px); opacity: 0.25; -webkit-mask: linear-gradient(transparent, #000 20%, #000 80%, transparent); mask: linear-gradient(transparent, #000 20%, #000 80%, transparent); }
+.pillar + .screen-glass + .pillar { background: repeating-linear-gradient(0deg, var(--pink) 0 6px, transparent 6px 9px); }
+.lit .pillar { opacity: 0.6; }
+.pillar { position: relative; overflow: hidden; will-change: opacity; }
+.pillar::before { content: ''; position: absolute; inset: 0 0 -90px; background: inherit; }
+.lit .pillar::before { animation: pillar 2.4s linear infinite; }
+@keyframes pillar { to { transform: translateY(-90px); } }
+
+/* The headline act: the key art in a hologram frame. */
+.act { width: var(--wrap); margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 56px); align-items: center; }
+.act-copy { display: grid; gap: 14px; justify-items: start; }
+.act-copy > p:not(.label) { font-size: clamp(17px, 1.6vw, 20px); max-width: 42ch; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chips li { font: 700 12px/1 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; padding: 9px 12px; color: var(--green); box-shadow: inset 0 0 0 1px rgb(5 255 161 / 0.5); }
+@media (max-width: 900px) { .act { grid-template-columns: minmax(0, 1fr); } }
+.holo { position: relative; padding: 8px; background: linear-gradient(135deg, rgb(0 240 255 / 0.5), rgb(180 76 255 / 0.2) 40%, rgb(255 42 109 / 0.5));
+  clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 22px, 100% 100%, 22px 100%, 0 calc(100% - 22px)); overflow: hidden; }
+.holo img { display: block; width: 100%; height: auto; filter: brightness(0.35) saturate(0.4); transition: filter 1.2s ease; }
+.holo::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(100deg, transparent 40%, rgb(255 255 255 / 0.18) 50%, transparent 60%) -200% 0 / 200% 100% no-repeat, repeating-linear-gradient(transparent 0 2px, rgb(0 0 0 / 0.22) 2px 3px); }
+.holo.lit img { filter: none; }
+.holo.lit::after { animation: sheen 1.6s ease 0.2s 1 both; }
+@keyframes sheen { to { background-position: 300% 0, 0 0; } }
+
+/* The setlist: numbered LED panels that power on as they arrive. */
+.setlist { width: var(--wrap); margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(330px, 100%), 1fr)); gap: 22px; counter-reset: track; }
+.track { position: relative; display: grid; align-content: start; gap: 6px; padding: 0 0 20px; background: var(--surface);
+  clip-path: polygon(0 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% 100%, var(--cut) 100%, 0 calc(100% - var(--cut)));
+  box-shadow: inset 0 0 0 1px rgb(180 76 255 / 0.25); }
+.track .panel { position: relative; overflow: hidden; background: var(--bg); }
+.track .panel::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(transparent 0 2px, rgb(0 0 0 / 0.25) 2px 3px); opacity: 0.6; }
+.track img { display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: cover; object-position: top; filter: brightness(0.25) grayscale(0.8); transition: filter 0.5s ease; }
+.track.tall img { object-fit: contain; }
+.track-n { position: absolute; z-index: 1; top: 10px; left: 12px; font: 900 44px/1 var(--display); color: transparent; -webkit-text-stroke: 1.5px var(--cyan); text-shadow: 0 0 18px rgb(0 240 255 / 0.5); }
+.track h3 { font: 900 22px/1.15 var(--display); margin: 12px 18px 0; color: var(--text); }
+.track p { margin: 0 18px; color: var(--muted); font-size: 15px; }
+.track.lit { box-shadow: inset 0 0 0 1px rgb(0 240 255 / 0.55), inset 0 0 40px rgb(0 240 255 / 0.08); }
+.track.lit img { filter: none; animation: power 0.7s steps(1) 1; }
+.track:nth-child(3n + 2).lit img { animation-delay: 0.12s; }
+.track:nth-child(3n + 3).lit img { animation-delay: 0.24s; }
+@keyframes power { 0% { filter: brightness(0.25) grayscale(0.8); } 15% { filter: brightness(1.6); } 25% { filter: brightness(0.3); } 40% { filter: brightness(1.2); } 55% { filter: brightness(0.6); } 70% { filter: none; } }
+.bsides { width: var(--wrap); margin: 28px auto 0; display: grid; gap: 10px; }
+.bsides ul { display: flex; flex-wrap: wrap; gap: 6px 0; }
+.bsides li { font: 700 14px/1.4 var(--mono); color: var(--text); }
+.bsides li:not(:last-child)::after { content: '//'; color: var(--pink); margin: 0 12px; }
+
+/* The crowd chants: huge outlined banners rolling past, the plain words underneath. */
+.facts { display: grid; gap: clamp(26px, 4vw, 44px); }
+.chant { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; overflow: hidden; }
+.roll { display: flex; width: max-content; font: 900 clamp(46px, 8.5vw, 116px)/1 var(--display); text-transform: uppercase; color: transparent; -webkit-text-stroke: 2px var(--c); white-space: pre;
+  animation: roll 26s linear infinite paused; }
+.roll p { padding-right: 0.3em; }
+.chant.lit .roll { animation-play-state: running; }
+.chant:nth-child(even) .roll { animation-direction: reverse; }
+.chant > div:last-child { width: var(--wrap); margin: 0 auto; display: grid; grid-template-columns: minmax(0, 260px) minmax(0, 1fr); gap: 4px 24px; align-items: baseline; }
+.chant h3 { font: 900 26px/1.1 var(--display); color: var(--c); }
+.chant > div p { color: var(--muted); max-width: 60ch; }
+.c0 { --c: var(--cyan); } .c1 { --c: var(--pink); } .c2 { --c: var(--yellow); } .c3 { --c: var(--green); }
+@media (max-width: 620px) { .chant > div:last-child { grid-template-columns: minmax(0, 1fr); } }
+@keyframes roll { to { transform: translateX(-50%); } }
+
+/* The box office: the pass maker. */
+#maker { width: var(--wrap); margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; background: var(--surface); padding: 22px;
+  clip-path: polygon(0 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% 100%, var(--cut) 100%, 0 calc(100% - var(--cut))); box-shadow: inset 0 0 0 1px rgb(249 240 2 / 0.3); }
+#maker label { display: grid; gap: 5px; font: 700 12px/1.3 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+#maker input { width: 100%; border: 1px solid var(--overlay); background: var(--bg); color: var(--text); padding: 11px 12px; font: 400 15px/1.2 var(--ui); min-height: 44px; }
+#maker input:focus { outline: 2px solid var(--cyan); outline-offset: 1px; }
+.wide { grid-column: 1 / -1; }
+.warn { color: var(--yellow); min-height: 1.4em; font-size: 14px; }
+
+/* The encore: the downloads, and the anthem once more. */
+.encore { position: relative; }
+.encore-word { display: block; width: 100%; text-align: center; font-size: clamp(64px, 19vw, 300px); line-height: 0.85; margin-bottom: 18px; opacity: 0.9; }
+.encore-row { width: var(--wrap); margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 340px); gap: clamp(24px, 4vw, 56px); align-items: center; }
+.encore-copy { display: grid; gap: 14px; justify-items: start; }
+@media (max-width: 760px) { .encore-row { grid-template-columns: minmax(0, 1fr); } .encore-art { max-width: 300px; } }
+
+.credits { width: var(--wrap); margin: clamp(72px, 10vw, 120px) auto 0; padding: 22px 0 40px; border-top: 1px solid rgb(180 76 255 / 0.3); display: grid; gap: 8px; }
+.credits a { color: inherit; }
+
+/* Reduced motion: the still show. No sweeps, rolls, flicker or tilt. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .ticket { transform: none !important; }
+  .roll { animation: none; }
+  .k-fill, .k-ink { transform: none !important; }
+}

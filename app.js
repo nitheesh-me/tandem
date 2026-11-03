@@ -106,26 +106,44 @@ function showTicket(ticket) {
   for (const key of FIELDS) $(`t-${key}`).textContent = ticket[key] ?? '';
 }
 
+/** The showcase, as tonight's setlist: numbered LED panels that light up on scroll. */
 function showcase(items) {
   const box = $('showcase');
-  for (const item of items) {
-    const card = document.createElement('figure');
-    card.className = `show cut${item.tall ? ' tall' : ''}`;
-    card.style.margin = 0;
-    const img = Object.assign(document.createElement('img'), { src: item.image, alt: item.title, loading: 'lazy' });
+  items.forEach((item, i) => {
+    const track = Object.assign(document.createElement('li'), { className: `track${item.tall ? ' tall' : ''}` });
+    track.dataset.lit = '';
+    const number = Object.assign(document.createElement('span'), { className: 'track-n', textContent: String(i + 1).padStart(2, '0') });
+    number.setAttribute('aria-hidden', 'true');
+    const panel = Object.assign(document.createElement('div'), { className: 'panel' });
+    panel.append(Object.assign(document.createElement('img'), { src: item.image, alt: item.alt ?? item.title, loading: 'lazy', decoding: 'async' }));
     const title = Object.assign(document.createElement('h3'), { textContent: item.title });
     const text = Object.assign(document.createElement('p'), { textContent: item.text });
-    card.append(img, title, text);
-    box.append(card);
-  }
+    track.append(number, panel, title, text);
+    box.append(track);
+  });
 }
 
+/** Short extras under the setlist. */
+function bsides(list) {
+  for (const name of list) $('bsides').append(Object.assign(document.createElement('li'), { textContent: name }));
+  $('bsides').closest('.bsides').hidden = !list.length;
+}
+
+/** The facts, as crowd chants: a banner that rolls past, and the plain words under it. */
 function facts(list) {
-  for (const [name, text] of list) {
-    const box = document.createElement('div');
-    box.append(Object.assign(document.createElement('b'), { textContent: name, className: 'split' }), Object.assign(document.createElement('p'), { textContent: text }));
-    $('facts').append(box);
-  }
+  list.forEach(([name, text], i) => {
+    const row = Object.assign(document.createElement('li'), { className: `chant c${i % 4}` });
+    row.dataset.lit = '';
+    const roll = Object.assign(document.createElement('div'), { className: 'roll' });
+    roll.setAttribute('aria-hidden', 'true');
+    const line = document.createElement('p');
+    line.textContent = `${name.toUpperCase()}! `.repeat(6);
+    roll.append(line, line.cloneNode(true));
+    const words = document.createElement('div');
+    words.append(Object.assign(document.createElement('h3'), { textContent: name }), Object.assign(document.createElement('p'), { textContent: text }));
+    row.append(roll, words);
+    $('facts').append(row);
+  });
 }
 
 function downloads({ note, links }) {
@@ -156,26 +174,52 @@ function maker(ticket) {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const { url } = link();
-    try { await navigator.clipboard.writeText(url); note.textContent = 'Ticket link copied.'; }
+    try { await navigator.clipboard.writeText(url); note.textContent = 'Pass link copied.'; }
     catch { note.textContent = url; }
   });
   $('preview').addEventListener('click', () => setTimeout(() => location.reload(), 0));
   refresh();
 }
 
-function enter(trailer) {
-  $('ticket').classList.add('torn');
-  $('theatre').hidden = false;
+/**
+ * The main stage screen. The video and its poster load only when the screen
+ * comes near, so the first visit stays light. config.json's trailer.sources (a
+ * list of { src, type }) wins over trailer.src, which makes a new cut a one-line swap.
+ */
+function stage(trailer) {
   const video = $('trailer');
-  if (!video.src) {
-    video.src = trailer.src;
-    video.poster = trailer.poster ?? '';
-    video.style.aspectRatio = trailer.shape ?? '';
+  if (trailer.shape) video.style.aspectRatio = trailer.shape;
+  const load = () => {
+    if (video.dataset.loaded) return;
+    video.dataset.loaded = '1';
+    if (trailer.poster) video.poster = trailer.poster;
+    const sources = trailer.sources?.length ? trailer.sources : [{ src: trailer.src }];
+    for (const { src, type } of sources) {
+      const source = document.createElement('source');
+      source.src = src;
+      if (type) source.type = type;
+      video.append(source);
+    }
+    video.load();
+  };
+  if ('IntersectionObserver' in window) {
+    const near = new IntersectionObserver((seen) => {
+      if (seen.some((s) => s.isIntersecting)) { load(); near.disconnect(); }
+    }, { rootMargin: '150px 0px' });
+    near.observe(video);
+  } else {
+    load();
   }
-  video.addEventListener('play', () => window.contour?.pause(true));
-  for (const name of ['pause', 'ended']) video.addEventListener(name, () => window.contour?.pause(false));
-  $('theatre').scrollIntoView({ block: 'center' });
-  video.focus();
+  return load;
+}
+
+/** Without an invite, the pass leads to the main stage and starts the trailer. */
+function enter(loadTrailer) {
+  $('ticket').classList.add('admitted');
+  loadTrailer();
+  const video = $('trailer');
+  $('stage').scrollIntoView({ block: 'center' });
+  video.focus({ preventScroll: true });
   video.play().catch(() => {});
 }
 
@@ -192,24 +236,34 @@ async function start() {
   for (const key of FIELDS) if (link.get(key)) ticket[key] = link.get(key).slice(0, 80);
   const trailer = { ...programme.trailer };
   const fromLink = safeVideo(link.get('trailer'));
-  if (fromLink) Object.assign(trailer, { src: fromLink, poster: '', shape: '' });
+  if (fromLink) Object.assign(trailer, { src: fromLink, sources: null, poster: '', shape: '' });
   const invite = inviteFrom(link.get('invite'));
 
   showTicket(ticket);
   showcase(programme.showcase ?? []);
+  bsides(programme.bsides ?? []);
   facts(programme.facts ?? []);
   downloads(programme.download ?? {});
   maker(ticket);
+  const loadTrailer = stage(trailer);
+  // The pass is one big button: a click anywhere on it does what its button does.
+  $('ticket').addEventListener('click', (e) => {
+    if (!e.target.closest('a, button')) $('tear').click();
+  });
   if (invite) {
-    // A ticket with an invite is a way into that room, so tearing it goes in.
+    // A pass with an invite is a way into that room, so entering goes in.
     offerWays(invite, say);
+    $('tear').textContent = 'Enter the room';
     $('tear').addEventListener('click', () => {
-      $('ticket').classList.add('torn');
+      $('ticket').classList.add('admitted');
       enterRoom(invite, say);
     });
   } else {
-    $('tear').addEventListener('click', () => enter(trailer));
+    $('tear').addEventListener('click', () => enter(loadTrailer));
   }
+  // The rest of the show (lights, sound, the pass's code) picks up from here.
+  window.tandem = { ticket, invite, anthem: programme.anthem ?? null, credits: programme.credits ?? null };
+  document.dispatchEvent(new CustomEvent('tandem:ready'));
 }
 
 /** The join page: one invite, the two ways in, and the downloads. */

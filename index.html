@@ -4,65 +4,173 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Tandem: watch together, in lockstep</title>
-<meta name="description" content="Tandem plays the same frame at the same moment for everyone, with no server in the middle.">
+<meta name="description" content="Watch the same film, or play the same song, with friends far away. Frame-locked, peer to peer, with no server and no account.">
 <meta name="referrer" content="no-referrer">
 <meta name="theme-color" content="#07040F">
+<meta property="og:title" content="Tandem: the show starts on every screen at once">
+<meta property="og:description" content="Frame-locked watch parties, peer to peer, with no server and no account.">
+<meta property="og:image" content="media/art-stage.webp">
 <link rel="icon" href="media/icon.png">
-<link rel="stylesheet" href="style.css">
+<link rel="preload" href="fonts/iosevka-heavy.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="stage.css">
+<script>
+  // The doors start shut and the show counts in, unless motion is reduced. If the
+  // show's script never runs, the doors open by themselves.
+  document.documentElement.dataset.phase = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'live' : 'doors';
+  setTimeout(() => { if (!window.showRunning) document.documentElement.dataset.phase = 'live'; }, 4500);
+</script>
 </head>
 <body>
-<canvas id="contour" aria-hidden="true"></canvas>
+<a class="skip" href="#stage">Skip to the main stage</a>
+
+<header class="top">
+  <a class="brand" href="#doors" aria-label="Tandem, back to the top">TANDEM<span aria-hidden="true">//LIVE</span></a>
+  <nav aria-label="Sections">
+    <a href="#stage">Stage</a>
+    <a href="#setlist">Setlist</a>
+    <a href="#box-office">Box office</a>
+    <a href="#encore">Encore</a>
+  </nav>
+  <button class="sound" type="button" data-sound>
+    <span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+    <span class="sound-label">Sound on</span>
+  </button>
+</header>
+
 <main>
-  <section class="hero">
-    <p class="label">// Watch together, in lockstep</p>
-    <h1 class="split">TANDEM</h1>
-    <p class="lead">Everyone plays the same frame at the same moment, with no server in the middle.</p>
+  <section class="hero" id="doors" aria-labelledby="headline">
+    <div class="arena" aria-hidden="true">
+      <div class="arena-still"></div>
+      <canvas id="arena"></canvas>
+    </div>
 
-    <article class="ticket" id="ticket" aria-label="Ticket">
-      <div class="stub-main">
-        <p class="label">// Ticket</p>
-        <h2 id="t-show"></h2>
-        <p class="dim" id="t-line"></p>
-        <dl>
-          <div><dt>Venue</dt><dd id="t-venue"></dd></div>
-          <div><dt>Date</dt><dd id="t-date"></dd></div>
-          <div><dt>Time</dt><dd id="t-time"></dd></div>
-          <div><dt>Seat</dt><dd id="t-seat"></dd></div>
-        </dl>
-      </div>
-      <div class="stub-tear">
-        <p class="admit" id="t-admit"></p>
-        <button class="btn primary" id="tear">Tear to enter</button>
-      </div>
-    </article>
+    <div class="wall-row">
+      <aside class="side-screen left" aria-hidden="true">
+        <p class="ss-label">// Timecode</p>
+        <p class="ss-big" id="timecode">00:00:00:00</p>
+        <p class="ss-label">Frame-locked</p>
+      </aside>
 
-    <div class="ways" id="ways" hidden>
-      <p class="label">// Two ways in</p>
-      <div class="row">
-        <a class="btn primary" id="join">Open in the app</a>
-        <a class="btn" id="watch">Watch in this browser</a>
+      <div class="wall">
+        <div class="ticker" aria-hidden="true"><p><span>Live tonight // every screen // no server // no account // frame-locked // peer to peer // </span><span>Live tonight // every screen // no server // no account // frame-locked // peer to peer // </span></p></div>
+        <div class="wall-glow" aria-hidden="true"></div>
+        <h1 id="headline" class="led" data-text="TANDEM">TANDEM</h1>
+        <div class="count" aria-hidden="true">
+          <p class="count-label">Show starts in</p>
+          <p class="count-n" data-sync>3</p>
+        </div>
+        <div class="doors" aria-hidden="true"><span>Doors</span><span>open</span></div>
+        <p class="karaoke" id="karaoke" aria-hidden="true"><span class="k-now"><span class="k-base"></span><span class="k-fill"><span class="k-ink"></span></span></span><span class="k-next"></span></p>
       </div>
-      <p class="dim" id="ways-status" role="status" aria-live="polite"></p>
+
+      <aside class="side-screen right" aria-hidden="true">
+        <p class="ss-label">// Showtime</p>
+        <p class="ss-big"><span data-sync>3</span></p>
+        <p class="ss-label" id="side-status">Doors open</p>
+      </aside>
+    </div>
+
+    <div class="hero-row">
+      <div class="hero-copy">
+        <p class="label">// One show, every screen</p>
+        <p class="lead">The same film, or the same song, on every screen at once. Frame-locked, peer to peer, with no server and no account.</p>
+        <div class="row">
+          <button class="btn primary" type="button" data-sound><span class="sound-label">Play the anthem</span></button>
+          <a class="btn" href="#stage">Main stage</a>
+        </div>
+        <div class="ways" id="ways" hidden>
+          <p class="label">// Two ways in</p>
+          <div class="row">
+            <a class="btn primary" id="join">Open in the app</a>
+            <a class="btn" id="watch">Watch in this browser</a>
+          </div>
+        </div>
+        <p class="dim" id="ways-status" role="status" aria-live="polite"></p>
+      </div>
+
+      <div class="pass-wrap">
+        <article class="ticket" id="ticket" aria-labelledby="t-show">
+          <div class="foil" aria-hidden="true"></div>
+          <div class="pass-main">
+            <p class="pass-top"><span>VIP</span><span>All access</span><span class="pass-count" aria-hidden="true">T-<b data-sync>3</b></span></p>
+            <h2 id="t-show"></h2>
+            <p class="pass-line" id="t-line"></p>
+            <dl>
+              <div><dt>Venue</dt><dd id="t-venue"></dd></div>
+              <div><dt>Date</dt><dd id="t-date"></dd></div>
+              <div><dt>Time</dt><dd id="t-time"></dd></div>
+              <div><dt>Seat</dt><dd id="t-seat"></dd></div>
+            </dl>
+          </div>
+          <div class="pass-stub">
+            <p class="admit-all">Admit all</p>
+            <p class="admit" id="t-admit"></p>
+            <div class="qr" id="qr" aria-hidden="true"></div>
+            <button class="btn primary" id="tear" type="button">Enter the show</button>
+          </div>
+          <p class="stamp" aria-hidden="true">Admitted</p>
+        </article>
+      </div>
+    </div>
+    <a class="scroll-cue" href="#stage"><span>Main stage</span></a>
+  </section>
+
+  <section class="stage" id="stage" aria-labelledby="stage-title">
+    <div class="sec-head">
+      <p class="label">// Main stage</p>
+      <h2 id="stage-title" class="split">Now showing</h2>
+      <p class="dim">Every screen in the room shows this frame at the same moment.</p>
+    </div>
+    <div class="screen" data-lit>
+      <div class="pillar" aria-hidden="true"></div>
+      <div class="screen-glass">
+        <video id="trailer" controls playsinline preload="none" aria-label="Tandem trailer"></video>
+        <div class="shutter" aria-hidden="true"><span></span><span></span></div>
+      </div>
+      <div class="pillar" aria-hidden="true"></div>
     </div>
   </section>
 
-  <section class="theatre" id="theatre" hidden aria-label="Trailer">
-    <p class="label">// Now showing</p>
-    <video id="trailer" controls playsinline preload="none"></video>
+  <section class="act" aria-labelledby="act-title">
+    <figure class="act-art holo" data-lit>
+      <img src="media/art-stage-900.webp" srcset="media/art-stage-900.webp 900w, media/art-stage.webp 1600w" sizes="(min-width: 900px) 56vw, 100vw" width="1600" height="995" loading="lazy" decoding="async" alt="A TV, a laptop and a phone in a dark room, all showing the same sunset, linked by glowing lines.">
+    </figure>
+    <div class="act-copy">
+      <p class="label">// The headline act</p>
+      <h2 id="act-title" class="split">One room. Every screen.</h2>
+      <p>A TV, a laptop and a phone, in different homes, on the same frame. Send an invite and anyone can join. Nothing to sign up for.</p>
+      <ul class="chips" aria-label="Where Tandem runs">
+        <li>Android</li><li>Android TV</li><li>Desktop</li><li>Browser</li>
+      </ul>
+    </div>
   </section>
 
-  <section aria-labelledby="showcase-title">
-    <p class="label">// Showcase</p>
-    <h2 id="showcase-title" class="split">What is playing</h2>
-    <div class="showcase" id="showcase"></div>
+  <section class="setlist-sec" id="setlist" aria-labelledby="showcase-title">
+    <div class="sec-head">
+      <p class="label">// Setlist</p>
+      <h2 id="showcase-title" class="split">Tonight's setlist</h2>
+    </div>
+    <ol class="setlist" id="showcase"></ol>
+    <div class="bsides">
+      <h3 class="label">// B-sides</h3>
+      <ul id="bsides"></ul>
+    </div>
   </section>
 
-  <section class="facts" id="facts" aria-label="Why Tandem"></section>
+  <section class="chants" aria-labelledby="chants-title">
+    <div class="sec-head">
+      <p class="label">// The crowd</p>
+      <h2 id="chants-title" class="split">Sing it back</h2>
+    </div>
+    <ul class="facts" id="facts"></ul>
+  </section>
 
-  <section class="maker" aria-labelledby="maker-title">
-    <p class="label">// Box office</p>
-    <h2 id="maker-title" class="split">Make a ticket</h2>
-    <p class="dim">Name the show and paste your room invite. Opening the ticket opens the room in the app, or in the browser where the app is not installed. Everything stays in the link itself and is never sent to this site.</p>
+  <section class="maker" id="box-office" aria-labelledby="maker-title">
+    <div class="sec-head">
+      <p class="label">// Box office</p>
+      <h2 id="maker-title" class="split">Print a pass</h2>
+      <p class="dim">Name the show and paste your room invite. Opening the pass opens the room in the app, or in the browser where the app is not installed. Everything stays in the link itself and is never sent to this site.</p>
+    </div>
     <form id="maker">
       <label>Show<input name="show" maxlength="80" autocomplete="off"></label>
       <label>Date<input name="date" maxlength="40" autocomplete="off"></label>
@@ -71,21 +179,39 @@
       <label class="wide">Room invite<input name="invite" placeholder="https://nitheesh-me.github.io/tandem/join/#..." autocomplete="off" spellcheck="false"></label>
       <p class="wide warn" id="maker-note" role="status"></p>
       <div class="wide row">
-        <button class="btn primary" type="submit">Copy ticket link</button>
+        <button class="btn primary" type="submit">Copy pass link</button>
         <a class="btn" id="preview" href="#">Preview</a>
       </div>
     </form>
   </section>
 
-  <section class="get" aria-labelledby="get-title">
-    <p class="label">// Get Tandem</p>
-    <h2 id="get-title" class="split">Take your seat</h2>
-    <p class="dim" id="get-note"></p>
-    <div class="row" id="get-links"></div>
+  <section class="get encore" id="encore" aria-labelledby="get-title">
+    <p class="encore-word led" aria-hidden="true" data-text="ENCORE">ENCORE</p>
+    <div class="encore-row">
+      <div class="encore-copy">
+        <p class="label">// Encore</p>
+        <h2 id="get-title" class="split">Take your seat</h2>
+        <p class="dim" id="get-note"></p>
+        <div class="row" id="get-links"></div>
+        <div class="row">
+          <button class="btn" type="button" data-sound><span class="sound-label">Play the anthem</span></button>
+        </div>
+      </div>
+      <figure class="encore-art holo" data-lit>
+        <img src="media/art-poster.webp" width="760" height="1247" loading="lazy" decoding="async" alt="Three rooms at night: someone on a bus with a phone, someone at a laptop, two people on a sofa before a TV, all joined by one line of light.">
+      </figure>
+    </div>
   </section>
-  <footer class="label">// Tandem</footer>
 </main>
-<script src="contour.js"></script>
+
+<footer class="credits">
+  <p class="label">// <a href="#doors">Tandem</a> // free, peer to peer, no account</p>
+  <p class="dim" id="credits">The anthem, "DOKI-DOKI★FRAME-BY-FRAME! (The Tandem Anthem)", and the key art were made with Google Gemini by the project owner.</p>
+  <p class="dim fine">Fonts: Iosevka, JetBrains Mono and Inter, under the SIL Open Font License. QR codes: qrcode-generator, MIT. <a href="vendor/LICENSES.txt">Licences</a>.</p>
+</footer>
+
+<audio id="anthem" preload="none"></audio>
 <script src="app.js"></script>
+<script type="module" src="show.js"></script>
 </body>
 </html>
