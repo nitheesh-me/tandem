@@ -276,7 +276,11 @@ function bar() {
   $('t-ahead').style.width = `${dur ? Math.min(1, (pos + ahead) / dur) * 100 : 0}%`;
   $('track').setAttribute('aria-valuenow', String(Math.round(frac * 100)));
   $('track').setAttribute('aria-valuetext', `${clock(pos)} of ${clock(dur)}`);
-  $('f-ahead').textContent = `${ahead.toFixed(1)} s`;
+  $('f-ahead').textContent = ahead >= 0.1 ? `${ahead.toFixed(ahead < 10 ? 1 : 0)} s ready` : 'Nothing yet';
+  // Pace: the speed trim that keeps this Station on the room's moment.
+  const trim = (video.playbackRate - 1) * 100;
+  $('f-pace').textContent = video.paused || Math.abs(trim) < 0.5 ? 'Normal'
+    : trim > 0 ? `+${trim.toFixed(1)}%, catching up` : `${trim.toFixed(1)}%, easing back`;
   return ahead;
 }
 
