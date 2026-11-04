@@ -346,6 +346,14 @@ export class Tandem {
         wasm.tandem_player_gone(this.__wbg_ptr);
     }
     /**
+     * Whether this Station may be named in other Stations' viewer lists.
+     * It is counted either way.
+     * @param {boolean} on
+     */
+    set_listed(on) {
+        wasm.tandem_set_listed(this.__wbg_ptr, on);
+    }
+    /**
      * Moves the download toward this chunk.
      * @param {number} chunk
      */
