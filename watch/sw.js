@@ -15,11 +15,11 @@ bus.onmessage = ({ data }) => {
   }
 };
 
-function ask(id, start, end) {
+function ask(id, s, start, end) {
   const rid = crypto.randomUUID();
   return new Promise((resolve) => {
     replies.set(rid, resolve);
-    bus.postMessage({ t: 'read', rid, id, start, end });
+    bus.postMessage({ t: 'read', rid, id, s, start, end });
     setTimeout(() => {
       if (replies.delete(rid)) resolve({ t: 'late' });
     }, PATIENCE_MS);
@@ -27,12 +27,16 @@ function ask(id, start, end) {
 }
 
 async function media(request, id) {
+  // The Station the page names: every tab's Station hears this channel.
+  const s = new URL(request.url).searchParams.get('s') ?? undefined;
   const m = /bytes=(\d+)-(\d*)/.exec(request.headers.get('range') ?? 'bytes=0-');
   if (!m) return new Response(null, { status: 416 });
   const start = Number(m[1]);
   const end = m[2] ? Number(m[2]) : undefined;
-  const got = await ask(id, start, end);
+  const got = await ask(id, s, start, end);
   if (got.t === 'late') return new Response(null, { status: 504 });
+  // The Station left: its page is going away.
+  if (got.t === 'gone') return new Response(null, { status: 503 });
   if (got.t === 'range') return new Response(null, { status: 416, headers: { 'Content-Range': `bytes */${got.total}` } });
   const last = start + got.bytes.length - 1;
   served++;
@@ -55,4 +59,8 @@ self.addEventListener('fetch', (e) => {
   if (m) e.respondWith(media(e.request, m[1]));
 });
 // For the test: this proves a kill really produced a new instance.
-self.addEventListener('message', (e) => e.source?.postMessage({ t: 'sw', started, served }));
+self.addEventListener('message', (e) => {
+  // A page that opened without this worker in charge asks to be taken over.
+  if (e.data?.t === 'claim') e.waitUntil(self.clients.claim());
+  else e.source?.postMessage({ t: 'sw', started, served });
+});

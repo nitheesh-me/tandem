@@ -144,6 +144,14 @@ export class Tandem {
         wasm.tandem_chat(this.__wbg_ptr, ptr0, len0);
     }
     /**
+     * Stops the download and lets go of the storage object, so JavaScript
+     * can close the film's files: on leaving, on the room's end, on an error.
+     * Chunks in flight are dropped. Safe to call with no film open.
+     */
+    close_film() {
+        wasm.tandem_close_film(this.__wbg_ptr);
+    }
+    /**
      * Fetches `one` chunks on one stream at a time, then `many` more across
      * `workers` streams, checking every chunk against the manifest. Nothing
      * is kept: a real version would write to OPFS here.
@@ -847,9 +855,9 @@ function __wbg_get_imports() {
         __wbg_respond_d97c023ee981d1f5: function() { return handleError(function (arg0, arg1) {
             arg0.respond(arg1 >>> 0);
         }, arguments); },
-        __wbg_saved_2a5350bff2cb981e: function(arg0, arg1, arg2, arg3) {
+        __wbg_saved_f1ce6db95b9bd75c: function() { return handleError(function (arg0, arg1, arg2, arg3) {
             arg0.saved(arg1 >>> 0, getArrayU8FromWasm0(arg2, arg3));
-        },
+        }, arguments); },
         __wbg_send_cd51063ca1be4d0f: function() { return handleError(function (arg0, arg1, arg2) {
             arg0.send(getStringFromWasm0(arg1, arg2));
         }, arguments); },

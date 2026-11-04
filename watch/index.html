@@ -68,6 +68,23 @@
             </div>
           </div>
 
+          <div class="boot premiere" id="premiere" role="region" aria-labelledby="pr-title" hidden>
+            <div class="boot-card">
+              <p class="label" id="pr-label">// Next showing</p>
+              <h2 class="boot-title" id="pr-title"><span id="pr-lead">Next showing in</span> <span class="countdown" id="pr-time">0:00</span></h2>
+              <p class="boot-sub" id="pr-sub">The film runs on a loop, and it is partway through. Your seat is held: the picture starts here from the top, in step with everyone.</p>
+              <div class="ready" id="pr-ready-row">
+                <span class="ready-text" id="pr-ready">Your copy: 0% ready</span>
+                <span class="meter" aria-hidden="true"><i></i></span>
+              </div>
+              <p class="sr" id="pr-say" aria-live="polite"></p>
+              <div class="boot-actions">
+                <button class="btn primary" id="pr-sound" type="button" aria-pressed="false">Turn sound on</button>
+                <button class="btn ghost quiet" id="pr-now" type="button">Watch now, from the middle</button>
+              </div>
+            </div>
+          </div>
+
           <button class="btn primary unmute" id="unmute" type="button" hidden>
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 9a4 4 0 0 1 0 6M19 6a8 8 0 0 1 0 12"/></svg>
             Turn sound on

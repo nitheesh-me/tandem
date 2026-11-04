@@ -47,7 +47,16 @@ The code printed on the pass carries the show, date, time and seat, never the in
   the `#`: `invite=` (required to join), `window=` (chunks kept ahead), `windowkb=` (QUIC receive window
   for tests), `forget=` (chunk numbers to drop, for tests), `nobuckets` (plain OPFS), `small` (ask a
   native Station for its converted smaller picture), `mirror=` (a mirror's base URL instead of
-  `config.json`'s, for tests), `nomirror` (fetch only from the room). Keys: F fullscreen, M sound.
+  `config.json`'s, for tests), `nomirror` (fetch only from the room), `nowait` (no countdown in a
+  looping screening), `noshare` (one tab per copy of the film, as in Firefox). Keys: F fullscreen, M sound.
+  Storage: each copy of a film (an OPFS folder, or a Storage Bucket in Chrome) has a Web Lock, and the
+  Station holding it answers on the `tandem-owners` channel. A reload or a rejoin waits for the last
+  Station to let go (it does so on `pagehide`), and takes the lock if no live Station answers. A second
+  tab shares the files where the browser has `readwrite-unsafe` handles (Chrome), and keeps its own copy
+  otherwise (up to four copies; spare ones are removed when the first copy is free again).
+  A looping screening with observers holds a late joiner's seat: a countdown to the top from the room's
+  own position and agreed restart, with the copy downloading from the start, then the picture starts in
+  step. "Watch now, from the middle" skips it.
 
 ### Changing the screening film
 

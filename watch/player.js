@@ -95,7 +95,7 @@ async function run(play) {
 function apply(d) {
   facts.directives++;
   facts.lastDirective = d;
-  if (!video.src) return;
+  if (!video.src || holding()) return;
   const wanted = Math.round(Math.min(4, Math.max(0.25, d.rate)) * 100) / 100;
   const settling = wanted === room?.state.timeline.rate;
   const now = performance.now();
@@ -117,6 +117,13 @@ function apply(d) {
 
 /** Runs on the Worker's beat, because this page's own timers stop when hidden. */
 function sample() {
+  // While a seat is held for the next showing, this Station plays nothing: it
+  // keeps its clock and its download, and steers that to the film's start.
+  if (holding()) {
+    worker.postMessage({ t: 'gone' });
+    worker.postMessage({ t: 'steer', chunk: 0 });
+    return;
+  }
   if (!video.src) return worker.postMessage({ t: 'gone' });
   if (live) pumpLive();
   const pos = positionNow();
@@ -131,10 +138,21 @@ function sample() {
 
 async function serviceWorkerReady() {
   if (!navigator.serviceWorker) throw new Error('no service worker');
-  await navigator.serviceWorker.register('sw.js');
-  await navigator.serviceWorker.ready;
+  const reg = await Promise.race([
+    navigator.serviceWorker.register('sw.js').then(() => navigator.serviceWorker.ready),
+    new Promise((ok) => setTimeout(ok, 8000)),
+  ]);
+  if (!reg) throw new Error('the Service Worker did not start');
+  // A page can open without its Service Worker in charge (Firefox after a
+  // return to this page, or a hard reload), and then the film's reads would
+  // miss it: ask the worker to take this page over, and wait for it.
   if (!navigator.serviceWorker.controller) {
-    await new Promise((r) => navigator.serviceWorker.addEventListener('controllerchange', r, { once: true }));
+    note('asking the Service Worker to take over');
+    const taken = new Promise((ok) => navigator.serviceWorker.addEventListener('controllerchange', ok, { once: true }));
+    reg.active?.postMessage({ t: 'claim' });
+    await Promise.race([taken, new Promise((ok) => setTimeout(ok, 5000))]);
+    facts.swClaimed = !!navigator.serviceWorker.controller;
+    if (!facts.swClaimed) throw new Error('the Service Worker would not take this page');
   }
 }
 
@@ -175,15 +193,269 @@ function pumpLive() {
   }
 }
 
-async function show(id) {
+async function show(id, sid) {
   if (id === mediaId) return;
   mediaId = id;
   // Film bytes reach the <video> through the Service Worker, so it must be in charge first.
   await swReady;
-  video.src = `media/${id}`;
+  if (facts.swError) {
+    fail('The picture could not start', 'This browser did not let the page use its Service Worker, which carries the film to the picture. Reload the page to try again.', 'picture');
+    return;
+  }
+  // Every tab's Station hears the Service Worker, so the address names this one.
+  video.src = sid ? `media/${id}?s=${sid}` : `media/${id}`;
   video.load();
   note('source set');
 }
+
+// ---------- Next showing ----------
+//
+// A screening that loops (one film, or a list) holds a late joiner's seat:
+// instead of the middle of something, a countdown to the start of the next
+// item, with that item downloading and the Station locked to the room's clock.
+// When the room starts it, the picture starts here in step. Every time comes
+// from the room's own figures (its position, and the start it agrees ahead),
+// so this browser's clock does not matter.
+
+// Joined this close to the start: just watch.
+const SEAT_AFTER_S = 8;
+// The picture starts this much before the agreed instant: play() takes a moment.
+const PLAY_EARLY_MS = 30;
+// In a list, the room starts the next item a short lead after the last one ends
+// (0.8 s, and twice the slowest round trip it counts, at most 0.25 s for observers).
+const QUEUE_LEAD_MS = 1300;
+let premiere = null;
+let soundWanted = false;
+let lastLoop = null;
+facts.restarts = [];
+facts.premiere = null;
+const holding = () => premiere?.phase === 'wait' || premiere?.phase === 'arming';
+
+/** Only a looping screening with observers. Says what plays now and what comes next. */
+function loopOf(view, item) {
+  const st = view.state;
+  const tl = st.timeline;
+  if (!view.observer || !st.repeat || !st.items?.length || !item?.duration_ms || !tl?.playing) return null;
+  const at = st.items.findIndex((i) => i.id === tl.item);
+  const next = st.items[(at + 1) % st.items.length];
+  return { durS: item.duration_ms / 1000, posS: view.position_us / 1e6, rate: tl.rate || 1, tl, next, single: st.items.length === 1 };
+}
+
+/** A plain title for an item: config.json's, or its file name tidied. */
+function titleOf(item) {
+  const given = programme.screening?.titles?.[item.name];
+  if (given) return given;
+  const base = item.name.replace(/\.[^.]+$/, '').replace(/^song-\d+-/, '').replace(/[-_]+/g, ' ').trim();
+  return base.replace(/\b\w/g, (c) => c.toUpperCase()) || 'the next film';
+}
+
+/**
+ * When the seat's item starts, on this page's clock. Exact once the room has
+ * agreed the start (it does so a moment ahead); until then, the end of what
+ * plays now, which is an estimate.
+ */
+function nextStart(view, loop) {
+  const now = performance.now();
+  const tl = loop.tl;
+  if (tl.item === premiere.target && tl.anchor_pos_us === 0 && tl.generation !== premiere.gen0) {
+    premiere.agreed = true;
+    return now + (tl.anchor_room_us - view.room_us) / 1000;
+  }
+  premiere.agreed = false;
+  return now + ((loop.durS - loop.posS) / loop.rate) * 1000 + (loop.single ? 0 : QUEUE_LEAD_MS);
+}
+
+function holdSeat(loop) {
+  premiere.target = loop.next.id;
+  premiere.from = loop.tl.item;
+  premiere.rewound = false;
+  premiere.gen0 = loop.tl.generation;
+  premiere.title = loop.single ? null : titleOf(loop.next);
+  facts.premiere.target = loop.next.name;
+  // The Station downloads the item the seat waits for, not the one playing now.
+  worker.postMessage({ t: 'want-item', id: premiere.target });
+  $('pr-label').textContent = loop.single ? '// Next showing' : '// Up next';
+  $('pr-lead').textContent = loop.single ? 'Next showing in' : `Next: ${premiere.title} in`;
+  $('pr-sub').textContent = loop.single
+    ? 'The film runs on a loop, and it is partway through. Your seat is held: the picture starts here from the top, in step with everyone.'
+    : 'The room plays a list on a loop. Your seat is held: the picture starts here when the next one begins, in step with everyone.';
+}
+
+function premiereView(view, item) {
+  const loop = view.joined && item ? loopOf(view, item) : null;
+  // A start, seen from the room, for the facts and the tests: a new item, or
+  // the same one from the top. Its instant is the agreed anchor.
+  if (loop && lastLoop && (loop.tl.item !== lastLoop.item || loop.posS < lastLoop.posS - 10) && loop.tl.anchor_pos_us === 0) {
+    facts.restarts.push({ at: Math.round(Date.now() + (loop.tl.anchor_room_us - view.room_us) / 1000), item: loop.tl.item });
+  }
+  if (loop) lastLoop = { item: loop.tl.item, posS: loop.posS };
+  if (!premiere) {
+    if (!view.joined || !item) return;
+    const seat = loop && !live && !facts.liveFilm && !params.has('nowait') && loop.posS > SEAT_AFTER_S;
+    if (!seat) { premiere = { phase: 'off' }; return; }
+    premiere = { phase: 'wait', said: null };
+    facts.premiere = { phase: 'wait', joinedAtPos: +loop.posS.toFixed(2), joinedDuring: item.name, predictions: [] };
+    holdSeat(loop);
+    premiere.startAt = nextStart(view, loop);
+    boot(false);
+    $('premiere').hidden = false;
+    $('pr-sound').focus({ preventScroll: true });
+    note('seat held for the next item', { inS: (premiere.startAt - performance.now()) / 1000, next: loop.next.name });
+  }
+  if (!holding() || !loop) return;
+  // The room moved to something else than the seat's item (the list changed,
+  // or skipped ahead): wait for whatever comes next now.
+  if (loop.tl.item !== premiere.target && (loop.tl.item !== premiere.from || !view.state.items.some((i) => i.id === premiere.target))) {
+    holdSeat(loop);
+    note('seat moved to the next item', { next: loop.next.name });
+  }
+  premiere.startAt = nextStart(view, loop);
+  const left = premiere.startAt - performance.now();
+  facts.premiere.startsAtEpoch = Math.round(Date.now() + left);
+  facts.premiere.agreed = premiere.agreed;
+  if (facts.premiere.predictions.length < 600) facts.premiere.predictions.push([Date.now(), Math.round(Date.now() + left), premiere.agreed]);
+  if (left < 2500) {
+    // Back to the very first frame now, so the start needs no seek of its own.
+    if (video.src && mediaId === premiere.target && video.paused && video.currentTime !== 0 && !premiere.rewound) { premiere.rewound = true; video.currentTime = 0; }
+  }
+  // Start only on the room's agreed instant, never on an estimate: before it,
+  // the room still plays the last item.
+  if (premiere.agreed) {
+    clearTimeout(premiere.timer);
+    premiere.timer = setTimeout(premiereGo, Math.max(0, left - PLAY_EARLY_MS));
+  }
+}
+
+const countText = (s) => {
+  const t = Math.max(0, Math.ceil(s));
+  const h = Math.floor(t / 3600);
+  const m = Math.floor((t % 3600) / 60);
+  const sec = String(t % 60).padStart(2, '0');
+  return h ? `${h}:${String(m).padStart(2, '0')}:${sec}` : `${m}:${sec}`;
+};
+const spoken = (s) => {
+  const t = Math.max(0, Math.round(s));
+  if (t >= 60) { const m = Math.round(t / 60); return `${m} minute${m === 1 ? '' : 's'}`; }
+  return `${t} second${t === 1 ? '' : 's'}`;
+};
+
+/** On the Worker's beat: the countdown, the copy, and what a screen reader hears. */
+function premiereTick() {
+  if (premiere.phase === 'late') return premiereLate();
+  if (!holding()) return;
+  const left = (premiere.startAt - performance.now()) / 1000;
+  $('pr-time').textContent = countText(left);
+  const f = facts.swarm;
+  const pct = f?.total ? Math.floor((f.have / f.total) * 100) : 0;
+  $('pr-ready').textContent = f?.total ? `Your copy: ${pct}% ready` : 'Your copy: starting the download';
+  $('pr-ready-row').style.setProperty('--p', f?.total ? f.have / f.total : 0);
+  // Said politely, and only now and then: on arrival, each minute, then 30 and 10 seconds.
+  const marks = [10, 30, ...Array.from({ length: 180 }, (_, i) => (i + 1) * 60)];
+  const due = premiere.said === null ? Math.ceil(left) : marks.find((m) => left <= m && premiere.said > m);
+  if (due !== undefined) {
+    premiere.said = Math.ceil(left);
+    $('pr-say').textContent = `${premiere.title ? `Next: ${premiere.title}, in` : 'Next showing in'} ${spoken(left)}. Your copy is ${pct}% ready.`;
+  }
+  // A hidden tab may miss the page timer: the Worker's beat starts it too.
+  if (premiere.agreed && left * 1000 <= PLAY_EARLY_MS) premiereGo();
+}
+
+/** The top of the film: start the picture in step, or as soon as the copy can. */
+async function premiereGo() {
+  if (!holding() || premiere.phase === 'arming') return;
+  premiere.phase = 'arming';
+  clearTimeout(premiere.timer);
+  const ready = video.src && mediaId === premiere.target && video.readyState >= 3;
+  facts.premiere.wentAt = Date.now();
+  facts.premiere.readyAtStart = ready;
+  // Late to the start (a hidden tab, or a start agreed only at the last moment):
+  // begin where the room is, while the picture is still covered.
+  const late = (performance.now() - premiere.startAt) / 1000;
+  if (ready) {
+    if (late > 0.1) video.currentTime = late;
+    else if (video.currentTime > 0.05) video.currentTime = 0;
+    video.playbackRate = 1;
+    video.addEventListener('playing', () => { facts.premiere.playLagMs = Math.round(performance.now() - premiere.startAt); }, { once: true });
+    video.muted = !soundWanted;
+    try {
+      await video.play();
+    } catch (e) {
+      // Autoplay rules: start without sound; the sound button stays on the picture.
+      video.muted = true;
+      facts.autoMuted = true;
+      await video.play().catch(() => {});
+    }
+  } else {
+    video.muted = !soundWanted;
+  }
+  // Steering resumes once the room is past the top, so a sample sent a few
+  // milliseconds early cannot pull the picture back to the end.
+  const wait = Math.max(0, premiere.startAt - performance.now()) + 150;
+  setTimeout(() => {
+    premiere.phase = ready ? 'started' : 'late';
+    facts.premiere.phase = premiere.phase;
+    worker.postMessage({ t: 'want-item', id: null });
+    if (ready) {
+      $('premiere').hidden = true;
+      $('pr-say').textContent = '';
+      soundUi();
+      note('next showing started in step');
+    } else {
+      note('next showing started before the copy was ready');
+      premiereLate();
+    }
+  }, wait);
+}
+
+/** Started without enough of the copy: say so, and show the picture once it plays. */
+function premiereLate() {
+  if (!video.paused && video.readyState >= 3) {
+    premiere.phase = 'started';
+    facts.premiere.phase = 'started';
+    facts.premiere.lateStartAt = Date.now();
+    $('premiere').hidden = true;
+    soundUi();
+    return;
+  }
+  const box = $('premiere');
+  if (box.dataset.state !== 'late') {
+    box.dataset.state = 'late';
+    $('pr-label').textContent = '// Starting';
+    $('pr-lead').textContent = 'Starting as soon as your copy is ready';
+    $('pr-time').textContent = '';
+    $('pr-sub').textContent = 'The showing has begun. Your copy needs a little more, then the picture joins in step.';
+    $('pr-say').textContent = 'The showing has begun. The picture joins as soon as your copy is ready.';
+    $('pr-now').hidden = true;
+  }
+  const f = facts.swarm;
+  if (f?.total) $('pr-ready').textContent = `Your copy: ${Math.floor((f.have / f.total) * 100)}% ready`;
+}
+
+$('pr-sound').onclick = () => {
+  soundWanted = !soundWanted;
+  $('pr-sound').setAttribute('aria-pressed', String(soundWanted));
+  $('pr-sound').textContent = soundWanted ? 'Sound on at the start' : 'Turn sound on';
+  // A tap now lets the browser start the film with sound later.
+  if (soundWanted && video.src && video.paused && holding()) {
+    // Silent: the tap itself is what lets sound start later.
+    video.muted = true;
+    video.play().then(() => { if (holding()) { video.pause(); video.currentTime = 0; } }).catch(() => {});
+  }
+  if (premiere?.phase === 'late') video.muted = !soundWanted;
+};
+$('pr-now').onclick = () => {
+  if (!holding()) return;
+  clearTimeout(premiere.timer);
+  premiere.phase = 'skipped';
+  facts.premiere.phase = 'skipped';
+  worker.postMessage({ t: 'want-item', id: null });
+  facts.premiere.skippedAt = Date.now();
+  video.muted = !soundWanted && video.muted;
+  $('premiere').hidden = true;
+  boot(true, { label: '// Joining the showing', title: 'Starting from the middle', sub: 'Locking to the room. The picture appears in a moment.' });
+  $('stage').focus({ preventScroll: true });
+  note('watching from the middle');
+};
 
 // ---------- What you see ----------
 
@@ -253,7 +525,7 @@ function soundUi() {
   $('sound').title = `${off ? 'Turn sound on' : 'Turn sound off'} (M)`;
   $('sound-wave').style.display = off ? 'none' : '';
   $('sound-x').style.display = off ? '' : 'none';
-  $('unmute').hidden = !(off && !video.paused && $('boot').hidden);
+  $('unmute').hidden = !(off && !video.paused && $('boot').hidden && $('premiere').hidden);
 }
 
 function fullUi() {
@@ -326,6 +598,7 @@ function syncUi(view) {
   $('f-rtt').textContent = msText(view.clock?.rtt_us);
   if (failed) return;
   if (!view.joined) return;
+  if (holding()) { chip('Seat held', 'violet'); return; }
   if (buffering || (wantPlay && !playing && video.src)) chip('Buffering', 'yellow');
   else if (!view.state.timeline.playing) chip('Paused by the room', 'muted');
   else if (d?.inSync) chip('In sync', 'green');
@@ -377,6 +650,7 @@ function onView(data) {
     else if (STEPS.indexOf(stepNow) < 3) setStep('picture', 'Opening the film');
   }
   people(view);
+  premiereView(view, item);
   const now = performance.now();
   if (now - lastView > 1000) {
     lastView = now;
@@ -387,7 +661,8 @@ function onView(data) {
 /** The boot steps after joining, and the bar, on the Worker's beat. */
 function progress() {
   const ahead = bar();
-  if (!room?.joined) return;
+  if (premiere) premiereTick();
+  if (!room?.joined || holding()) return;
   if (!video.src) return;
   const f = facts.swarm;
   const playing = !video.paused && video.readyState >= 3;
@@ -439,8 +714,9 @@ worker.onmessage = ({ data }) => {
     case 'view': onView(data); break;
     case 'film':
       facts.film = data;
-      $('f-store').textContent = data.kind === 'bucket' ? 'Storage bucket' : data.kind === 'opfs' ? 'Private files' : data.kind;
-      show(data.id);
+      $('f-store').textContent = storeLabel(data);
+      if (data.how === 'own-copy') note('own copy', { slot: data.slot });
+      show(data.id, data.sid);
       break;
     case 'live-film':
       facts.liveFilm = data;
@@ -460,6 +736,8 @@ worker.onmessage = ({ data }) => {
       if (live?.generation === data.generation) { live.ended = true; pumpLive(); }
       break;
     case 'storage': facts.storageNow = data.facts; break;
+    case 'storage-wait': note('waiting for the last Station to let go of the film', { slot: data.slot }); break;
+    case 'closed': facts.closed = true; break;
     case 'tick': sample(); progress(); if (room) syncUi(room); break;
     case 'lag': facts.workerLag = data.ms; break;
     case 'directive': apply(data.d); break;
@@ -470,7 +748,7 @@ worker.onmessage = ({ data }) => {
       const t = String(data.text);
       if (/relay/i.test(t)) fail('No relay answered', 'This browser could not reach any Tandem relay. Check the connection, then try again.', 'relay');
       else if (/ticket/i.test(t)) fail('This invite does not work', 'It could not be read. Ask the host for a fresh invite.', 'room');
-      else if (/storage|quota/i.test(t)) fail('This browser would not store the film', `Private browsing or a full disk can do this. The browser said: ${t}`, 'picture');
+      else if (data.kind === 'storage' || /storage|quota/i.test(t)) storageFailed(data.name, t);
       else if (/wasm|WebAssembly|compile/i.test(t)) fail('The Station did not load', 'The download may have been cut off. Try again.', 'station');
       else fail('Something stopped the Station', `The browser said: ${t}`, stepNow);
       break;
@@ -478,6 +756,27 @@ worker.onmessage = ({ data }) => {
     default: break;
   }
 };
+
+/** Where the film is kept, and with whom. */
+function storeLabel(f) {
+  const where = f.kind === 'bucket' ? 'Storage bucket' : f.kind === 'opfs' ? 'Private files' : f.kind;
+  if (f.how === 'shared') return `${where}, shared with another tab`;
+  if (f.how === 'own-copy') return `${where}, this tab's own copy (Tandem is open in another tab)`;
+  return where;
+}
+
+/** A storage error in plain words: what it means, not every reason it might. */
+function storageFailed(name, said) {
+  if (name === 'QuotaExceededError') {
+    fail('There is no room for the film', 'The disk, or the space this browser gives a site, is full. Free some space, then try again.', 'picture');
+  } else if (name === 'NoModificationAllowedError' || name === 'InvalidModificationError') {
+    fail('The film is in use in other tabs', 'Tandem is open in several other tabs or windows, and this browser lets only one use a film\'s files at a time. Close one of them, then try again.', 'picture');
+  } else if (name === 'SecurityError' || name === 'NotAllowedError') {
+    fail('This browser would not store the film', 'Private windows often keep sites from storing files. Open this page in a normal window.', 'picture');
+  } else {
+    fail('This browser would not store the film', `The browser said: ${said}`, 'picture');
+  }
+}
 
 function bufferedSeconds() {
   const b = video.buffered;
@@ -498,7 +797,14 @@ video.addEventListener('error', () => {
   note('video error', { message: facts.videoError });
   if (video.error?.code === 4) fail('This browser cannot play this film', 'Its format is not one browsers play. Open the room in the Tandem app, or ask the host for an MP4.', 'picture');
 });
-window.addEventListener('pagehide', () => worker.postMessage({ t: 'bye' }));
+// Leaving, reloading or closing: the Station lets go of the film's files and
+// says goodbye first, so the next Station (here or in another tab) has them.
+let gone = false;
+const goodbye = () => { if (!gone) { gone = true; worker.postMessage({ t: 'bye' }); } };
+window.addEventListener('pagehide', goodbye);
+window.addEventListener('beforeunload', goodbye);
+// Back from the back-forward cache, the Station has already said goodbye: start again.
+window.addEventListener('pageshow', (e) => { if (e.persisted && gone) location.reload(); });
 
 // Sound and size are this viewer's own.
 $('sound').onclick = () => { video.muted = !video.muted; if (!video.muted && video.volume === 0) video.volume = 1; soundUi(); };
@@ -541,6 +847,8 @@ function join(invite, name) {
   worker.postMessage({
     t: 'join', invite, name, key: stationKey(),
     window: Number(params.get('window') ?? 0), noBuckets: params.has('nobuckets'), small: params.has('small'),
+    // For tests: one tab per copy of the film, as in a browser that cannot share files.
+    noShare: params.has('noshare'),
     // For tests only: the receive window in KiB, where 0 means QUIC's defaults.
     windowKb: params.has('windowkb') ? Number(params.get('windowkb')) : undefined,
     forget: (params.get('forget') ?? '').split(',').filter(Boolean).map(Number),

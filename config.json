@@ -108,6 +108,59 @@
         "https://cdn.jsdelivr.net/gh/nitheesh-me/tandem@media-4k/"
       ],
       "manifest": "manifest.json"
+    },
+    "mirrors": [
+      {
+        "root": "730493780402875ab642c6eb85d4d940f442df3ec4a1825398b46e797f13476b",
+        "base": [
+          "https://raw.githubusercontent.com/nitheesh-me/tandem/media-4k/",
+          "https://fastly.jsdelivr.net/gh/nitheesh-me/tandem@media-4k/",
+          "https://cdn.jsdelivr.net/gh/nitheesh-me/tandem@media-4k/"
+        ],
+        "manifest": "manifest.json"
+      },
+      {
+        "root": "f446923687df8605e5b84670420d352bba975e04bfcd6bddfa8f6549c380fc12",
+        "base": [
+          "https://raw.githubusercontent.com/nitheesh-me/tandem/media-songs/song-1-san-ni-ichi/",
+          "https://fastly.jsdelivr.net/gh/nitheesh-me/tandem@media-songs/song-1-san-ni-ichi/",
+          "https://cdn.jsdelivr.net/gh/nitheesh-me/tandem@media-songs/song-1-san-ni-ichi/"
+        ],
+        "manifest": "manifest.json"
+      },
+      {
+        "root": "e93e886c41f2d9ae568ca02cf1ce5a4072c9910bea323bc7512384fc4e24ac7b",
+        "base": [
+          "https://raw.githubusercontent.com/nitheesh-me/tandem/media-songs/song-2-heart-fire-star/",
+          "https://fastly.jsdelivr.net/gh/nitheesh-me/tandem@media-songs/song-2-heart-fire-star/",
+          "https://cdn.jsdelivr.net/gh/nitheesh-me/tandem@media-songs/song-2-heart-fire-star/"
+        ],
+        "manifest": "manifest.json"
+      },
+      {
+        "root": "69739479f7b2571cae2856ff15164e396c47868ac49c01b7f685b64aecfa05ee",
+        "base": [
+          "https://raw.githubusercontent.com/nitheesh-me/tandem/media-songs/song-3-nobody-left-behind/",
+          "https://fastly.jsdelivr.net/gh/nitheesh-me/tandem@media-songs/song-3-nobody-left-behind/",
+          "https://cdn.jsdelivr.net/gh/nitheesh-me/tandem@media-songs/song-3-nobody-left-behind/"
+        ],
+        "manifest": "manifest.json"
+      },
+      {
+        "root": "c41e616df4c2201f0ef61779115e1dd029492dfaf00c4764c0cabe1f53aa17a9",
+        "base": [
+          "https://raw.githubusercontent.com/nitheesh-me/tandem/media-songs/song-4-teen-do-ek/",
+          "https://fastly.jsdelivr.net/gh/nitheesh-me/tandem@media-songs/song-4-teen-do-ek/",
+          "https://cdn.jsdelivr.net/gh/nitheesh-me/tandem@media-songs/song-4-teen-do-ek/"
+        ],
+        "manifest": "manifest.json"
+      }
+    ],
+    "titles": {
+      "song-1-san-ni-ichi.mp4": "SAN, NI, ICHI!",
+      "song-2-heart-fire-star.mp4": "Heart Fire Star",
+      "song-3-nobody-left-behind.mp4": "Nobody Left Behind",
+      "song-4-teen-do-ek.mp4": "Teen Do Ek"
     }
   }
 }
