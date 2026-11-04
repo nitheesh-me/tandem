@@ -127,8 +127,23 @@ button, input { font: inherit; color: inherit; }
 
 /* The pass: what this invite really says, read from it on this device. */
 :where(.pass) { --tone: var(--cyan); }
-.pass { position: relative; display: grid; background: var(--surface); filter: drop-shadow(0 0 1px var(--tone)) drop-shadow(0 0 22px color-mix(in srgb, var(--tone) 26%, transparent)); }
-.pass-in { display: grid; background: var(--surface); clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 22px, 100% 100%, 22px 100%, 0 calc(100% - 22px)); }
+.pass { position: relative; display: grid; filter: drop-shadow(0 0 1px var(--tone)) drop-shadow(0 0 22px color-mix(in srgb, var(--tone) 26%, transparent)); }
+.pass-in { --perf: 72%; --n: 9px; position: relative; display: grid; isolation: isolate; overflow: hidden;
+  background: linear-gradient(135deg, #1a0f33, #0d0820 55%, #1b0b2b); box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.07);
+  /* Cut corners as everywhere, plus a V notch at each end of the perforation, where the stub would tear. */
+  clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 22px, 100% calc(var(--perf) - var(--n)), calc(100% - var(--n)) var(--perf), 100% calc(var(--perf) + var(--n)),
+    100% 100%, 22px 100%, 0 calc(100% - 22px), 0 calc(var(--perf) + var(--n)), var(--n) var(--perf), 0 calc(var(--perf) - var(--n))); }
+/* The pass as a printed object, like the landing page's: grain, fine guilloche lines, a foil sheen and a watermark. */
+.pass-in::before { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: 0.7;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.16 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E") 0 0 / 160px 160px,
+    repeating-radial-gradient(circle at 18% 120%, transparent 0 7px, rgb(180 76 255 / 0.09) 7px 8px),
+    repeating-radial-gradient(circle at 92% -30%, transparent 0 9px, rgb(0 240 255 / 0.06) 9px 10px); }
+.pass-in::after { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; mix-blend-mode: color-dodge; opacity: 0.35;
+  background: linear-gradient(115deg, transparent 25%, rgb(0 240 255 / 0.45) 38%, rgb(255 42 109 / 0.4) 46%, rgb(249 240 2 / 0.35) 54%, rgb(5 255 161 / 0.35) 62%, transparent 75%) 30% 30% / 260% 260% no-repeat,
+    repeating-linear-gradient(60deg, rgb(255 255 255 / 0.05) 0 2px, transparent 2px 7px); }
+.pass-water { position: absolute; left: -2%; bottom: 10%; z-index: -1; margin: 0; pointer-events: none; font: 900 clamp(64px, 8vw, 110px)/0.8 var(--display); letter-spacing: 0.02em;
+  color: transparent; -webkit-text-stroke: 1.2px rgb(234 246 255 / 0.1); transform: rotate(-8deg); white-space: nowrap; user-select: none; }
 .pass[data-tone='muted'] { --tone: var(--overlay); filter: none; }
 .pass-head { display: flex; justify-content: space-between; gap: 10px; padding: 12px 20px; background: var(--tone); color: var(--bg); font: 700 12px/1.2 var(--mono); letter-spacing: 0.16em; text-transform: uppercase; }
 .pass[data-tone='muted'] .pass-head { color: var(--text); }

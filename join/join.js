@@ -199,3 +199,12 @@ $('paste').addEventListener('submit', (e) => {
 
 window.addEventListener('hashchange', render);
 render();
+
+// The perforation's notches follow the dashed line wherever the layout puts it.
+{
+  const inner = document.querySelector('.pass-in');
+  const perf = document.querySelector('.pass-perf');
+  const place = () => { if (inner && perf && perf.offsetParent) inner.style.setProperty('--perf', `${perf.offsetTop + 1}px`); };
+  place();
+  if (inner && 'ResizeObserver' in window) new ResizeObserver(place).observe(inner);
+}

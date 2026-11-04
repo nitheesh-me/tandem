@@ -102,7 +102,7 @@ function safeVideo(text) {
 }
 
 function showTicket(ticket) {
-  for (const key of FIELDS) $(`t-${key}`).textContent = ticket[key] ?? '';
+  for (const key of FIELDS) { const el = $(`t-${key}`); if (el) el.textContent = ticket[key] ?? ""; }
 }
 
 /** Small line glyphs for the setlist, drawn in the current colour. */
@@ -317,10 +317,12 @@ async function start() {
   });
   if (invite) {
     // A pass with an invite is a way into that room, so entering goes in.
-    offerWays(invite, say);
+    // One call to action: the ticket. Tearing it opens the room; the two ways in
+    // appear only then, for when the app did not open.
     $('tear').textContent = 'Enter the room';
     $('tear').addEventListener('click', () => {
       tear();
+      offerWays(invite, say);
       enterRoom(invite, say);
     });
   } else {
