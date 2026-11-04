@@ -16,8 +16,8 @@
     "sources": []
   },
   "anthem": {
-    "title": "DOKI-DOKI★FRAME-BY-FRAME!",
-    "subtitle": "The Tandem Anthem",
+    "title": "The Tandem Anthem",
+    "subtitle": "Same frame, same time",
     "sources": [
       {
         "src": "media/anthem.webm",
@@ -94,5 +94,11 @@
   "download": {
     "note": "Android, Android TV and desktop are in their final rehearsal. Public downloads open soon.",
     "links": []
+  },
+  "screening": {
+    "invite": "tandem1xyyj2uk2qxotc54opgrflqqcc5wx4pxbaaybsmo66c3ujdag4q5qdi3ojuhymjzpzwaz5ooev72kzwnbi4rq64thrk7z4njy2fu7n22zegrw4tipqyts7tmbt244jl7uvtm2crzdb5zgpcv7ty2trulj63vvsaa",
+    "label": "Watch the live screening",
+    "name": "Tandem Screening",
+    "note": "A three-minute trailer on a loop, open to everyone, all day. The room steers and you watch along."
   }
 }

@@ -4,50 +4,129 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex">
 <meta name="theme-color" content="#07040F">
 <title>Tandem: watch in your browser</title>
 <link rel="icon" href="../media/icon.png">
+<link rel="preload" href="../fonts/iosevka-heavy.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="../style.css">
-<style>
-  main { gap: 18px; padding: 28px 16px 40px; }
-  .top { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: baseline; justify-content: space-between; }
-  .top h1 { font: 900 clamp(28px, 5vw, 44px)/1 var(--display); }
-  .stage { position: relative; background: #000; }
-  .stage video { aspect-ratio: 16 / 9; }
-  #stage-note { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; padding: 16px; color: var(--muted); pointer-events: none; }
-  #unmute { position: absolute; left: 16px; top: 16px; }
-  .info { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px 24px; }
-  .info dd { color: var(--text); }
-  .row label { flex: 1 1 220px; }
-  .small { font-size: 14px; }
-</style>
 </head>
 <body>
-<canvas id="contour" aria-hidden="true"></canvas>
-<main>
-  <div class="top">
-    <div><p class="label">// Now showing</p><h1 class="split" id="room">Tandem</h1></div>
-    <p class="label" id="status" role="status">Not joined</p>
+<a class="skip" href="#stage">Skip to the picture</a>
+<header class="top">
+  <a class="brand" href="../" aria-label="Tandem, home">TANDEM<span aria-hidden="true">//LIVE</span></a>
+  <a class="top-link" id="back" href="../join/">Leave</a>
+</header>
+
+<main class="booth">
+  <div class="booth-head">
+    <div>
+      <p class="label" id="kicker">// Browser Station</p>
+      <h1 class="split" id="room">Tandem</h1>
+    </div>
+    <div class="chips" id="chips">
+      <span class="chip" id="state-chip" data-tone="violet" role="status"><span class="dot" aria-hidden="true"></span><span id="state-text">Starting</span></span>
+      <span class="chip" id="role-chip" data-tone="muted" hidden>Observer</span>
+    </div>
   </div>
-  <div class="stage cut">
-    <video id="video" preload="auto" playsinline controls></video>
-    <p id="stage-note">The picture starts when the room's film reaches this browser.</p>
-    <button class="btn" id="unmute" hidden>Sound is off. Tap to turn it on.</button>
+
+  <div class="stage-wrap">
+    <div class="glass">
+      <div class="stage" id="stage" tabindex="-1">
+        <div class="screen">
+          <video id="video" preload="auto" playsinline aria-label="The room's picture"></video>
+
+          <div class="boot" id="boot" role="region" aria-labelledby="boot-title">
+            <div class="boot-card">
+              <p class="label" id="boot-label">// Boot sequence</p>
+              <h2 class="boot-title" id="boot-title">Getting your seat ready</h2>
+              <p class="boot-sub" id="boot-sub">This browser becomes a Tandem Station. It takes a few seconds the first time.</p>
+              <ol class="steps" id="steps" aria-label="Progress">
+                <li class="step" data-step="station" data-state="now"><b>Load the Station</b><span class="what">Waiting</span><span class="meter" aria-hidden="true"><i></i></span></li>
+                <li class="step" data-step="relay" data-state="wait"><b>Reach a relay</b><span class="what">Waiting</span></li>
+                <li class="step" data-step="room" data-state="wait"><b>Join the room</b><span class="what">Waiting</span></li>
+                <li class="step" data-step="picture" data-state="wait"><b>Fetch the picture</b><span class="what">Waiting</span><span class="meter" aria-hidden="true"><i></i></span></li>
+                <li class="step" data-step="sync" data-state="wait"><b>Lock to the room</b><span class="what">Waiting</span></li>
+              </ol>
+              <form class="boot-form" id="form" hidden>
+                <div class="field">
+                  <label for="invite">Room invite</label>
+                  <input class="input" id="invite" autocomplete="off" spellcheck="false" placeholder="https://nitheesh-me.github.io/tandem/join/#tandem1..." aria-describedby="form-warn">
+                </div>
+                <div class="field">
+                  <label for="name">Your name</label>
+                  <input class="input" id="name" maxlength="32" autocomplete="nickname">
+                </div>
+                <p class="warn" id="form-warn" aria-live="polite"></p>
+              </form>
+              <div class="boot-actions" id="boot-actions">
+                <button class="btn primary" id="join" type="button" hidden>Join the room</button>
+                <a class="btn pink" id="screening" href="#" hidden>Watch the live screening</a>
+                <button class="btn" id="retry" type="button" hidden>Try again</button>
+                <a class="btn" id="boot-back" href="../join/" hidden>Back to the invite</a>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn primary unmute" id="unmute" type="button" hidden>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 9a4 4 0 0 1 0 6M19 6a8 8 0 0 1 0 12"/></svg>
+            Turn sound on
+          </button>
+        </div>
+
+        <div class="bar" id="bar">
+          <div class="scrub">
+            <span class="time" id="t-now">0:00</span>
+            <div class="track" id="track" role="progressbar" aria-label="Position in the film" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <span class="ahead" id="t-ahead"></span><span class="played" id="t-played"></span>
+            </div>
+            <span class="time" id="t-total">0:00</span>
+          </div>
+          <div class="row">
+            <button class="btn ghost" id="sound" type="button" aria-pressed="false" title="Sound (M)">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path id="sound-wave" d="M16 9a4 4 0 0 1 0 6"/><path id="sound-x" d="M16 9l6 6M22 9l-6 6"/></svg>
+              <span class="sr" id="sound-name">Sound</span>
+            </button>
+            <button class="btn ghost" id="full" type="button" title="Fullscreen (F)">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg>
+              <span class="sr" id="full-name">Fullscreen</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="steer" id="steer">Play, pause and seeking follow the room.</p>
   </div>
-  <dl class="info">
-    <div><dt>Film</dt><dd id="film"></dd></div>
-    <div><dt>Stations</dt><dd id="stations"></dd></div>
-  </dl>
-  <form class="row" onsubmit="event.preventDefault()">
-    <label>Your name<input id="name" maxlength="32" autocomplete="nickname"></label>
-    <label hidden>Invite<input id="invite"></label>
-    <button class="btn primary" id="join" type="button" hidden>Join the room</button>
-  </form>
-  <p class="dim small">This is the browser version of Tandem. Play and pause follow the room. MP4 films play directly, and other formats play when someone in the room has the Tandem app.
-    For the full experience, <a href="../" style="color: var(--cyan)">get the app</a>.</p>
-  <pre id="facts" hidden></pre>
+
+  <aside class="rail" aria-label="The room">
+    <section class="panel" aria-labelledby="sync-title">
+      <p class="label" id="sync-title">// Sync</p>
+      <p class="big" id="sync-big" data-tone="muted">Not measured yet</p>
+      <dl class="figs">
+        <div><dt>Clock</dt><dd id="f-clock">Not synced</dd></div>
+        <div><dt>RTT</dt><dd id="f-rtt">Not measured</dd></div>
+        <div><dt>Ahead</dt><dd id="f-ahead">0 s</dd></div>
+        <div><dt>Here</dt><dd id="f-here">0%</dd></div>
+      </dl>
+    </section>
+    <section class="panel" aria-labelledby="people-title">
+      <p class="label" id="people-title">// In the room</p>
+      <ul class="people" id="people"><li class="person"><span class="name dim">Nobody yet</span></li></ul>
+      <p class="fine" id="audience"></p>
+    </section>
+    <section class="panel" aria-labelledby="me-title">
+      <p class="label" id="me-title">// This Station</p>
+      <dl class="figs">
+        <div><dt>Name</dt><dd id="f-name">Guest</dd></div>
+        <div><dt>Path</dt><dd id="f-path">Not linked</dd></div>
+        <div><dt>Film</dt><dd id="f-film">None yet</dd></div>
+        <div><dt>Kept in</dt><dd id="f-store">Nothing yet</dd></div>
+      </dl>
+      <p class="fine">The browser version plays MP4 films directly. Other formats play when someone in the room has the Tandem app. <a href="../#encore">Get the app</a></p>
+      <details class="facts"><summary>Station facts</summary><pre id="facts"></pre></details>
+    </section>
+  </aside>
 </main>
-<script src="../contour.js"></script>
 <script src="player.js" type="module"></script>
 </body>
 </html>

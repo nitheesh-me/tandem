@@ -2,9 +2,8 @@
 // part of the address after #, which browsers never send to a server, so a room
 // invite in a link stays between the people who have it.
 //
-// The same script runs the join page, join/#<ticket>, which is what the app's
-// Copy invite gives. It opens the app if it is installed and otherwise the
-// browser version, and the ticket never leaves the address's # part.
+// A pass with an invite opens the app if it is installed and otherwise the
+// browser version. join/ and watch/ have their own scripts (invite.js).
 const $ = (id) => document.getElementById(id);
 const INVITE = /^tandem:\/\/join\/tandem1[a-z2-7]+\/?$/;
 const TICKET = /^tandem1[a-z2-7]+$/;
@@ -280,23 +279,7 @@ async function start() {
   document.dispatchEvent(new CustomEvent('tandem:ready'));
 }
 
-/** The join page: one invite, the two ways in, and the downloads. */
-async function startJoin() {
-  const invite = inviteFrom(fromHash(location.hash.slice(1)) ?? '');
-  if (invite) {
-    offerWays(invite, say);
-  } else {
-    $('j-title').textContent = 'This invite is not complete';
-    say('Ask for a new invite, or copy the whole link again.');
-  }
-  try { downloads((await config()).download ?? {}); } catch { /* the ways in above still work */ }
-}
-
-if (document.body.dataset.page === 'join') {
-  startJoin();
-} else {
-  start().catch(() => {
-    $('t-show').textContent = 'Tandem';
-    $('t-line').textContent = 'The programme did not load. Refresh to try again.';
-  });
-}
+start().catch(() => {
+  $('t-show').textContent = 'Tandem';
+  $('t-line').textContent = 'The programme did not load. Refresh to try again.';
+});

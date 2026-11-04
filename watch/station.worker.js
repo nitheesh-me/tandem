@@ -11,6 +11,45 @@ let station = null;
 let store = null;
 let opening = null;
 let options = {};
+
+// The wasm is the biggest thing the page loads, so it starts at once, with
+// progress for the page. The copy that streams into the compiler is the
+// browser's own response, so the browser can keep the compiled code for the
+// next visit; a clone of it is only counted.
+const WASM_URL = new URL('./pkg/tandem_web_bg.wasm', import.meta.url);
+// The wasm's size, for progress where the server compresses it (GitHub Pages
+// does) and so sends no usable length. Update it with pkg/; it only steers a bar.
+const WASM_BYTES = 3_166_980;
+let wasmReady = null;
+function loadWasm() {
+  if (wasmReady) return wasmReady;
+  const started = performance.now();
+  wasmReady = (async () => {
+    const res = await fetch(WASM_URL);
+    if (!res.ok) throw new Error(`wasm download: HTTP ${res.status}`);
+    // With compression, Content-Length counts the compressed bytes, so it is no total.
+    const encoded = res.headers.get('content-encoding');
+    const total = encoded && encoded !== 'identity' ? WASM_BYTES : Number(res.headers.get('content-length') ?? 0) || WASM_BYTES;
+    let got = 0;
+    const counted = (async () => {
+      const reader = res.clone().body.getReader();
+      let last = 0;
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        got += value.length;
+        const now = performance.now();
+        if (now - last > 100) { last = now; postMessage({ t: 'wasm', got, total: Math.max(total, got) }); }
+      }
+    })();
+    await init({ module_or_path: res });
+    await counted.catch(() => {});
+    const entry = performance.getEntriesByName(WASM_URL.href).at(-1);
+    postMessage({ t: 'wasm-ready', bytes: got, ms: Math.round(performance.now() - started), cached: entry ? entry.transferSize === 0 : undefined });
+  })();
+  return wasmReady;
+}
+
 const waiting = new Map();
 const bus = new BroadcastChannel('tandem-media');
 
@@ -113,6 +152,14 @@ async function openFilm(id, root) {
   store.id = id;
   store.count = count;
   station.open_film(id, root, manifest, bits, options.window ?? 0, store);
+  // In the same turn, before the download's first pick: the header first (a
+  // browser reads it before anything), and the chunk at the room's position
+  // next, so a joiner fetches both at once.
+  if (station.want) {
+    station.want(0);
+    const ms = lastView?.state.items.find((i) => i.id === id)?.duration_ms;
+    if (ms) station.steer(aim(lastView.position_us / 1000, ms, count));
+  }
   postMessage({ t: 'film', id, size, count, kept, kind, manifestFromDisk: fromDisk, verifyMs: performance.now() - started, storage: await storageFacts(bucket) });
   for (const job of pendingReads.splice(0)) serve(job);
 }
@@ -133,6 +180,13 @@ async function storageFacts(bucket) {
 }
 
 const pendingReads = [];
+
+// Where the room will be when a first chunk arrives: two 4 MB chunks at a
+// relay's measured 0.4 MB/s take about 20 s. The download picks from one chunk
+// before the cursor, hence the + 1.
+const LEAD_MS = 20_000;
+const aim = (posMs, durMs, count) => Math.min(count - 1, Math.floor(((posMs + LEAD_MS) / durMs) * count) + 1);
+let lastView = null;
 
 // A format this browser cannot play: a native Station converts it on the fly.
 let liveGeneration = 0;
@@ -179,6 +233,8 @@ function serve({ rid, id, start, end }) {
     if (!waiting.has(index)) waiting.set(index, []);
     waiting.get(index).push(job);
     postMessage({ t: 'miss', index });
+    // Older builds of the Station have no want(); they reach the chunk in turn.
+    station.want?.(index);
   }
 }
 
@@ -191,7 +247,7 @@ function publish() {
   const id = view.state.timeline.item;
   const item = view.state.items.find((i) => i.id === id);
   const root = item?.source.File?.root;
-  if (root && !opening && /\.(mkv|avi|wmv|flv|mpg|mpeg|ts)$/i.test(item.name)) {
+  if (root && !opening && (options.small || /\.(mkv|avi|wmv|flv|mpg|mpeg|ts)$/i.test(item.name))) {
     opening = Promise.resolve();
     liveRoot = root;
     postMessage({ t: 'live-film', id, position: view.position_us / 1e6, duration: (item.duration_ms ?? 0) / 1000 });
@@ -201,15 +257,17 @@ function publish() {
       postMessage({ t: 'error', text: `storage: ${e.name ?? ''} ${e.message ?? e}` });
     });
   }
+  lastView = view;
   postMessage({ t: 'view', view, links: JSON.parse(station.links()), film: JSON.parse(station.film_stats()) });
 }
 
 onmessage = async ({ data }) => {
   switch (data.t) {
+    case 'warm': loadWasm().catch(() => {}); break;
     case 'join':
       options = data;
       try {
-        await init();
+        await loadWasm();
         station = await Tandem.join(data.invite, data.name, data.key, data.windowKb);
         postMessage({ t: 'joined', me: station.me(), inWorker: typeof document === 'undefined' });
         setInterval(publish, 500);
@@ -231,6 +289,13 @@ onmessage = async ({ data }) => {
       if (!station) return;
       const d = station.player(data.pos, data.playing, data.buffering, data.seeking, data.speed);
       if (store && data.duration) station.steer(Math.floor((data.pos / data.duration) * store.count));
+      else if (store && lastView) {
+        // Before the picture knows its length, aim at the room's position from
+        // the room's own figures, so that chunk comes alongside the header.
+        const item = lastView.state.items.find((i) => i.id === store.id);
+        const ms = item?.duration_ms;
+        if (ms) station.steer(aim(lastView.position_us / 1000, ms, store.count));
+      }
       postMessage({ t: 'directive', d: JSON.parse(d) });
       break;
     }

@@ -9,35 +9,95 @@
 <meta name="robots" content="noindex">
 <meta name="theme-color" content="#07040F">
 <link rel="icon" href="../media/icon.png">
+<link rel="preload" href="../fonts/iosevka-heavy.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="../style.css">
 </head>
-<body data-page="join">
-<canvas id="contour" aria-hidden="true"></canvas>
-<main class="join">
-  <section class="hero">
-    <p class="label">// Invite</p>
-    <h1 class="split">TANDEM</h1>
-    <h2 id="j-title">You have a seat in a room</h2>
-    <p class="lead">Everyone plays the same frame at the same moment. Open the room in the app, or watch in this browser.</p>
-    <div class="ways" id="ways" hidden>
-      <div class="row">
-        <a class="btn primary" id="join">Open in the app</a>
-        <a class="btn" id="watch">Watch in this browser</a>
-      </div>
-    </div>
-    <p class="dim" id="ways-status" role="status" aria-live="polite"></p>
-    <p class="dim fine">The invite stays in this link after the #, and is never sent to this site. Anyone who has it can join, so share it only with the people you are watching with.</p>
-  </section>
+<body>
+<a class="skip" href="#main">Skip to the invite</a>
+<header class="top">
+  <a class="brand" href="../" aria-label="Tandem, home">TANDEM<span aria-hidden="true">//LIVE</span></a>
+  <a class="top-link" href="../">What is Tandem</a>
+</header>
 
-  <section class="get" aria-labelledby="get-title">
-    <p class="label">// Get Tandem</p>
-    <h2 id="get-title" class="split">Take your seat</h2>
-    <p class="dim" id="get-note"></p>
-    <div class="row" id="get-links"></div>
-  </section>
-  <footer class="label">// <a href="../">Tandem</a></footer>
+<main id="main" class="gate">
+  <div class="beams" aria-hidden="true"></div>
+  <div class="gate-row">
+    <div class="gate-copy">
+      <p class="label kicker" id="kicker">// Admission</p>
+      <h1 class="headline split" id="title" tabindex="-1">You have a seat.</h1>
+      <p class="lead" id="lead">This is an invite to a Tandem room. Everyone in it sees the same frame at the same moment, wherever they are.</p>
+
+      <ul class="ways" id="ways" hidden>
+        <li>
+          <a class="way primary" id="join" href="#">
+            <span class="way-n" aria-hidden="true">01</span>
+            <span class="way-title">Open in the app</span>
+            <span class="way-line">Tandem for desktop, Android and Android TV.</span>
+            <svg class="way-go" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M12 5l7 7-7 7"/></svg>
+          </a>
+        </li>
+        <li>
+          <a class="way" id="watch" href="../watch/">
+            <span class="way-n" aria-hidden="true">02</span>
+            <span class="way-title">Watch in your browser</span>
+            <span class="way-line">Nothing to install. A 3 MB download, then you are in.</span>
+            <svg class="way-go" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M12 5l7 7-7 7"/></svg>
+          </a>
+        </li>
+      </ul>
+
+      <div class="notice" id="notice" role="status" aria-live="polite"></div>
+
+      <form class="paste" id="paste" hidden>
+        <label for="paste-in">Room invite</label>
+        <input class="input" id="paste-in" name="invite" placeholder="https://nitheesh-me.github.io/tandem/join/#tandem1..." autocomplete="off" spellcheck="false" aria-describedby="paste-warn">
+        <button class="btn primary" type="submit">Use invite</button>
+        <p class="warn" id="paste-warn" aria-live="polite"></p>
+      </form>
+    </div>
+
+    <aside class="pass" id="pass" aria-labelledby="pass-room">
+      <div class="pass-in">
+        <p class="pass-head"><span id="pass-kind">Room invite</span><span aria-hidden="true">Admit one</span></p>
+        <div class="pass-body">
+          <p class="label">// Room</p>
+          <p class="pass-room" id="pass-room">A private room</p>
+          <dl>
+            <div><dt>Invite</dt><dd id="pass-state">Checking</dd></div>
+            <div><dt>Stations listed</dt><dd id="pass-stations">None</dd></div>
+            <div><dt>Account</dt><dd>None needed</dd></div>
+            <div><dt>Server</dt><dd>None between you</dd></div>
+          </dl>
+        </div>
+        <div class="pass-perf" aria-hidden="true"></div>
+        <div class="pass-foot" aria-hidden="true">
+          <div class="code" id="code"></div>
+          <p class="pass-serial" id="serial">TDM</p>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="more">
+    <section class="card" id="screening" data-tone="pink" aria-labelledby="screening-title" hidden>
+      <p><span class="chip live" data-tone="pink"><span class="dot"></span>Live now</span></p>
+      <h2 id="screening-title">The public screening</h2>
+      <p class="dim" id="screening-note"></p>
+      <a class="btn pink" id="screening-go" href="../watch/">Watch the live screening</a>
+    </section>
+    <section class="card" id="get" data-tone="yellow" aria-labelledby="get-title">
+      <p class="label">// Get Tandem</p>
+      <h2 id="get-title">The app</h2>
+      <p class="dim" id="get-note"></p>
+      <div class="row links" id="get-links"></div><p class="soon">Opening soon</p>
+    </section>
+  </div>
 </main>
-<script src="../contour.js"></script>
-<script src="../app.js"></script>
+
+<footer class="foot">
+  <p class="label">// <a href="../">Tandem</a> // free, peer to peer, no account</p>
+  <p class="dim fine">The invite stays in this link after the #, and is never sent to this site. Anyone who has it can join, so share it only with the people you are watching with.</p>
+</footer>
+<script type="module" src="join.js"></script>
 </body>
 </html>
