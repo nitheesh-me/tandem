@@ -335,6 +335,7 @@ function onView(data) {
   facts.view = data.view;
   facts.links = data.links;
   facts.swarm = data.film;
+  facts.mirrorHosts = data.hosts;
   const view = room;
   const item = view.state.items?.find((i) => i.id === view.state.timeline.item);
   const name = view.state.name || (ticket && ticket === ticketFrom(programme.screening?.invite) ? programme.screening?.name : '') || 'A Tandem room';
@@ -353,6 +354,10 @@ function onView(data) {
   $('f-film').textContent = item?.name ?? 'None yet';
   const f = data.film;
   if (f?.total) $('f-here').textContent = `${Math.round((f.have / f.total) * 100)}%`;
+  if (f?.total) {
+    const m = f.mirror;
+    $('f-source').textContent = !m ? 'The room' : m.up ? `Mirror, ${mb(m.bytes)}${f.pulled_bytes > m.bytes ? `, room ${mb(f.pulled_bytes - m.bytes)}` : ''}` : 'The room (mirror not answering)';
+  }
   const path = data.links?.flatMap((l) => l.paths).find((p) => p.selected);
   $('f-path').textContent = path ? `${path.relay ? 'Relay' : 'Direct'}, ${Math.round(path.rtt_ms)} ms` : 'Not linked';
   if (path) {
@@ -455,6 +460,7 @@ worker.onmessage = ({ data }) => {
     case 'lag': facts.workerLag = data.ms; break;
     case 'directive': apply(data.d); break;
     case 'miss': note('read waits for a chunk', { index: data.index }); break;
+    case 'mirror-off': facts.mirrorOff = data.why; note('no mirror', { why: data.why }); break;
     case 'error': {
       facts.error = data.text;
       const t = String(data.text);
@@ -534,6 +540,8 @@ function join(invite, name) {
     // For tests only: the receive window in KiB, where 0 means QUIC's defaults.
     windowKb: params.has('windowkb') ? Number(params.get('windowkb')) : undefined,
     forget: (params.get('forget') ?? '').split(',').filter(Boolean).map(Number),
+    // For tests: a mirror's base URL instead of config.json's, or no mirror at all.
+    mirror: params.get('mirror') ?? undefined, noMirror: params.has('nomirror'),
   });
 }
 

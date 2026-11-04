@@ -14,6 +14,15 @@ Live at <https://nitheesh-me.github.io/tandem/>. Everything on it comes from `co
 - `screening`: the public screening room. `invite` is its ticket, `label` the button's words, `name` the
   room's name on a pass, and `note` one line about it. The join page and the browser version offer it
   when a link has no invite or a broken one, and name the room when someone opens its invite.
+  `mirror` is optional: `{ "root", "base", "manifest" }` names an HTTPS copy of the screening film, cut into
+  the swarm's 4 MiB chunks (`c00000.bin`, ...) with a `manifest.json` of their blake3 hashes. The browser
+  version uses it only when `root` is the film the room is playing and the manifest adds up to that root;
+  it checks every chunk and fetches a bad or missing one from the room instead. `base` may be a list of
+  hosts with the same files: a browser sends all requests for one host over one HTTP/2 connection, and some
+  links limit each connection, so chunks are spread over the hosts (the one a read waits on goes to the
+  least busy, at high priority). Today it is the `media-4k` branch of this repository, served by
+  raw.githubusercontent.com and, as two more hosts, jsDelivr's GitHub mirror of the same branch (its Fastly
+  and Cloudflare names). jsDelivr caches a branch for up to 12 hours, so a new film goes on a new branch.
 
 The pass maker is for hosts, so it sits behind the footer link "Hosting a show? Make a pass" and at `#make`.
 
@@ -37,7 +46,16 @@ The code printed on the pass carries the show, date, time and seat, never the in
   real figures: the wasm download, the relay, the room, the picture and the sync. Address options after
   the `#`: `invite=` (required to join), `window=` (chunks kept ahead), `windowkb=` (QUIC receive window
   for tests), `forget=` (chunk numbers to drop, for tests), `nobuckets` (plain OPFS), `small` (ask a
-  native Station for its converted smaller picture). Keys: F fullscreen, M sound.
+  native Station for its converted smaller picture), `mirror=` (a mirror's base URL instead of
+  `config.json`'s, for tests), `nomirror` (fetch only from the room). Keys: F fullscreen, M sound.
+
+### Changing the screening film
+
+A new film has a new root, so the mirror needs new chunks. Cut it with `mirror-split <film> <dir>` (in the
+app repository's `target/team/mirror/split`), which prints the root, check that the root matches the one
+the room announces, commit the folder as a fresh orphan commit and force-push it to `media-4k` (or a new
+branch, so old visitors finish their loop), then set `screening.mirror.root` (and `base` if the branch
+changed) here. Until `root` matches, browsers simply fetch from the room.
 - `show.js`: the intro count-in, the pass's tilt and code, the anthem and its karaoke line.
 - `arena.js`: the WebGL arena behind the hero, one fragment shader with no library. It loads after the page,
   draws at a reduced resolution capped at 1.5x the pixel ratio, and stops off-screen or in a hidden tab.

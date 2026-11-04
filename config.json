@@ -99,6 +99,15 @@
     "invite": "tandem1xyyj2uk2qxotc54opgrflqqcc5wx4pxbaaybsmo66c3ujdag4q5qdi3ojuhymjzpzwaz5ooev72kzwnbi4rq64thrk7z4njy2fu7n22zegrw4tipqyts7tmbt244jl7uvtm2crzdb5zgpcv7ty2trulj63vvsaa",
     "label": "Watch the live screening",
     "name": "Tandem Screening",
-    "note": "A three-minute film on a loop, open to everyone, all day. The room steers and you watch along."
+    "note": "A three-minute film in 4K on a loop, open to everyone, all day. The room steers and you watch along.",
+    "mirror": {
+      "root": "730493780402875ab642c6eb85d4d940f442df3ec4a1825398b46e797f13476b",
+      "base": [
+        "https://raw.githubusercontent.com/nitheesh-me/tandem/media-4k/",
+        "https://fastly.jsdelivr.net/gh/nitheesh-me/tandem@media-4k/",
+        "https://cdn.jsdelivr.net/gh/nitheesh-me/tandem@media-4k/"
+      ],
+      "manifest": "manifest.json"
+    }
   }
 }

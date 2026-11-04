@@ -1,11 +1,19 @@
 // The Station. Networking, Room and swarm run here, and so does storage, because
 // OPFS sync access handles exist only in a dedicated Worker. It also sets the
 // pace for the page: a Worker's timers keep running in a hidden tab.
-import init, { Tandem, chunk_ok } from './pkg/tandem_web.js';
+import init, { Tandem, chunk_ok, manifest_root } from './pkg/tandem_web.js';
 
 const CHUNK = 4 * 1024 * 1024;
 const SLICE = 2 * 1024 * 1024;
 const TICK_MS = 200;
+// Chunks fetched from a mirror at once. Each is 4 MiB, so this is also the
+// memory in flight.
+const MIRROR_FETCHES = 4;
+// A fetch that delivers nothing for this long is given up. A slow one that
+// keeps delivering is let finish: aborting it would throw its bytes away.
+const MIRROR_PATIENCE_MS = 15_000;
+// A host that failed rests this long before it gets chunks again.
+const MIRROR_REST_MS = 60_000;
 
 let station = null;
 let store = null;
@@ -19,7 +27,7 @@ let options = {};
 const WASM_URL = new URL('./pkg/tandem_web_bg.wasm', import.meta.url);
 // The wasm's size, for progress where the server compresses it (GitHub Pages
 // does) and so sends no usable length. Update it with pkg/; it only steers a bar.
-const WASM_BYTES = 3_166_980;
+const WASM_BYTES = 3_173_589;
 let wasmReady = null;
 function loadWasm() {
   if (wasmReady) return wasmReady;
@@ -77,9 +85,89 @@ async function syncHandle(dir, name) {
   }
 }
 
+/**
+ * The film's chunks as plain files over HTTPS, when config.json names a mirror
+ * for this exact film (`screening.mirror`), or `mirror=<base URL>` is in the
+ * address for a test. Its manifest must add up to the room's root, and the
+ * Station checks every chunk too, so a wrong or tampered mirror costs only time.
+ *
+ * `base` may be a list of hosts with the same files. A browser sends every
+ * request to one host over one HTTP/2 connection, and some links limit each
+ * connection, so the chunks are spread over the hosts.
+ */
+async function findMirror(root) {
+  let spec = null;
+  if (options.noMirror) return null;
+  try {
+    if (options.mirror) spec = { root, base: options.mirror };
+    else {
+      const res = await fetch(new URL('../config.json', import.meta.url), { cache: 'no-cache' });
+      spec = (await res.json()).screening?.mirror ?? null;
+    }
+    if (!spec?.base || spec.root !== root) return null;
+    const hosts = [spec.base].flat().map((b) => ({ base: new URL(b, import.meta.url), busy: 0, restUntil: 0, bytes: 0, fails: 0 }));
+    const base = hosts[0].base;
+    const res = await fetch(new URL(spec.manifest ?? 'manifest.json', base), { signal: AbortSignal.timeout(MIRROR_PATIENCE_MS * 2) });
+    if (!res.ok) throw new Error(`manifest: HTTP ${res.status}`);
+    const m = await res.json();
+    const manifest = new Uint8Array(8 + 32 * m.chunks.length);
+    new DataView(manifest.buffer).setBigUint64(0, BigInt(m.size), true);
+    m.chunks.forEach((hex, i) => {
+      for (let b = 0; b < 32; b++) manifest[8 + i * 32 + b] = parseInt(hex.substr(b * 2, 2), 16);
+    });
+    if (manifest_root(manifest) !== root) throw new Error('its manifest is for another film');
+    const pattern = m.chunk_name ?? 'c{index:05}.bin';
+    const name = (i) => pattern.replace(/\{index(?::0(\d+))?\}/, (_, w) => String(i).padStart(Number(w ?? 0), '0'));
+    return { base, hosts, manifest, name };
+  } catch (e) {
+    postMessage({ t: 'mirror-off', why: String(e.message ?? e) });
+    return null;
+  }
+}
+
 class Store {
   constructor(data, have, size, kind, bucket) {
     Object.assign(this, { data, have, size, kind, bucket });
+  }
+
+  /**
+   * Called by the wasm for a chunk from the mirror; the wasm checks the bytes.
+   * A chunk a read waits on goes first: to the least busy host, at high priority.
+   */
+  async mirror(index) {
+    const now = Date.now();
+    const urgent = waiting.has(index) || !this.holds(0);
+    const ready = this.source.hosts.filter((h) => h.restUntil <= now);
+    const host = (ready.length ? ready : this.source.hosts).reduce((a, b) => (b.busy < a.busy ? b : a));
+    const stop = new AbortController();
+    let timer = setTimeout(() => stop.abort(new Error('mirror: no bytes for a while')), MIRROR_PATIENCE_MS);
+    host.busy++;
+    try {
+      const res = await fetch(new URL(this.source.name(index), host.base), { signal: stop.signal, priority: urgent ? 'high' : 'low' });
+      if (!res.ok) throw new Error(`HTTP ${res.status} from ${host.base.host}`);
+      const out = new Uint8Array(Math.min(CHUNK, this.size - index * CHUNK));
+      const reader = res.body.getReader();
+      let at = 0;
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        if (at + value.length > out.length) throw new Error(`chunk ${index} is too long`);
+        out.set(value, at);
+        at += value.length;
+        clearTimeout(timer);
+        timer = setTimeout(() => stop.abort(new Error('mirror: no bytes for a while')), MIRROR_PATIENCE_MS);
+      }
+      host.bytes += at;
+      host.fails = 0;
+      return out.subarray(0, at);
+    } catch (e) {
+      host.fails++;
+      host.restUntil = Date.now() + MIRROR_REST_MS;
+      throw e;
+    } finally {
+      clearTimeout(timer);
+      host.busy--;
+    }
   }
 
   /** Called by the wasm with a chunk that has passed its hash. */
@@ -115,8 +203,10 @@ async function openFilm(id, root) {
   let manifest = new Uint8Array(manifestFile.getSize());
   manifestFile.read(manifest, { at: 0 });
   const fromDisk = manifest.length > 8;
+  const source = await findMirror(root);
   if (!fromDisk) {
-    manifest = await station.manifest(root);
+    // The mirror's manifest has passed the root check, and saves a trip over the relay.
+    manifest = source?.manifest ?? await station.manifest(root);
     manifestFile.write(manifest, { at: 0 });
     manifestFile.flush();
   }
@@ -151,7 +241,9 @@ async function openFilm(id, root) {
   store = new Store(data, have, size, kind, bucket);
   store.id = id;
   store.count = count;
-  station.open_film(id, root, manifest, bits, options.window ?? 0, store);
+  store.source = source;
+  leadMs = source ? MIRROR_LEAD_MS : LEAD_MS;
+  station.open_film(id, root, manifest, bits, options.window ?? 0, store, source ? MIRROR_FETCHES : 0);
   // In the same turn, before the download's first pick: the header first (a
   // browser reads it before anything), and the chunk at the room's position
   // next, so a joiner fetches both at once.
@@ -160,7 +252,7 @@ async function openFilm(id, root) {
     const ms = lastView?.state.items.find((i) => i.id === id)?.duration_ms;
     if (ms) station.steer(aim(lastView.position_us / 1000, ms, count));
   }
-  postMessage({ t: 'film', id, size, count, kept, kind, manifestFromDisk: fromDisk, verifyMs: performance.now() - started, storage: await storageFacts(bucket) });
+  postMessage({ t: 'film', id, size, count, kept, kind, manifestFromDisk: fromDisk, mirror: source?.base.href ?? null, verifyMs: performance.now() - started, storage: await storageFacts(bucket) });
   for (const job of pendingReads.splice(0)) serve(job);
 }
 
@@ -182,10 +274,12 @@ async function storageFacts(bucket) {
 const pendingReads = [];
 
 // Where the room will be when a first chunk arrives: two 4 MB chunks at a
-// relay's measured 0.4 MB/s take about 20 s. The download picks from one chunk
-// before the cursor, hence the + 1.
+// relay's measured 0.4 MB/s take about 20 s, from a mirror a second or two.
+// The download picks from one chunk before the cursor, hence the + 1.
 const LEAD_MS = 20_000;
-const aim = (posMs, durMs, count) => Math.min(count - 1, Math.floor(((posMs + LEAD_MS) / durMs) * count) + 1);
+const MIRROR_LEAD_MS = 3_000;
+let leadMs = LEAD_MS;
+const aim = (posMs, durMs, count) => Math.min(count - 1, Math.floor(((posMs + leadMs) / durMs) * count) + 1);
 let lastView = null;
 
 // A format this browser cannot play: a native Station converts it on the fly.
@@ -258,7 +352,8 @@ function publish() {
     });
   }
   lastView = view;
-  postMessage({ t: 'view', view, links: JSON.parse(station.links()), film: JSON.parse(station.film_stats()) });
+  const hosts = store?.source?.hosts.map((h) => ({ host: h.base.host, bytes: h.bytes, busy: h.busy, fails: h.fails }));
+  postMessage({ t: 'view', view, links: JSON.parse(station.links()), film: JSON.parse(station.film_stats()), hosts });
 }
 
 onmessage = async ({ data }) => {
