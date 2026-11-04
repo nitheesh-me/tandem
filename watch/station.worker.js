@@ -612,6 +612,8 @@ onmessage = async ({ data }) => {
       try {
         await loadWasm();
         station = await Tandem.join(data.invite, data.name, data.key, data.windowKb);
+        // A Station built before the viewer list has no such call; it is then never named.
+        if (data.listed === false) station.set_listed?.(false);
         postMessage({ t: 'joined', me: station.me(), inWorker: typeof document === 'undefined' });
         setInterval(publish, 500);
         // How late this Worker's own timer fires: a busy Worker delays the room too.
@@ -650,6 +652,7 @@ onmessage = async ({ data }) => {
     case 'storage': postMessage({ t: 'storage', facts: await storageFacts(store?.bucket) }); break;
     case 'gone': station?.player_gone(); break;
     case 'chat': station?.chat(data.text); break;
+    case 'listed': station?.set_listed?.(data.on); break;
     case 'bye':
       // The page is going: let go of the film first, so the next Station (a
       // reload, a rejoin, another tab) finds it free at once.

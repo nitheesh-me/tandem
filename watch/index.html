@@ -130,6 +130,11 @@
       <p class="label" id="people-title">// In the room</p>
       <ul class="people" id="people"><li class="person"><span class="name dim">Nobody yet</span></li></ul>
       <p class="fine" id="audience"></p>
+      <div class="roster" id="roster" hidden>
+        <p class="label" id="roster-title">// Watching along</p>
+        <ul class="roster-names" id="roster-names" aria-labelledby="roster-title"></ul>
+        <p class="fine" id="roster-note" hidden></p>
+      </div>
     </section>
     <section class="panel" aria-labelledby="me-title">
       <p class="label" id="me-title">// This Station</p>
@@ -142,6 +147,8 @@
         <div><dt>Buffered</dt><dd id="f-ahead">Nothing yet</dd></div>
         <div><dt>Downloaded</dt><dd id="f-here">0%</dd></div>
       </dl>
+      <label class="switch"><input type="checkbox" id="show-name" checked aria-describedby="show-name-hint"> <span>Show my name to other viewers</span></label>
+      <p class="fine" id="show-name-hint">Others watching along see up to 20 names. Off: you are still counted, but not named. Remembered on this device.</p>
       <p class="fine">The browser version plays MP4 films directly. Other formats play when someone in the room has the Tandem app. <a href="../#encore">Get the app</a></p>
       <details class="facts"><summary>Station facts</summary><pre id="facts"></pre></details>
     </section>

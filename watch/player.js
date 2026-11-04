@@ -578,7 +578,48 @@ function people(view) {
   $('audience').textContent = view.observer || others
     ? `${others} watching along as observers, including you.`
     : '';
+  roster(view);
 }
+
+/** Who else watches along, by name: at most 20 from the room's master, then a count. */
+function roster(view) {
+  const r = view.roster;
+  $('roster').hidden = !r;
+  if (!r) return;
+  const li = (cls, text, title) => Object.assign(document.createElement('li'), { className: cls, textContent: text, title: title ?? text });
+  const rows = [];
+  if (!r.off) {
+    if (view.observer) {
+      const me = view.stations.find((s) => s.is_you)?.name || 'You';
+      const row = document.createElement('li');
+      row.dataset.you = '';
+      row.append(Object.assign(document.createElement('span'), { className: 'name', textContent: me, title: me }),
+        Object.assign(document.createElement('span'), { className: 'you', textContent: r.listed ? '(you)' : '(you, not shown to others)' }));
+      rows.push(row);
+    }
+    for (const name of r.names) {
+      const row = li('', '');
+      row.append(Object.assign(document.createElement('span'), { className: 'name', textContent: name, title: name, dir: 'auto' }));
+      rows.push(row);
+    }
+    if (r.more) rows.push(li('more', `+ ${r.more} more`, 'Past the first 20, or chose not to be named'));
+  }
+  $('roster-names').replaceChildren(...rows);
+  const note = r.off ? 'The host shows only how many are watching.' : !r.names.length && !r.more ? 'Nobody else is watching along yet.' : '';
+  $('roster-note').textContent = note;
+  $('roster-note').hidden = !note;
+}
+
+/** Whether this browser lets itself be named in other viewers' lists. On unless turned off here. */
+function showName() {
+  try { return localStorage.getItem('tandem-show-name') !== 'off'; } catch { return true; }
+}
+$('show-name').checked = showName();
+$('show-name').addEventListener('change', (e) => {
+  const on = e.currentTarget.checked;
+  try { localStorage.setItem('tandem-show-name', on ? 'on' : 'off'); } catch { /* this visit only */ }
+  worker.postMessage({ t: 'listed', on });
+});
 
 function syncUi(view) {
   const d = facts.lastDirective;
@@ -845,7 +886,7 @@ function join(invite, name) {
   $('f-name').textContent = name;
   if (facts.wasm) setStep('relay', 'Finding the nearest relay');
   worker.postMessage({
-    t: 'join', invite, name, key: stationKey(),
+    t: 'join', invite, name, key: stationKey(), listed: showName(),
     window: Number(params.get('window') ?? 0), noBuckets: params.has('nobuckets'), small: params.has('small'),
     // For tests: one tab per copy of the film, as in a browser that cannot share files.
     noShare: params.has('noshare'),
