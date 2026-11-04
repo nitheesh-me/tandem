@@ -175,7 +175,7 @@ a { color: var(--cyan); }
   background: linear-gradient(135deg, #1a0f33, #0d0820 55%, #1b0b2b); transform: rotateX(var(--rx)) rotateY(var(--ry)); transition: transform 0.25s ease-out;
   clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 18px 100%, 0 calc(100% - 18px)); }
 .ticket:hover { --glow: 1; }
-/* The pass as a printed object: grain, a guilloche of fine rings, a watermark, a holographic seal,
+/* The pass as a printed object: grain, a guilloche of fine rings, a watermark,
    perforation notches where the stub tears off, microprint and a serial. */
 .ticket { -webkit-mask: radial-gradient(circle 10px at calc(100% - 178px) 0, transparent 9.5px, #000 10px), radial-gradient(circle 10px at calc(100% - 178px) 100%, transparent 9.5px, #000 10px);
   -webkit-mask-composite: source-in; mask: radial-gradient(circle 10px at calc(100% - 178px) 0, transparent 9.5px, #000 10px), radial-gradient(circle 10px at calc(100% - 178px) 100%, transparent 9.5px, #000 10px);
@@ -188,11 +188,6 @@ a { color: var(--cyan); }
   }
 .pass-mark { position: absolute; left: -2%; bottom: 8%; margin: 0; pointer-events: none; font: 900 clamp(70px, 9vw, 120px)/0.8 var(--display); letter-spacing: 0.02em;
   color: transparent; -webkit-text-stroke: 1.2px rgb(234 246 255 / 0.11); transform: rotate(-8deg); white-space: nowrap; user-select: none; }
-.seal { position: absolute; right: calc(178px + 18px); bottom: 34px; width: 54px; aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center; pointer-events: none;
-  background: conic-gradient(from calc(var(--mx) * 360deg), var(--cyan), var(--violet), var(--pink), var(--yellow), var(--green), var(--cyan));
-  -webkit-mask: radial-gradient(circle, #000 60%, transparent 61%, transparent 66%, #000 67%); mask: radial-gradient(circle, #000 60%, transparent 61%, transparent 66%, #000 67%);
-  opacity: 0.75; filter: saturate(1.2) brightness(1.05); box-shadow: 0 0 18px rgb(0 240 255 / 0.25); }
-.seal span { font: 900 13px/1 var(--display); letter-spacing: 0.08em; color: rgb(7 4 15 / 0.85); mix-blend-mode: multiply; }
 .micro { margin: 14px 0 0; overflow: hidden; white-space: nowrap; font: 700 7px/1 var(--mono); letter-spacing: 0.24em; color: rgb(234 246 255 / 0.22);
   border-top: 1px solid rgb(234 246 255 / 0.08); padding-top: 6px; }
 .serial { position: absolute; right: 6px; top: 50%; margin: 0; transform: translateY(-50%) rotate(180deg); writing-mode: vertical-rl;
@@ -219,13 +214,17 @@ a { color: var(--cyan); }
 .qr:empty { background: repeating-linear-gradient(90deg, var(--text) 0 2px, transparent 2px 4px, var(--text) 4px 7px, transparent 7px 9px); opacity: 0.5; }
 .qr svg { display: block; width: 100%; height: 100%; }
 #tear { width: 100%; }
-.stamp { position: absolute; right: 22%; top: 38%; padding: 6px 14px; border: 3px solid var(--pink); color: var(--pink); font: 900 28px/1 var(--display); text-transform: uppercase;
-  transform: rotate(-12deg) scale(1.6); opacity: 0; pointer-events: none; transition: transform 0.35s cubic-bezier(0.2, 1.4, 0.4, 1), opacity 0.2s; background: rgb(7 4 15 / 0.7); }
-.admitted .stamp { opacity: 1; transform: rotate(-12deg); }
+/* Entering tears the stub off along the perforation: both pieces keep the same ragged edge. */
+.pass-wrap { position: relative; }
+.torn-stub { position: absolute; margin: 0; pointer-events: none; z-index: 2; animation: tear-away 0.95s cubic-bezier(0.55, 0, 0.9, 0.45) forwards; }
+@keyframes tear-away {
+  0% { transform: var(--peel0); opacity: 1; }
+  22% { transform: var(--peel1); opacity: 1; }
+  100% { transform: var(--peel2); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .torn-stub { display: none; } }
 @media (max-width: 620px) {
   .ticket { grid-template-columns: minmax(0, 1fr); }
   .ticket { -webkit-mask: none; mask: none; }
-  .seal { right: 16px; bottom: auto; top: 205px; width: 44px; }
   .serial { display: none; }
   .pass-stub { border-left: 0; border-top: 2px dotted rgb(180 76 255 / 0.6); grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
   .pass-stub .qr { grid-row: span 2; grid-column: 2; width: 84px; }
@@ -379,6 +378,5 @@ a.encore-card:hover, button.encore-card:hover { background: color-mix(in srgb, v
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
   .ticket { transform: none !important; }
-  .seal { background: conic-gradient(var(--cyan), var(--violet), var(--pink), var(--yellow), var(--green), var(--cyan)); }
   .song, .call { opacity: 1 !important; }
 }

@@ -221,11 +221,62 @@ function stage(trailer) {
 }
 
 /**
- * Without an invite, the pass leads to the main stage: the video plays if there
+ * Entering tears the stub off along the perforation. The pass keeps a ragged
+ * edge, and the stub, cut along the same line, falls away. With reduced motion
+ * the stub is simply gone.
+ */
+function tear() {
+  const ticket = $('ticket');
+  if (ticket.classList.contains('admitted')) return;
+  ticket.classList.add('admitted');
+  const stub = ticket.querySelector('.pass-stub');
+  const w = ticket.offsetWidth, h = ticket.offsetHeight, C = 18;
+  // Side by side, the perforation runs down the stub's left edge; stacked, across its top.
+  const across = stub.offsetLeft > 0;
+  const at = across ? stub.offsetLeft : stub.offsetTop;
+  const len = across ? h : w;
+  let seed = 7;
+  const edge = [];
+  for (let t = 0; t < len; t += 7) {
+    seed = (seed * 9301 + 49297) % 233280;
+    const d = (seed / 233280 - 0.5) * 8;
+    edge.push(across ? `${at + d}px ${t}px` : `${t}px ${at + d}px`);
+  }
+  edge.push(across ? `${at}px ${h}px` : `${w}px ${at}px`);
+  const back = [...edge].reverse();
+  const keep = across
+    ? `polygon(0 0, ${edge.join(', ')}, ${C}px ${h}px, 0 ${h - C}px)`
+    : `polygon(0 0, ${w - C}px 0, ${w}px ${C}px, ${back.join(', ')})`;
+  const gone = across
+    ? `polygon(${edge.join(', ')}, ${w}px ${h}px, ${w}px ${C}px, ${w - C}px 0)`
+    : `polygon(${edge.join(', ')}, ${w}px ${h}px, ${C}px ${h}px, 0 ${h - C}px)`;
+  const piece = ticket.cloneNode(true);
+  piece.removeAttribute('id');
+  piece.querySelectorAll('[id]').forEach((el) => el.removeAttribute('id'));
+  piece.setAttribute('aria-hidden', 'true');
+  piece.inert = true;
+  piece.classList.add('torn-stub');
+  const base = getComputedStyle(ticket).transform;
+  const t0 = base === 'none' ? 'translate(0, 0)' : base;
+  Object.assign(piece.style, {
+    left: `${ticket.offsetLeft}px`, top: `${ticket.offsetTop}px`, width: `${w}px`, height: `${h}px`,
+    clipPath: gone, transformOrigin: across ? `${at}px 0` : `0 ${at}px`,
+  });
+  piece.style.setProperty('--peel0', t0);
+  piece.style.setProperty('--peel1', `${t0} rotate(${across ? 5 : -4}deg) translate(4px, 2px)`);
+  piece.style.setProperty('--peel2', `${t0} translate(${across ? 60 : 12}px, 70vh) rotate(${across ? 22 : -14}deg)`);
+  ticket.style.clipPath = keep;
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  piece.addEventListener('animationend', () => piece.remove(), { once: true });
+  ticket.after(piece);
+}
+
+/**
+ * Without an invite (and no live screening), the pass leads to the main stage: the video plays if there
  * is one, and otherwise the premiere's "Play the anthem" waits for a press.
  */
 function enter(loadTrailer) {
-  $('ticket').classList.add('admitted');
+  tear();
   $('stage').scrollIntoView({ block: 'center' });
   if (!loadTrailer) {
     document.querySelector('#premiere [data-sound]')?.focus({ preventScroll: true });
@@ -251,7 +302,8 @@ async function start() {
   const trailer = { ...programme.trailer };
   const fromLink = safeVideo(link.get('trailer'));
   if (fromLink) Object.assign(trailer, { sources: [{ src: fromLink }], poster: '', shape: '' });
-  const invite = inviteFrom(link.get('invite'));
+  // No invite in the link: the pass is a seat in the live screening room.
+  const invite = inviteFrom(link.get('invite')) ?? inviteFrom(programme.screening?.invite);
 
   showTicket(ticket);
   showcase(programme.showcase ?? []);
@@ -268,7 +320,7 @@ async function start() {
     offerWays(invite, say);
     $('tear').textContent = 'Enter the room';
     $('tear').addEventListener('click', () => {
-      $('ticket').classList.add('admitted');
+      tear();
       enterRoom(invite, say);
     });
   } else {
