@@ -172,5 +172,16 @@
   </aside>
 </main>
 <script src="player.js" type="module"></script>
+  <dialog class="ask-name" id="ask-name" aria-labelledby="ask-name-title" aria-describedby="ask-name-sub">
+    <form class="ask-name-in" id="ask-name-form" method="dialog">
+      <p class="label">// Your seat</p>
+      <h2 id="ask-name-title">What should the room call you?</h2>
+      <p class="fine" id="ask-name-sub">Others in the room see this name. Your seat is getting ready behind this, and you can change the name later.</p>
+      <label class="sr" for="ask-name-input">Your name</label>
+      <input class="input" id="ask-name-input" maxlength="32" autocomplete="nickname" enterkeyhint="done" placeholder="Your name" required>
+      <p class="warn" id="ask-name-warn" aria-live="polite"></p>
+      <button class="btn primary" id="ask-name-go" type="submit">Take my seat</button>
+    </form>
+  </dialog>
 </body>
 </html>

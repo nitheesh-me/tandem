@@ -966,7 +966,7 @@ document.addEventListener('keydown', (e) => {
 $('retry').onclick = () => location.reload();
 
 /** Starts the Station: the Worker has been loading the wasm since the page opened. */
-function join(invite, name) {
+function join(invite, name, unnamed = false) {
   facts.joining = true;
   failed = false;
   $('form').hidden = true;
@@ -977,10 +977,10 @@ function join(invite, name) {
   STEPS.forEach((s) => { step(s).hidden = false; });
   boot(true, { label: '// Boot sequence', title: 'Getting your seat ready', sub: 'This browser becomes a Tandem Station. It takes a few seconds the first time.' });
   chip('Connecting', 'violet');
-  $('my-name').value = name;
+  $('my-name').value = unnamed ? '' : name;
   if (facts.wasm) setStep('relay', 'Finding the nearest relay');
   worker.postMessage({
-    t: 'join', invite, name, key: stationKey(), listed: showName(),
+    t: 'join', invite, name, key: stationKey(), listed: showName() && !unnamed,
     window: Number(params.get('window') ?? 0), noBuckets: params.has('nobuckets'), small: params.has('small'),
     // For tests: one tab per copy of the film, as in a browser that cannot share files.
     noShare: params.has('noshare'),
@@ -994,6 +994,37 @@ function join(invite, name) {
 
 function savedName() {
   try { return localStorage.getItem('tandem-name') || 'Guest'; } catch { return 'Guest'; }
+}
+
+/** Whether this browser has been given a name; "Guest" was only ever a stand-in. */
+function hasName() {
+  try { const n = localStorage.getItem('tandem-name')?.trim(); return !!n && n !== 'Guest'; } catch { return false; }
+}
+
+/**
+ * No name yet: ask in a modal while the Station joins and fetches behind it.
+ * Until then it is in the room unnamed and left out of who is watching along.
+ */
+function askName() {
+  const dlg = $('ask-name');
+  $('ask-name-input').value = '';
+  // A name is needed: Escape does not close it.
+  dlg.addEventListener('cancel', (e) => e.preventDefault());
+  $('ask-name-form').addEventListener('submit', (e) => {
+    const name = $('ask-name-input').value.trim();
+    if (!name) {
+      e.preventDefault();
+      $('ask-name-warn').textContent = 'Type a name, so the others know who joined.';
+      $('ask-name-input').focus();
+      return;
+    }
+    try { localStorage.setItem('tandem-name', name); } catch { /* this visit only */ }
+    worker.postMessage({ t: 'name', name });
+    worker.postMessage({ t: 'listed', on: showName() });
+    $('my-name').value = name;
+    renameDirty();
+  });
+  dlg.showModal();
 }
 
 /** No usable invite: ask for one, and offer the live screening. */
@@ -1011,7 +1042,7 @@ function ask(problem) {
   STEPS.forEach((s) => { step(s).hidden = true; });
   $('form').hidden = false;
   $('join').hidden = false;
-  $('name').value = savedName();
+  $('name').value = hasName() ? savedName() : '';
   config().then((c) => {
     programme = c;
     const t = ticketFrom(c.screening?.invite);
@@ -1031,7 +1062,8 @@ $('join').onclick = () => {
     $('invite').focus();
     return;
   }
-  try { localStorage.setItem('tandem-name', $('name').value.trim() || 'Guest'); } catch { /* fine */ }
+  // No name typed: the room page asks for one.
+  try { if ($('name').value.trim()) localStorage.setItem('tandem-name', $('name').value.trim()); } catch { /* fine */ }
   // The address keeps the invite, so a reload or a shared tab rejoins the same room.
   history.replaceState(null, '', `#${new URLSearchParams({ invite: appLink(t) })}`);
   location.reload();
@@ -1052,7 +1084,8 @@ function start() {
   }
   worker.postMessage({ t: 'warm' });
   config().then((c) => { programme = c; }).catch(() => {});
-  join(appLink(ticket), savedName());
+  if (hasName()) join(appLink(ticket), savedName());
+  else { join(appLink(ticket), '', true); askName(); }
 }
 
 if (!('Worker' in window) || !navigator.serviceWorker || !window.WebAssembly) {

@@ -26,6 +26,8 @@ let retryAt = 0;
 let leaving = false;
 /** A name chosen in the page, kept for a Station still joining. */
 let renamed = null;
+/** The page's choice to be named, kept for a Station still joining. */
+let listedLater = null;
 let wantItem = null;
 
 // The wasm is the biggest thing the page loads, so it starts at once, with
@@ -618,6 +620,7 @@ onmessage = async ({ data }) => {
         if (data.listed === false) station.set_listed?.(false);
         // Renamed while the Station was still joining.
         if (renamed && renamed !== data.name) station.set_name?.(renamed);
+        if (listedLater != null && listedLater !== data.listed) station.set_listed?.(listedLater);
         postMessage({ t: 'joined', me: station.me(), inWorker: typeof document === 'undefined' });
         setInterval(publish, 500);
         // How late this Worker's own timer fires: a busy Worker delays the room too.
@@ -656,7 +659,7 @@ onmessage = async ({ data }) => {
     case 'storage': postMessage({ t: 'storage', facts: await storageFacts(store?.bucket) }); break;
     case 'gone': station?.player_gone(); break;
     case 'chat': station?.chat(data.text); break;
-    case 'listed': station?.set_listed?.(data.on); break;
+    case 'listed': listedLater = data.on; station?.set_listed?.(data.on); break;
     case 'name': renamed = data.name; station?.set_name?.(data.name); break;
     case 'bye':
       // The page is going: let go of the film first, so the next Station (a

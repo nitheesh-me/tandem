@@ -339,3 +339,11 @@ details.facts pre { margin: 0; max-height: 240px; overflow: auto; font: 400 11px
   :focus-visible, .btn:focus-visible, .way:focus-visible { outline: 3px solid Highlight; }
   .beams, .code { display: none; }
 }
+
+/* Asks for a name over the boot sequence, which keeps going behind it. */
+.ask-name { width: min(440px, calc(100vw - 32px)); padding: 0; border: 0; background: var(--surface); color: var(--text); box-shadow: inset 0 0 0 1px var(--overlay), 0 24px 80px rgba(0,0,0,0.6); }
+.ask-name::backdrop { background: rgba(4, 2, 10, 0.62); backdrop-filter: blur(3px); }
+.ask-name-in { display: grid; gap: 12px; padding: 24px; }
+.ask-name h2 { margin: 0; font: 700 22px/1.2 var(--mono); }
+.ask-name .warn:empty { display: none; }
+.ask-name .btn { justify-self: start; }
