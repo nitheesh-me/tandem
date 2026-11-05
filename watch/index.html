@@ -35,6 +35,16 @@
       <div class="stage" id="stage" tabindex="-1">
         <div class="screen">
           <video id="video" preload="auto" playsinline aria-label="The room's picture"></video>
+          <div class="song" id="song" role="region" aria-labelledby="song-title" hidden>
+            <img class="song-art" id="song-art" alt="">
+            <div class="song-text">
+              <p class="label song-head"><span class="song-bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>// Now playing</span></p>
+              <h2 class="song-title" id="song-title"></h2>
+              <p class="song-artist" id="song-artist"></p>
+              <p class="song-line" id="song-line"></p>
+              <p class="song-next" id="song-next" aria-hidden="true"></p>
+            </div>
+          </div>
 
           <div class="boot" id="boot" role="region" aria-labelledby="boot-title">
             <div class="boot-card">

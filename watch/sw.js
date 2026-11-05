@@ -28,7 +28,11 @@ function ask(id, s, start, end) {
 
 async function media(request, id) {
   // The Station the page names: every tab's Station hears this channel.
-  const s = new URL(request.url).searchParams.get('s') ?? undefined;
+  const url = new URL(request.url);
+  const s = url.searchParams.get('s') ?? undefined;
+  // The page names the file's type (a song is not an MP4); some browsers trust it over the bytes.
+  const asked = url.searchParams.get('type') ?? '';
+  const type = /^(audio|video)\/[a-z0-9.+-]{1,40}$/.test(asked) ? asked : 'video/mp4';
   const m = /bytes=(\d+)-(\d*)/.exec(request.headers.get('range') ?? 'bytes=0-');
   if (!m) return new Response(null, { status: 416 });
   const start = Number(m[1]);
@@ -43,7 +47,7 @@ async function media(request, id) {
   return new Response(got.bytes, {
     status: 206,
     headers: {
-      'Content-Type': 'video/mp4',
+      'Content-Type': type,
       'Accept-Ranges': 'bytes',
       'Content-Length': String(got.bytes.length),
       'Content-Range': `bytes ${start}-${last}/${got.total}`,

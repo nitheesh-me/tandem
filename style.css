@@ -197,6 +197,35 @@ button, input { font: inherit; color: inherit; }
 .stage.idle:fullscreen .bar { opacity: 0; }
 .stage.idle:fullscreen { cursor: none; }
 
+/* A song: the app's audio stage, from the song's own tags. Cover, title, and the
+   timed lyrics, the next line under the current one, smaller and quieter. */
+.song { position: absolute; inset: 0; z-index: 1; container-type: size; display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center;
+  gap: clamp(12px, 4cqw, 44px); padding: clamp(12px, 5cqh, 48px) clamp(14px, 5cqw, 56px); overflow: hidden;
+  background: radial-gradient(120% 90% at 18% 50%, rgb(180 76 255 / 0.22), transparent 60%), var(--bg); }
+.song::before { content: ''; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(transparent 0 2px, rgb(0 0 0 / 0.2) 2px 3px); }
+.song-art { position: relative; width: min(78cqh, 44cqw); aspect-ratio: 1; object-fit: cover; background: var(--surface);
+  clip-path: polygon(0 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% 100%, var(--cut) 100%, 0 calc(100% - var(--cut)));
+  box-shadow: 0 0 0 1px rgb(0 240 255 / 0.4); }
+.song-art:not([src]) { visibility: hidden; }
+.song-text { position: relative; display: grid; gap: clamp(2px, 1.6cqh, 12px); min-width: 0; }
+.song-head { display: flex; align-items: center; gap: 10px; }
+.song-title { font: 900 clamp(16px, 5.4cqw, 52px)/1 var(--display); overflow-wrap: anywhere; text-shadow: -1px 0 var(--pink), 1px 0 var(--cyan); }
+.song-artist { font: 700 clamp(10px, 1.5cqw, 14px)/1.2 var(--mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.song-line { min-height: 2.3em; margin-top: clamp(4px, 3cqh, 24px); font: 700 clamp(14px, 3.4cqw, 34px)/1.15 var(--ui); color: var(--text); overflow-wrap: anywhere; }
+.song-next { min-height: 1.3em; font: 400 clamp(11px, 2cqw, 20px)/1.25 var(--ui); color: var(--muted); overflow-wrap: anywhere; }
+.song-line:empty::before, .song-next:empty::before { content: '\00a0'; }
+.song-bars { display: inline-flex; align-items: flex-end; gap: 2px; height: 12px; }
+.song-bars i { width: 3px; height: 100%; background: var(--cyan); transform-origin: bottom; transform: scaleY(0.3); }
+.song[data-playing] .song-bars i { animation: song-bar 900ms ease-in-out infinite alternate; }
+.song-bars i:nth-child(2) { animation-delay: -300ms; background: var(--violet); }
+.song-bars i:nth-child(3) { animation-delay: -600ms; background: var(--pink); }
+.song-bars i:nth-child(4) { animation-delay: -150ms; }
+@keyframes song-bar { from { transform: scaleY(0.25); } to { transform: scaleY(1); } }
+@container (max-aspect-ratio: 1 / 1) {
+  .song-art { width: min(40cqh, 60cqw); }
+}
+.screen:has(.premiere:not([hidden])) .song { display: none; }
+
 /* The boot sequence: what the browser Station is doing, step by step, with real figures. */
 .boot { position: absolute; inset: 0; z-index: 2; display: grid; place-items: center; overflow: auto; padding: clamp(12px, 3vw, 40px);
   background: radial-gradient(70% 60% at 50% 45%, rgb(18 10 34 / 0.94), rgb(7 4 15 / 0.98)); }

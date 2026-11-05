@@ -57,6 +57,10 @@ The code printed on the pass carries the show, date, time and seat, never the in
   A looping screening with observers holds a late joiner's seat: a countdown to the top from the room's
   own position and agreed restart, with the copy downloading from the start, then the picture starts in
   step. "Watch now, from the middle" skips it.
+  A song (sound and no picture) gets the app's audio stage (`song.js`): the cover art, title and artist
+  from its ID3v2.3 or v2.4 tags (a title in `screening.titles` wins), and timed lyrics from LRC text in its
+  lyrics frame (USLT), the next line under the current one, smaller and quieter. The tags are read from
+  the start of the file through the same Service Worker address the picture plays.
 
 ### Changing the screening film
 
@@ -65,6 +69,9 @@ app repository's `target/team/mirror/split`), which prints the root, check that 
 the room announces, commit the folder as a fresh orphan commit and force-push it to `media-4k` (or a new
 branch, so old visitors finish their loop), then set `screening.mirror.root` (and `base` if the branch
 changed) here. Until `root` matches, browsers simply fetch from the room.
+Songs after the film are listed in `screening.mirrors` (one `{ root, base, manifest }` per file, the film's
+first) and named in `screening.titles` (keyed by the file name in the room). They live in one folder each on
+the `media-songs` branch; jsDelivr's bases name the commit, not the branch, so a new push is served at once.
 - `show.js`: the intro count-in, the pass's tilt and code, the anthem and its karaoke line.
 - `arena.js`: the WebGL arena behind the hero, one fragment shader with no library. It loads after the page,
   draws at a reduced resolution capped at 1.5x the pixel ratio, and stops off-screen or in a hidden tab.

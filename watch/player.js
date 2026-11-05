@@ -2,6 +2,7 @@
 // everything else is in the Station Worker, and the steering below follows
 // `ui/src/lib/Player.svelte`. Facts for tests and the page live on `window.tandem`.
 import { ticketFrom, fromHash, readTicket, appLink, joinLink, config } from '../invite.js';
+import { readSong, cueAt } from './song.js';
 
 const video = document.getElementById('video');
 const $ = (id) => document.getElementById(id);
@@ -160,6 +161,7 @@ function beginLive(start) {
   const ms = new MediaSource();
   const stream = { ms, sb: null, queue: [], generation: null, ended: false, owed: false };
   live = stream;
+  songOff();
   liveStart = start;
   facts.liveStart = start;
   seeking = true;
@@ -193,6 +195,10 @@ function pumpLive() {
   }
 }
 
+const TYPES = { mp3: 'audio/mpeg', m4a: 'audio/mp4', aac: 'audio/aac', flac: 'audio/flac', ogg: 'audio/ogg', oga: 'audio/ogg', opus: 'audio/ogg', wav: 'audio/wav', webm: 'video/webm', mkv: 'video/x-matroska', mov: 'video/quicktime' };
+/** A media type from a file name; MP4 when it does not say. */
+const mediaType = (name) => TYPES[/\.([a-z0-9]+)$/i.exec(name)?.[1].toLowerCase()] ?? 'video/mp4';
+
 async function show(id, sid) {
   if (id === mediaId) return;
   mediaId = id;
@@ -202,10 +208,76 @@ async function show(id, sid) {
     fail('The picture could not start', 'This browser did not let the page use its Service Worker, which carries the film to the picture. Reload the page to try again.', 'picture');
     return;
   }
-  // Every tab's Station hears the Service Worker, so the address names this one.
-  video.src = sid ? `media/${id}?s=${sid}` : `media/${id}`;
+  songOff();
+  // Every tab's Station hears the Service Worker, so the address names this one,
+  // and the file's type, which the Service Worker answers with.
+  const name = room?.state.items?.find((i) => i.id === id)?.name ?? '';
+  const q = new URLSearchParams({ ...(sid ? { s: sid } : {}), type: mediaType(name) });
+  video.src = `media/${id}?${q}`;
   video.load();
   note('source set');
+}
+
+// ---------- A song ----------
+//
+// Sound and no picture: the app's audio stage, from the song's own tags. The
+// cover, the title (config.json's, else the tag's), the artist, and the timed
+// lyrics follow the playhead, with the next line under the current one.
+
+let song = null;
+function songOff() {
+  song?.abort.abort();
+  if (song?.art) URL.revokeObjectURL(song.art);
+  song = null;
+  facts.song = null;
+  $('song').hidden = true;
+  $('song-art').removeAttribute('src');
+}
+
+async function songOn() {
+  if (live || !video.src || video.videoWidth || song?.id === mediaId) return;
+  songOff();
+  const id = mediaId;
+  const item = room?.state.items?.find((i) => i.id === id);
+  song = { id, abort: new AbortController(), cues: null, shown: null };
+  facts.song = { id, name: item?.name ?? null, tags: 'reading' };
+  $('song-title').textContent = item ? titleOf(item) : 'Now playing';
+  $('song-artist').textContent = '';
+  $('song-line').textContent = '';
+  $('song-next').textContent = '';
+  $('song').hidden = false;
+  try {
+    const tags = await readSong(video.src, song.abort.signal);
+    if (song?.id !== id) return;
+    facts.song = { id, name: item?.name ?? null, tags: tags ? 'read' : 'none', title: tags?.title ?? null, artist: tags?.artist ?? null,
+      cover: tags?.cover ? { type: tags.cover.type, bytes: tags.cover.size } : null,
+      lyrics: tags?.lyrics ? { lines: tags.lyrics.cues.length, language: tags.lyrics.language } : null };
+    if (!tags) return;
+    if (!programme.screening?.titles?.[item?.name] && tags.title) $('song-title').textContent = tags.title;
+    $('song-artist').textContent = tags.artist ?? '';
+    if (tags.cover) {
+      song.art = URL.createObjectURL(tags.cover);
+      $('song-art').src = song.art;
+      $('song-art').alt = `Cover art for ${$('song-title').textContent}`;
+    }
+    song.cues = tags.lyrics?.cues ?? null;
+    songTick();
+  } catch (e) {
+    if (e.name !== 'AbortError') { note('song tags unread', { why: String(e) }); if (facts.song) facts.song.tags = 'failed'; }
+  }
+}
+
+function songTick() {
+  if (!song) return;
+  if (video.paused) delete $('song').dataset.playing; else $('song').dataset.playing = '';
+  if (!song.cues) return;
+  const { now, next } = cueAt(song.cues, positionNow());
+  if (song.shown === now && song.next === next) return;
+  song.shown = now;
+  song.next = next;
+  $('song-line').textContent = now?.text ?? '';
+  $('song-next').textContent = next?.text ?? '';
+  facts.song.line = now?.text ?? null;
 }
 
 // ---------- Next showing ----------
@@ -779,7 +851,7 @@ worker.onmessage = ({ data }) => {
     case 'storage': facts.storageNow = data.facts; break;
     case 'storage-wait': note('waiting for the last Station to let go of the film', { slot: data.slot }); break;
     case 'closed': facts.closed = true; break;
-    case 'tick': sample(); progress(); if (room) syncUi(room); break;
+    case 'tick': sample(); progress(); songTick(); if (room) syncUi(room); break;
     case 'lag': facts.workerLag = data.ms; break;
     case 'directive': apply(data.d); break;
     case 'miss': note('read waits for a chunk', { index: data.index }); break;
@@ -831,7 +903,8 @@ video.addEventListener('seeked', () => { seeking = false; });
 video.addEventListener('waiting', () => { buffering = true; facts.stalls++; note('waiting', { pos: video.currentTime }); });
 video.addEventListener('playing', () => { buffering = false; soundUi(); });
 video.addEventListener('canplay', () => { buffering = false; seeking = false; });
-video.addEventListener('loadedmetadata', () => { seeking = false; note('metadata', { duration: video.duration }); });
+video.addEventListener('loadedmetadata', () => { seeking = false; note('metadata', { duration: video.duration }); if (!video.videoWidth) songOn(); else songOff(); });
+video.addEventListener('timeupdate', songTick);
 video.addEventListener('volumechange', soundUi);
 video.addEventListener('error', () => {
   facts.videoError = video.error?.message ?? String(video.error?.code);
