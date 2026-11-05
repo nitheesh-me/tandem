@@ -24,6 +24,8 @@ let openRoot = null;
 let filmGeneration = 0;
 let retryAt = 0;
 let leaving = false;
+/** A name chosen in the page, kept for a Station still joining. */
+let renamed = null;
 let wantItem = null;
 
 // The wasm is the biggest thing the page loads, so it starts at once, with
@@ -614,6 +616,8 @@ onmessage = async ({ data }) => {
         station = await Tandem.join(data.invite, data.name, data.key, data.windowKb);
         // A Station built before the viewer list has no such call; it is then never named.
         if (data.listed === false) station.set_listed?.(false);
+        // Renamed while the Station was still joining.
+        if (renamed && renamed !== data.name) station.set_name?.(renamed);
         postMessage({ t: 'joined', me: station.me(), inWorker: typeof document === 'undefined' });
         setInterval(publish, 500);
         // How late this Worker's own timer fires: a busy Worker delays the room too.
@@ -653,6 +657,7 @@ onmessage = async ({ data }) => {
     case 'gone': station?.player_gone(); break;
     case 'chat': station?.chat(data.text); break;
     case 'listed': station?.set_listed?.(data.on); break;
+    case 'name': renamed = data.name; station?.set_name?.(data.name); break;
     case 'bye':
       // The page is going: let go of the film first, so the next Station (a
       // reload, a rejoin, another tab) finds it free at once.

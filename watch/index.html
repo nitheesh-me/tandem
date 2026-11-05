@@ -148,8 +148,15 @@
     </section>
     <section class="panel" aria-labelledby="me-title">
       <p class="label" id="me-title">// This Station</p>
+      <form class="rename" id="rename">
+        <label class="label" for="my-name">Your name</label>
+        <div class="rename-row">
+          <input class="input" id="my-name" maxlength="32" autocomplete="nickname" enterkeyhint="done" aria-describedby="rename-note">
+          <button class="btn" id="rename-save" type="submit" disabled>Save</button>
+        </div>
+        <p class="fine" id="rename-note" aria-live="polite">What others in the room see. Change it any time.</p>
+      </form>
       <dl class="figs">
-        <div><dt>Name</dt><dd id="f-name">Guest</dd></div>
         <div><dt>Path</dt><dd id="f-path">Not linked</dd></div>
         <div><dt>Film</dt><dd id="f-film">None yet</dd></div>
         <div><dt>Kept in</dt><dd id="f-store">Nothing yet</dd></div>

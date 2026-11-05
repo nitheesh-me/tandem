@@ -354,6 +354,16 @@ export class Tandem {
         wasm.tandem_set_listed(this.__wbg_ptr, on);
     }
     /**
+     * Renames this Station while it is in the room. An observer's name rides
+     * on its next report; a member's goes to the master to be logged.
+     * @param {string} name
+     */
+    set_name(name) {
+        const ptr0 = passStringToWasm0(name, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.tandem_set_name(this.__wbg_ptr, ptr0, len0);
+    }
+    /**
      * Moves the download toward this chunk.
      * @param {number} chunk
      */

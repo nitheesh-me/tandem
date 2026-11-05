@@ -693,6 +693,27 @@ $('show-name').addEventListener('change', (e) => {
   worker.postMessage({ t: 'listed', on });
 });
 
+/** Renames this Station in the room, and remembers the name on this device. */
+const renameDirty = () => {
+  const v = $('my-name').value.trim();
+  $('rename-save').disabled = !v || v === savedName();
+};
+$('my-name').addEventListener('input', renameDirty);
+$('my-name').addEventListener('blur', () => { if (!$('rename-save').disabled) $('rename').requestSubmit(); });
+$('my-name').addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') { $('my-name').value = savedName(); renameDirty(); }
+});
+$('rename').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const name = $('my-name').value.trim();
+  if (!name) { $('my-name').value = savedName(); renameDirty(); return; }
+  try { localStorage.setItem('tandem-name', name); } catch { /* this visit only */ }
+  worker.postMessage({ t: 'name', name });
+  $('my-name').value = name;
+  renameDirty();
+  $('rename-note').textContent = `Saved. Others see you as ${name}.`;
+});
+
 function syncUi(view) {
   const d = facts.lastDirective;
   const big = $('sync-big');
@@ -956,7 +977,7 @@ function join(invite, name) {
   STEPS.forEach((s) => { step(s).hidden = false; });
   boot(true, { label: '// Boot sequence', title: 'Getting your seat ready', sub: 'This browser becomes a Tandem Station. It takes a few seconds the first time.' });
   chip('Connecting', 'violet');
-  $('f-name').textContent = name;
+  $('my-name').value = name;
   if (facts.wasm) setStep('relay', 'Finding the nearest relay');
   worker.postMessage({
     t: 'join', invite, name, key: stationKey(), listed: showName(),

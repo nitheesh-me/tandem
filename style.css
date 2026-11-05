@@ -293,6 +293,11 @@ button, input { font: inherit; color: inherit; }
 .big { font: 900 clamp(30px, 3vw, 44px)/1 var(--display); font-variant-numeric: tabular-nums; color: var(--tone, var(--text)); }
 .big small { font: 700 14px var(--mono); color: var(--muted); margin-left: 4px; }
 .big[data-tone='muted'] { font-size: 22px; }
+.rename { display: grid; gap: 8px; margin-bottom: 16px; }
+.rename-row { display: flex; gap: 8px; }
+.rename-row .input { flex: 1; min-width: 0; }
+.rename-row .btn { flex: none; }
+.rename-row .btn:disabled { opacity: 0.45; cursor: default; pointer-events: none; }
 .figs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 14px; }
 .figs dt { font: 700 11px/1.3 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
 .figs dd { font: 400 15px/1.3 var(--mono); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
