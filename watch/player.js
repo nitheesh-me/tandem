@@ -651,6 +651,48 @@ function people(view) {
     ? `${others} watching along as observers, including you.`
     : '';
   roster(view);
+  queue(view);
+}
+
+const AUDIO = /\.(mp3|m4a|aac|ogg|oga|opus|flac|wav)$/i;
+let queueKey = '';
+
+/** What the room will play, in order. Read only: the host sets it from the app. */
+function queue(view) {
+  const st = view.state;
+  const items = st.items ?? [];
+  $('queue-panel').hidden = !items.length;
+  const now = st.timeline?.item;
+  const at = items.findIndex((i) => i.id === now);
+  const next = at < 0 ? -1 : at + 1 < items.length ? at + 1 : st.repeat && items.length > 1 ? 0 : -1;
+  const key = JSON.stringify([items.map((i) => [i.id, i.name, i.duration_ms]), at, next, st.repeat, !!programme.screening?.titles]);
+  if (key === queueKey) return;
+  queueKey = key;
+  const rows = items.map((item, i) => {
+    const li = Object.assign(document.createElement('li'), { className: 'q-item' });
+    if (i === at) { li.dataset.now = ''; li.setAttribute('aria-current', 'true'); }
+    const title = titleOf(item);
+    li.append(
+      Object.assign(document.createElement('span'), { className: 'q-n', textContent: String(i + 1).padStart(2, '0') }),
+      Object.assign(document.createElement('span'), { className: 'q-title', textContent: title, title: item.name, dir: 'auto' }),
+      Object.assign(document.createElement('span'), { className: 'q-kind', textContent: AUDIO.test(item.name) ? 'Song' : 'Film' }),
+      Object.assign(document.createElement('span'), { className: 'q-dur', textContent: item.duration_ms ? clock(item.duration_ms / 1000) : '' }),
+    );
+    const chip = (text, tone, solid) => {
+      const c = Object.assign(document.createElement('span'), { className: `chip${solid ? ' solid' : ''}`, textContent: text });
+      c.dataset.tone = tone;
+      li.append(c);
+    };
+    if (i === at) chip(st.timeline.playing ? 'Now' : 'Paused', 'green', true);
+    else if (i === next) chip('Next', 'violet');
+    return li;
+  });
+  $('queue').replaceChildren(...rows);
+  const total = items.reduce((t, i) => t + (i.duration_ms ?? 0), 0);
+  const parts = [`${items.length} ${items.length === 1 ? 'item' : 'items'}${total ? `, ${clock(total / 1000)}` : ''}.`];
+  if (st.repeat) parts.push('On a loop: after the last, it starts again from the top.');
+  parts.push(view.observer ? 'The host chooses what plays.' : 'To change the queue, open this room in the Tandem app.');
+  $('queue-note').textContent = parts.join(' ');
 }
 
 /** Who else watches along, by name: at most 20 from the room's master, then a count. */
