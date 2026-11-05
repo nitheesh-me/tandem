@@ -1,0 +1,10 @@
+{
+ "root": "bfcc01c31351294c2a9994c3b9ae75f9d17895f706450091bb9f1e940b0981d8",
+ "size": 4500378,
+ "chunk_size": 4194304,
+ "chunk_name": "c{index:05}.bin",
+ "chunks": [
+  "d830306a54ce14541891982142b4b77060f0366c859be414c54ec2ce02c55287",
+  "abd1bfe9962bd697b7ef0444c833d18319d0820bfdc944f590428eec2470fb15"
+ ]
+}
