@@ -35,7 +35,7 @@ let wantItem = null;
 const WASM_URL = new URL('./pkg/tandem_web_bg.wasm', import.meta.url);
 // The wasm's size, for progress where the server compresses it (GitHub Pages
 // does) and so sends no usable length. Update it with pkg/; it only steers a bar.
-const WASM_BYTES = 3_218_060;
+const WASM_BYTES = 3_219_105;
 let wasmReady = null;
 function loadWasm() {
   if (wasmReady) return wasmReady;
