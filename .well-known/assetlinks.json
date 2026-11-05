@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "app.tandem.desktop",
+      "sha256_cert_fingerprints": [
+        "4D:B2:9A:75:A6:72:BA:0D:5D:9C:A7:C5:E6:43:D8:C4:36:FD:A0:A2:8F:C7:48:42:15:77:31:7F:69:F5:79:E0"
+      ]
+    }
+  }
+]
