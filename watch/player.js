@@ -93,6 +93,9 @@ async function run(play) {
   } else if (!play && !video.paused) video.pause();
 }
 
+/** Milliseconds on a clock this page and its Worker share. */
+const wallNow = () => performance.timeOrigin + performance.now();
+
 function apply(d) {
   facts.directives++;
   facts.lastDirective = d;
@@ -109,8 +112,11 @@ function apply(d) {
     if (live) {
       if (Math.abs(d.seek - positionNow()) > 0.25) beginLive(Math.max(0, d.seek));
     } else {
+      // The seek was aimed at the moment the Worker decided it; the room has
+      // moved on while the answer came back.
+      const late = d.at ? Math.min(1, Math.max(0, (wallNow() - d.at) / 1000)) * (room?.state.timeline.rate ?? 1) : 0;
       seeking = true;
-      video.currentTime = Math.max(0, d.seek);
+      video.currentTime = Math.max(0, d.seek + late);
     }
   }
   run(d.play);
@@ -134,6 +140,9 @@ function sample() {
   worker.postMessage({
     t: 'sample', pos, playing: !video.paused, buffering, seeking,
     speed: measureSpeed(pos), duration: Number.isFinite(video.duration) ? video.duration : 0,
+    // When it was taken, on a clock the Worker shares: a busy Worker can hold
+    // a report for a while, and the player has moved on meanwhile.
+    at: wallNow(), rate: video.playbackRate,
   });
 }
 

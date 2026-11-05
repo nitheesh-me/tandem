@@ -37,7 +37,7 @@ let wantItem = null;
 const WASM_URL = new URL('./pkg/tandem_web_bg.wasm', import.meta.url);
 // The wasm's size, for progress where the server compresses it (GitHub Pages
 // does) and so sends no usable length. Update it with pkg/; it only steers a bar.
-const WASM_BYTES = 3_219_105;
+const WASM_BYTES = 3_219_430;
 let wasmReady = null;
 function loadWasm() {
   if (wasmReady) return wasmReady;
@@ -639,7 +639,14 @@ onmessage = async ({ data }) => {
       break;
     case 'sample': {
       if (!station) return;
-      const d = station.player(data.pos, data.playing, data.buffering, data.seeking, data.speed);
+      // Where the player is now, not when it was sampled: this Worker may have
+      // been busy (hashing chunks, a slow call) while the report waited, and
+      // steering against an old position reads the wait as lag.
+      const wall = performance.timeOrigin + performance.now();
+      const age = data.at ? Math.min(1, Math.max(0, (wall - data.at) / 1000)) : 0;
+      const moving = data.playing && !data.seeking && !data.buffering;
+      const pos = moving ? data.pos + age * (data.speed > 0 ? data.speed : data.rate ?? 1) : data.pos;
+      const d = station.player(pos, data.playing, data.buffering, data.seeking, data.speed);
       if (store && data.duration) station.steer(Math.floor((data.pos / data.duration) * store.count));
       else if (store && lastView) {
         // Before the picture knows its length, aim at the room's position from
@@ -648,7 +655,7 @@ onmessage = async ({ data }) => {
         const ms = item?.duration_ms;
         if (ms) station.steer(aim(lastView.position_us / 1000, ms, store.count));
       }
-      postMessage({ t: 'directive', d: JSON.parse(d) });
+      postMessage({ t: 'directive', d: { ...JSON.parse(d), at: wall } });
       break;
     }
     case 'live-go': postMessage({ t: 'live-started', generation: startLive(data.start, data.width), want: data.want }); break;
