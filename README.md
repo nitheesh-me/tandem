@@ -1,7 +1,8 @@
 # Tandem's site
 
-Live at <https://tandem.nitheesh.me/>. The landing page (`index.html`, `site.css`, `site.js`, `img/`, `robots.txt`,
-`sitemap.xml`) is copied from `docs/site` in the app repository, where its README says how it is made and checked.
+Live at <https://tandem.nitheesh.me/>. The landing page and its smaller pages (`index.html`, `compare/`,
+`alternatives/`, `how-to/`, `site.css`, `site.js`, `img/`, `robots.txt`,
+`sitemap.xml`) are copied from `docs/site` in the app repository, where its README says how it is made and checked.
 The show page below, with the pass maker and the public screening's stage, is now `show.html`; a pass link to the
 old address (`/#show=...`) opens it. Everything on the show page comes from `config.json`.
 

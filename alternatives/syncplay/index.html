@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>A Syncplay alternative that needs no server</title>
+<meta name="description" content="Syncplay keeps everyone's own copy in sync through a Syncplay server. Tandem Watch Party is free, needs no server to run, and only one person needs the file.">
+<link rel="canonical" href="https://tandem.nitheesh.me/alternatives/syncplay/">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#07040f" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f5f2fb" media="(prefers-color-scheme: light)">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Tandem Watch Party">
+<meta property="og:url" content="https://tandem.nitheesh.me/alternatives/syncplay/">
+<meta property="og:title" content="A Syncplay alternative that needs no server">
+<meta property="og:description" content="Syncplay keeps everyone's own copy in sync through a Syncplay server. Tandem Watch Party is free, needs no server to run, and only one person needs the file.">
+<meta property="og:image" content="https://tandem.nitheesh.me/img/social.jpg">
+<meta property="og:image:alt" content="The Tandem wordmark beside one watch party playing Sprite Fright on a laptop, a TV and a phone at the same moment.">
+<meta property="og:locale" content="en_GB">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="A Syncplay alternative that needs no server">
+<meta name="twitter:description" content="Syncplay keeps everyone's own copy in sync through a Syncplay server. Tandem Watch Party is free, needs no server to run, and only one person needs the file.">
+<meta name="twitter:image" content="https://tandem.nitheesh.me/img/social.jpg">
+<meta name="twitter:image:alt" content="The Tandem wordmark beside one watch party playing Sprite Fright on a laptop, a TV and a phone at the same moment.">
+<link rel="icon" href="/img/icon.svg" type="image/svg+xml">
+<link rel="preload" href="/fonts/inter-Regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/site.css">
+<script>
+  // The theme before the first paint: the visitor's choice if they made one, else the system's.
+  try { const t = localStorage.getItem('tandem-site-theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch {}
+</script>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+  {
+   "@type": "ListItem",
+   "position": 1,
+   "name": "Tandem Watch Party",
+   "item": "https://tandem.nitheesh.me/"
+  },
+  {
+   "@type": "ListItem",
+   "position": 2,
+   "name": "A Syncplay alternative that needs no server",
+   "item": "https://tandem.nitheesh.me/alternatives/syncplay/"
+  }
+ ]
+}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="/" aria-label="Tandem Watch Party, home"><svg class="mark" viewBox="0 0 60 60" width="32" height="32" aria-hidden="true" focusable="false"><path d="M0,0L60,0L60,60L0,60Z" fill="var(--bg)"/><path d="M0,0L33.75,0L35.625,1.875L35.625,7.5L1.875,7.5L0,5.625Z" fill="color-mix(in srgb, var(--muted) 38%, var(--bg))"/><path d="M37.5,0L58.125,0L60,1.875L60,7.5L39.375,7.5L37.5,5.625Z" fill="color-mix(in srgb, var(--muted) 38%, var(--bg))"/><path d="M0,9.375L5.625,9.375L7.5,11.25L7.5,60L1.875,60L0,58.125Z" fill="color-mix(in srgb, var(--muted) 38%, var(--bg))"/><path d="M50.625,9.375L58.125,9.375L60,11.25L60,60L52.5,60L50.625,58.125Z" fill="color-mix(in srgb, var(--muted) 38%, var(--bg))"/><path d="M9.375,18.75L20.625,18.75L22.5,20.625L22.5,28.125L11.25,28.125L9.375,26.25Z" fill="color-mix(in srgb, var(--muted) 38%, var(--bg))"/><path d="M9.375,30L20.625,30L22.5,31.875L22.5,50.625L11.25,50.625L9.375,48.75Z" fill="color-mix(in srgb, var(--muted) 38%, var(--bg))"/><path d="M35.625,18.75L46.875,18.75L48.75,20.625L48.75,41.25L37.5,41.25L35.625,39.375Z" fill="color-mix(in srgb, var(--muted) 38%, var(--bg))"/><path d="M35.625,43.125L37.5,43.125L39.375,45L39.375,50.625L37.5,50.625L35.625,48.75Z" fill="color-mix(in srgb, var(--muted) 38%, var(--bg))"/><path d="M9.375,52.5L46.875,52.5L48.75,54.375L48.75,60L11.25,60L9.375,58.125Z" fill="color-mix(in srgb, var(--muted) 38%, var(--bg))"/><path d="M9.375,9.375L18.75,9.375L20.625,11.25L20.625,16.875L11.25,16.875L9.375,15Z" fill="var(--muted)"/><path d="M22.5,9.375L27.5,9.375L27.5,16.875L24.375,16.875L22.5,15Z" fill="var(--muted)"/><path d="M30.625,9.375L37.5,9.375L39.375,11.25L39.375,16.875L30.625,16.875Z" fill="var(--muted)"/><path d="M28.125,9.375L30,9.375L30,16.875L28.125,16.875Z" fill="var(--accent)"/><path d="M41.25,9.375L46.875,9.375L48.75,11.25L48.75,16.875L43.125,16.875L41.25,15Z" fill="var(--muted)"/><path d="M24.375,18.75L27.5,18.75L27.5,35.625L26.25,35.625L24.375,33.75Z" fill="var(--muted)"/><path d="M30.625,18.75L31.875,18.75L33.75,20.625L33.75,35.625L30.625,35.625Z" fill="var(--muted)"/><path d="M28.125,18.75L30,18.75L30,35.625L28.125,35.625Z" fill="var(--accent)"/><path d="M24.375,37.5L27.5,37.5L27.5,50.625L26.25,50.625L24.375,48.75Z" fill="var(--muted)"/><path d="M30.625,37.5L31.875,37.5L33.75,39.375L33.75,50.625L30.625,50.625Z" fill="var(--muted)"/><path d="M28.125,37.5L30,37.5L30,50.625L28.125,50.625Z" fill="var(--accent)"/><path d="M41.25,43.125L41.788,43.125L41.788,49.288L41.25,48.75Z" fill="var(--danger)"/><path d="M44.913,43.125L46.875,43.125L48.75,45L48.75,50.625L44.913,50.625Z" fill="var(--danger)"/><path d="M42.413,43.125L44.288,43.125L44.288,50.625L43.125,50.625L42.413,49.913Z" fill="var(--accent)"/></svg>
+      <span aria-hidden="true">TANDEM</span></a>
+    <nav aria-label="Sections">
+      <ul class="nav">
+        <li><a href="/#how">How it works</a></li>
+        <li><a href="/#features">Features</a></li>
+        <li><a href="/#download">Download</a></li>
+        <li><a href="/compare/">Compare</a></li>
+      </ul>
+    </nav>
+    <div class="theme" role="group" aria-label="Colour theme">
+      <button type="button" data-set="auto" aria-pressed="true">Auto</button>
+      <button type="button" data-set="light" aria-pressed="false">Light</button>
+      <button type="button" data-set="dark" aria-pressed="false">Dark</button>
+    </div>
+  </div>
+</header>
+
+<main id="main" tabindex="-1">
+<div class="hero page" id="top">
+  <div class="wrap">
+    <div class="hero-text">
+      <p class="label">Syncplay alternative</p>
+      <h1 class="split">A Syncplay alternative that needs no server</h1>
+      <p class="lead">Syncplay keeps video players such as mpv, VLC and MPC-HC in sync through a Syncplay server, a public one or your own <a href="#src-12">[12]</a> <a href="#src-13">[13]</a>, and everyone needs their own copy of the film <a href="#src-13">[13]</a>.</p>
+      <p class="lead">Tandem Watch Party is a free app that needs no server to pick or run. The devices in a room connect to each other directly, with public relays only when a direct connection fails, and only one person needs the file.</p>
+    </div>
+  </div>
+</div>
+<section id="changes" aria-labelledby="changes-h">
+  <div class="wrap">
+    <div class="head">
+      <p class="label">No server, one copy</p>
+      <h2 id="changes-h">What changes with Tandem</h2>
+    </div>
+    <ul class="list">
+      <li><strong>One copy is enough.</strong> Friends without the film stream it from the room, and every piece is checked as it arrives.</li>
+      <li><strong>Copies are compared.</strong> When people bring their own, Tandem marks each one Same file, Probably same, Same length or Different file before anyone presses play.</li>
+      <li><strong>The screens stay closer.</strong> Syncplay's defaults slow a player at 1.5 seconds behind and rewind it at 4 seconds ahead <a href="#src-14">[14]</a>. Tandem nudges each player a touch faster or slower, and in tests the screens stayed about 10 ms apart in browsers.</li>
+      <li><strong>Phones, tablets and TVs join too.</strong> Tandem runs on Android and Android TV as well as Linux and Windows, and a friend on a computer can watch from the invite in a browser.</li>
+      <li><strong>Your own subtitles and audio stay yours,</strong> as in Syncplay, and the room stays in sync while you change them.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="band" id="pictures" aria-labelledby="pictures-h">
+  <div class="wrap">
+    <div class="head">
+      <p class="label">Pictures</p>
+      <h2 id="pictures-h">A friend without the film</h2>
+    </div>
+    <figure class="feature narrow">
+      <img src="/img/need-file.webp" width="1000" height="742" alt="The stage asking for Sprite.Fright.2021.1080p.mp4, with I have a copy and Stream from stations." decoding="async" loading="lazy">
+      <figcaption>A friend who joined without the film can stream it from the others or point Tandem at their own copy.</figcaption>
+    </figure>
+  </div>
+</section>
+<section id="syncplay-better" aria-labelledby="syncplay-better-h">
+  <div class="wrap">
+    <div class="head">
+      <p class="label">Fair to Syncplay</p>
+      <h2 id="syncplay-better-h">What Syncplay does better</h2>
+    </div>
+    <ul class="list">
+      <li><strong>It works inside the player you already like,</strong> such as mpv, VLC, MPC-HC or IINA <a href="#src-12">[12]</a> <a href="#src-13">[13]</a>. Tandem has its own player.</li>
+      <li><strong>It runs on macOS and BSD</strong> as well as Windows and Linux <a href="#src-12">[12]</a>. Tandem has no Mac release yet.</li>
+      <li><strong>It has been around since 2012</strong> <a href="#src-13">[13]</a>, and it is light: it never converts a film, while Tandem's conversion of a format a screen cannot play is heavy on a computer without a working graphics chip.</li>
+    </ul>
+  </div>
+</section>
+<section class="band" id="start" aria-labelledby="start-h">
+  <div class="wrap">
+    <div class="head">
+      <h2 id="start-h">Try it on your next film night</h2>
+    </div>
+    <div class="prose">
+      <p>One of you opens a room in Tandem and adds the film. Press <strong>Copy invite</strong>, send the link in any chat app, and when your friends have joined, anyone presses play.</p>
+    </div>
+    <ul class="links">
+      <li><a class="frame" href="/#download"><b>Download Tandem 0.6.0</b><span>For Linux, Windows and Android, or watch from an invite in a browser.</span></a></li>
+      <li><a class="frame" href="/how-to/watch-a-movie-together-online/"><b>How to watch a movie together online</b><span>The steps from opening a room to pressing play, with pictures.</span></a></li>
+      <li><a class="frame" href="/compare/"><b>Tandem compared with five others</b><span>Teleparty, Syncplay, Discord, Plex and Jellyfin, and where each one does better.</span></a></li>
+    </ul>
+    <details class="sources" open>
+      <summary>Sources, all read on 9 November 2026</summary>
+      <ol>
+        <li id="src-12" value="12">Syncplay, guide: <a href="https://syncplay.pl/guide/">syncplay.pl/guide</a></li>
+        <li id="src-13" value="13">Syncplay, about: <a href="https://syncplay.pl/about/syncplay/">syncplay.pl/about</a></li>
+        <li id="src-14" value="14">Syncplay defaults in its source: <a href="https://github.com/Syncplay/syncplay/blob/master/syncplay/constants.py">github.com/Syncplay/syncplay</a></li>
+      </ol>
+    </details>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a class="brand" href="/" aria-label="Tandem Watch Party, home"><svg class="mark" viewBox="0 0 60 60" width="32" height="32" aria-hidden="true" focusable="false"><path d="M0,0L60,0L60,60L0,60Z" fill="var(--bg)"/><path d="M0,0L33.75,0L35.625,1.875L35.625,7.5L1.875,7.5L0,5.625Z" fill="color-mix(in srgb, var(--muted) 38%, var(--bg))"/><path d="M37.5,0L58.125,0L60,1.875L60,7.5L39.375,7.5L37.5,5.625Z" fill="color-mix(in srgb, var(--muted) 38%, var(--bg))"/><path d="M0,9.375L5.625,9.375L7.5,11.25L7.5,60L1.875,60L0,58.125Z" fill="color-mix(in srgb, var(--muted) 38%, var(--bg))"/><path d="M50.625,9.375L58.125,9.375L60,11.25L60,60L52.5,60L50.625,58.125Z" fill="color-mix(in srgb, var(--muted) 38%, var(--bg))"/><path d="M9.375,18.75L20.625,18.75L22.5,20.625L22.5,28.125L11.25,28.125L9.375,26.25Z" fill="color-mix(in srgb, var(--muted) 38%, var(--bg))"/><path d="M9.375,30L20.625,30L22.5,31.875L22.5,50.625L11.25,50.625L9.375,48.75Z" fill="color-mix(in srgb, var(--muted) 38%, var(--bg))"/><path d="M35.625,18.75L46.875,18.75L48.75,20.625L48.75,41.25L37.5,41.25L35.625,39.375Z" fill="color-mix(in srgb, var(--muted) 38%, var(--bg))"/><path d="M35.625,43.125L37.5,43.125L39.375,45L39.375,50.625L37.5,50.625L35.625,48.75Z" fill="color-mix(in srgb, var(--muted) 38%, var(--bg))"/><path d="M9.375,52.5L46.875,52.5L48.75,54.375L48.75,60L11.25,60L9.375,58.125Z" fill="color-mix(in srgb, var(--muted) 38%, var(--bg))"/><path d="M9.375,9.375L18.75,9.375L20.625,11.25L20.625,16.875L11.25,16.875L9.375,15Z" fill="var(--muted)"/><path d="M22.5,9.375L27.5,9.375L27.5,16.875L24.375,16.875L22.5,15Z" fill="var(--muted)"/><path d="M30.625,9.375L37.5,9.375L39.375,11.25L39.375,16.875L30.625,16.875Z" fill="var(--muted)"/><path d="M28.125,9.375L30,9.375L30,16.875L28.125,16.875Z" fill="var(--accent)"/><path d="M41.25,9.375L46.875,9.375L48.75,11.25L48.75,16.875L43.125,16.875L41.25,15Z" fill="var(--muted)"/><path d="M24.375,18.75L27.5,18.75L27.5,35.625L26.25,35.625L24.375,33.75Z" fill="var(--muted)"/><path d="M30.625,18.75L31.875,18.75L33.75,20.625L33.75,35.625L30.625,35.625Z" fill="var(--muted)"/><path d="M28.125,18.75L30,18.75L30,35.625L28.125,35.625Z" fill="var(--accent)"/><path d="M24.375,37.5L27.5,37.5L27.5,50.625L26.25,50.625L24.375,48.75Z" fill="var(--muted)"/><path d="M30.625,37.5L31.875,37.5L33.75,39.375L33.75,50.625L30.625,50.625Z" fill="var(--muted)"/><path d="M28.125,37.5L30,37.5L30,50.625L28.125,50.625Z" fill="var(--accent)"/><path d="M41.25,43.125L41.788,43.125L41.788,49.288L41.25,48.75Z" fill="var(--danger)"/><path d="M44.913,43.125L46.875,43.125L48.75,45L48.75,50.625L44.913,50.625Z" fill="var(--danger)"/><path d="M42.413,43.125L44.288,43.125L44.288,50.625L43.125,50.625L42.413,49.913Z" fill="var(--accent)"/></svg>
+      <span aria-hidden="true">TANDEM</span></a>
+    <nav aria-label="Footer">
+      <ul>
+        <li><a href="/">Tandem Watch Party</a></li>
+        <li><a href="/compare/">Tandem compared</a></li>
+        <li><a href="/alternatives/teleparty/">Teleparty alternative</a></li>
+        <li><a href="/alternatives/syncplay/">Syncplay alternative</a></li>
+        <li><a href="/how-to/watch-a-movie-together-online/">How to watch a movie together</a></li>
+      </ul>
+    </nav>
+    <p>This page has no trackers and loads nothing from other sites.</p>
+  </div>
+</footer>
+
+<script src="/site.js" defer></script>
+</body>
+</html>

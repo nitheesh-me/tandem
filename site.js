@@ -16,15 +16,21 @@ for (const b of buttons) b.addEventListener('click', () => {
 });
 
 // The recordings: each <img data-anim> shows a small still first. Once the page has loaded, and only when the
-// visitor has not asked for reduced motion, the animated WebP is fetched as the still nears the screen and replaces it
-// when it has arrived, so the first paint never waits on it.
+// visitor has not asked for reduced motion, the animated WebP is fetched as the still nears the screen, and it
+// plays over it once it has arrived, so the first paint never waits on it.
 const still = matchMedia('(prefers-reduced-motion: reduce)');
 function animate(img) {
   if (still.matches || img.dataset.animated) return;
   img.dataset.animated = '1';
+  // The recording goes over the still as its own picture, the same size, so the still stays the page's largest
+  // paint and nothing moves.
   const next = new Image();
   next.decoding = 'async';
-  next.onload = () => { img.src = next.src; };
+  next.alt = '';
+  next.className = 'anim';
+  next.width = img.width; next.height = img.height;
+  next.setAttribute('aria-hidden', 'true');
+  next.onload = () => img.after(next);
   next.src = img.dataset.anim;
 }
 function start() {

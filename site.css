@@ -141,7 +141,7 @@ kbd { font-weight: 700; padding: 2px 6px; background: var(--overlay); color: var
   border-block-end: 1px solid var(--line);
 }
 .top .wrap { display: flex; align-items: center; gap: 12px 20px; min-height: 64px; }
-.brand { display: flex; align-items: center; gap: 10px; color: var(--text); text-decoration: none; margin-inline-end: auto; min-height: 44px; }
+.brand { display: flex; align-items: center; gap: 10px; color: var(--text); text-decoration: none; margin-inline-end: auto; min-height: 44px; min-width: 44px; }
 .brand .mark { width: 32px; height: 32px; }
 .brand span { font: 900 22px/1 var(--display); letter-spacing: 0.04em; }
 .nav { display: flex; gap: 2px; margin: 0; padding: 0; list-style: none; }
@@ -160,14 +160,20 @@ kbd { font-weight: 700; padding: 2px 6px; background: var(--overlay); color: var
 .hero { padding-block: clamp(40px, 7vw, 88px) clamp(40px, 6vw, 72px); }
 .hero .wrap { display: grid; gap: clamp(28px, 4vw, 48px); }
 .hero-text { max-width: 70em; }
-.hero h1 { font: 900 clamp(34px, 5.2vw, 64px)/1.04 var(--display); letter-spacing: 0.005em; margin-block: 14px 22px; overflow-wrap: anywhere; }
+.hero h1 { font: 900 clamp(44px, 8vw, 96px)/1 var(--display); letter-spacing: 0.005em; margin-block: 14px 20px; overflow-wrap: anywhere; }
+.page h1 { font-size: clamp(32px, 4.8vw, 58px); line-height: 1.06; }
 .lead { font-size: clamp(18px, 2.1vw, 21px); color: var(--text); max-width: 38em; }
 .lead + .lead { margin-top: 12px; color: var(--muted); font-size: 17px; }
+.lead.strong { font: 600 clamp(20px, 2.4vw, 26px)/1.35 var(--ui); color: var(--text); margin-bottom: 16px; }
+.lead.strong + .lead { color: var(--text); font-size: clamp(18px, 2.1vw, 21px); margin-top: 0; }
 .ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
 
 /* The pictures are the README's: each carries its own dark ground, contour map and transparent cut corners. */
 .hero-shot, .feature { margin: 0; display: grid; gap: 10px; }
 .hero-shot img, .feature img { width: 100%; height: auto; }
+/* A recording plays over its still, in the same place (site.js). */
+.pic { display: block; position: relative; }
+.pic .anim { position: absolute; inset: 0; height: 100%; }
 .hero-shot figcaption, .feature figcaption { font: 400 13px/1.45 var(--mono); color: var(--muted); }
 .feature + .pair, .feature + .list, .feature + .note, .pair + .feature { margin-top: clamp(24px, 3.5vw, 36px); }
 .feature.narrow { max-width: 900px; }
@@ -218,6 +224,20 @@ section { padding-block: clamp(56px, 9vw, 104px); }
 .shot figcaption { color: var(--muted); font-size: 15px; }
 .shot figcaption b { color: var(--text); font-weight: 600; }
 
+/* The smaller pages. */
+.prose { display: grid; gap: 14px; max-width: 48em; color: var(--muted); }
+.prose strong { color: var(--text); font-weight: 600; }
+.prose + .feature, .list + .feature, .feature + .note, .prose + .links, .list + .links, .links + .sources { margin-top: clamp(24px, 3.5vw, 36px); }
+.steps.howto { grid-template-columns: minmax(0, 1fr); max-width: 760px; }
+.steps.howto img { width: 100%; height: auto; margin-top: 8px; }
+
+/* Links to the other pages: cut-corner cards. */
+.links { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 16px; margin: 0; padding: 0; list-style: none; }
+.links a { display: grid; gap: 8px; align-content: start; height: 100%; padding: 22px; text-decoration: none; color: var(--muted); font-size: 15px; }
+.links b { color: var(--accent); font: 600 18px/1.3 var(--ui); text-decoration: underline; text-underline-offset: 3px; }
+.links a:hover b { text-decoration-thickness: 2px; }
+.links a:focus-visible { outline-offset: -3px; }
+
 /* Download */
 .plats { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap: 16px; margin: 0; padding: 0; list-style: none; }
 .plats li { padding: 22px; display: grid; gap: 8px; align-content: start; }
@@ -232,15 +252,15 @@ section { padding-block: clamp(56px, 9vw, 104px); }
 /* Comparison */
 .tablewrap { overflow-x: auto; padding: 4px; }
 .tablewrap:focus-visible { outline-offset: -2px; }
-.compare table { border-collapse: collapse; min-width: 980px; width: 100%; font-size: 14px; line-height: 1.45; }
-.compare caption { text-align: start; padding: 14px 14px 6px; color: var(--muted); font: 400 13px/1.4 var(--mono); }
-.compare th, .compare td { text-align: start; vertical-align: top; padding: 10px 14px; border-block-start: 1px solid var(--line); }
-.compare thead th { font: 700 12px/1.3 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); border-block-start: 0; }
-.compare thead th:nth-child(2), .compare tbody td:nth-child(2) { color: var(--text); background: color-mix(in srgb, var(--accent) 8%, transparent); }
-.compare thead th:nth-child(2) { color: var(--accent); }
-.compare tbody th { font-weight: 600; width: 150px; }
-.compare td { color: var(--muted); }
-.compare td a { font-size: 12px; }
+.tablewrap table { border-collapse: collapse; min-width: 980px; width: 100%; font-size: 14px; line-height: 1.45; }
+.tablewrap caption { text-align: start; padding: 14px 14px 6px; color: var(--muted); font: 400 13px/1.4 var(--mono); }
+.tablewrap th, .tablewrap td { text-align: start; vertical-align: top; padding: 10px 14px; border-block-start: 1px solid var(--line); }
+.tablewrap thead th { font: 700 12px/1.3 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); border-block-start: 0; }
+.tablewrap thead th:nth-child(2), .tablewrap tbody td:nth-child(2) { color: var(--text); background: color-mix(in srgb, var(--accent) 8%, transparent); }
+.tablewrap thead th:nth-child(2) { color: var(--accent); }
+.tablewrap tbody th { font-weight: 600; width: 150px; }
+.tablewrap td { color: var(--muted); }
+.tablewrap td a { font-size: 12px; }
 .better { margin-top: 28px; display: grid; gap: 12px; max-width: 54em; }
 .better ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
 .better li { color: var(--muted); padding-inline-start: 18px; position: relative; }
@@ -286,6 +306,7 @@ footer nav a { display: inline-flex; align-items: center; min-height: 44px; }
   .brand span { font-size: 19px; }
   .theme button { min-width: 44px; padding: 0 6px; font-size: 10px; }
   .ctas .btn { flex: 1 1 100%; }
+  footer nav ul { flex-direction: column; gap: 0; }
 }
 @media (max-width: 360px) {
   .theme button { min-width: 44px; padding: 0 4px; }
