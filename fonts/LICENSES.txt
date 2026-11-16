@@ -1,3 +1,12 @@
 Subsets of the following fonts, all under the SIL Open Font License 1.1:
 Iosevka Nerd Font (Be5invis, Nerd Fonts), JetBrains Mono Nerd Font (JetBrains,
-Nerd Fonts), Inter (The Inter Project Authors), Noto Sans CJK JP (Google, Adobe).
+Nerd Fonts), Inter (The Inter Project Authors), Noto Sans CJK JP (Google, Adobe),
+and the script subsets of Noto Sans Arabic, Devanagari, Telugu, Tamil and
+Malayalam (The Noto Project Authors), variable weight, from @fontsource-variable 5.3.0.
+
+The home rail's rail-*.woff2 files are subsets, at weight 900, holding only the
+letters of "Tandem" in each script, of Noto Sans, Noto Sans Hebrew, Bengali,
+Thai, Ethiopic, Georgian and Armenian (The Noto Project Authors, from
+@fontsource-variable 5.3.0), the Arabic and Indian files above, and Noto Sans
+CJK JP Black (Google, Adobe), all under the SIL Open Font License 1.1. They are
+built by ui/scripts/rail-fonts.py.

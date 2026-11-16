@@ -1,6 +1,9 @@
-# Tandem landing page
+# Tandem's site
 
-Live at <https://nitheesh-me.github.io/tandem/>. Everything on it comes from `config.json`.
+Live at <https://tandem.nitheesh.me/>. The landing page (`index.html`, `site.css`, `site.js`, `img/`, `robots.txt`,
+`sitemap.xml`) is copied from `docs/site` in the app repository, where its README says how it is made and checked.
+The show page below, with the pass maker and the public screening's stage, is now `show.html`; a pass link to the
+old address (`/#show=...`) opens it. Everything on the show page comes from `config.json`.
 
 - `ticket`: the show, date, time, seat and the rest of the VIP pass.
 - `trailer`: the main stage. While `sources` is empty the stage is a premiere card for the music video.
@@ -27,14 +30,14 @@ Live at <https://nitheesh-me.github.io/tandem/>. Everything on it comes from `co
 The pass maker is for hosts, so it sits behind the footer link "Hosting a show? Make a pass" and at `#make`.
 
 A link can change a ticket without editing anything, after the `#`:
-`#show=Friday%20Film&date=Friday&time=21:00&seat=Sofa&invite=tandem://join/tandem1...`
+`show.html#show=Friday%20Film&date=Friday&time=21:00&seat=Sofa&invite=tandem://join/tandem1...`
 
 The part after `#` is not sent to a server. An invite works like a password, so share those links with care.
 The code printed on the pass carries the show, date, time and seat, never the invite.
 
 ## Files
 
-- `index.html`, `stage.css`: the landing page, staged as a live show.
+- `show.html`, `stage.css`: the show page (the old landing page), staged as a live show.
 - `app.js`: fills the landing page from `config.json`.
 - `invite.js`: reads an invite on the device (no network) for `join/` and `watch/`: the ticket from any
   link form, whether it is complete, and how many Stations it lists. The ticket carries no room name.
