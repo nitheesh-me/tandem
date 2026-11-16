@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="referrer" content="no-referrer">
 <title>Tandem Watch Party: watch videos in sync with friends</title>
-<meta name="description" content="Tandem Watch Party is a free app to watch videos in sync with friends, peer to peer and with no account, on Linux, Windows, Android, TV or in a browser.">
+<meta name="description" content="Tandem Watch Party is a free app to watch videos in sync with friends, peer to peer and with no account, on Linux, Windows, Android and Android TV.">
 <link rel="canonical" href="https://tandem.nitheesh.me/">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="color-scheme" content="dark light">
@@ -15,7 +15,7 @@
 <meta property="og:site_name" content="Tandem Watch Party">
 <meta property="og:url" content="https://tandem.nitheesh.me/">
 <meta property="og:title" content="Tandem Watch Party: watch videos in sync with friends">
-<meta property="og:description" content="Watch videos and movies in sync with friends, each on their own screen. Tandem is free, works peer to peer with no account, and runs on Linux, Windows, Android and in the browser.">
+<meta property="og:description" content="Watch videos and movies in sync with friends, each on their own screen. Tandem is free, works peer to peer with no account, and runs on Linux, Windows, Android and Android TV.">
 <meta property="og:image" content="https://tandem.nitheesh.me/img/social.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -23,7 +23,7 @@
 <meta property="og:locale" content="en_GB">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Tandem Watch Party: watch videos in sync with friends">
-<meta name="twitter:description" content="Watch videos and movies in sync with friends, each on their own screen. Free, peer to peer, with no account, on Linux, Windows, Android and in the browser.">
+<meta name="twitter:description" content="Watch videos and movies in sync with friends, each on their own screen. Free, peer to peer, with no account, on Linux, Windows, Android and Android TV.">
 <meta name="twitter:image" content="https://tandem.nitheesh.me/img/social.jpg">
 <meta name="twitter:image:alt" content="The Tandem wordmark beside one watch party playing Sprite Fright on a laptop, a TV and a phone at the same moment.">
 <link rel="icon" href="img/icon.svg" type="image/svg+xml">
@@ -45,7 +45,7 @@
   "Tandem Watch Party",
   "Tandem watch together"
  ],
- "description": "Tandem Watch Party is a free app for watching videos and movies in sync with friends, each on their own screen, peer to peer and with no account, on Linux, Windows, Android and Android TV, or from an invite in a browser.",
+ "description": "Tandem Watch Party is a free app for watching videos and movies in sync with friends, each on their own screen, peer to peer and with no account, on Linux, Windows, Android and Android TV.",
  "url": "https://tandem.nitheesh.me/",
  "sameAs": [
   "https://github.com/nitheesh-me/tandem"
@@ -100,7 +100,7 @@
    "name": "Can friends without the app join?",
    "acceptedAnswer": {
     "@type": "Answer",
-    "text": "Yes, from a computer. They open your invite, choose Watch in this browser, and need nothing else. The browser follows the room's play, pause and seeks, but it cannot chat, react or control playback. It plays MP4 films directly, and other formats when someone in the room has the app."
+    "text": "Today everyone in the room needs the Tandem app, on Linux, Windows or Android. Watching from an invite in a browser, with nothing to install, is paused for now and coming back soon."
    }
   },
   {
@@ -108,7 +108,7 @@
    "name": "Which devices does Tandem run on?",
    "acceptedAnswer": {
     "@type": "Answer",
-    "text": "Linux, Windows 10 and 11, and Android 7 or later on 64-bit ARM phones, tablets and Android TV. A computer without the app can join from an invite in a browser. There is no Mac release yet. A Mac app for Apple silicon is ready and comes with the next release. There is no iPhone or iPad version."
+    "text": "Linux, Windows 10 and 11, and Android 7 or later on 64-bit ARM phones, tablets and Android TV. There is no Mac release yet. A Mac app for Apple silicon is ready and comes with the next release. There is no iPhone or iPad version."
    }
   },
   {
@@ -124,7 +124,7 @@
    "name": "Does my film go through a server?",
    "acceptedAnswer": {
     "@type": "Answer",
-    "text": "Not in a form anyone can read. Stations connect to each other directly whenever they can, over QUIC, which is encrypted and authenticated, and each Station proves it holds the room's secret before it is let in. When two Stations cannot reach each other directly, for example on a strict network, their traffic goes through a public relay, and a browser always joins through one. The traffic stays encrypted between the Stations, so the relay passes it on without being able to read it. The relays and the discovery service do see your IP address."
+    "text": "Not in a form anyone can read. Stations connect to each other directly whenever they can, over QUIC, which is encrypted and authenticated, and each Station proves it holds the room's secret before it is let in. When two Stations cannot reach each other directly, for example on a strict network, their traffic goes through a public relay. The traffic stays encrypted between the Stations, so the relay passes it on without being able to read it. The relays and the discovery service do see your IP address."
    }
   },
   {
@@ -132,7 +132,7 @@
    "name": "What does the join page see?",
    "acceptedAnswer": {
     "@type": "Answer",
-    "text": "An invite looks like https://tandem.nitheesh.me/join/#tandem1…. The room's ticket comes after the #, and a browser never sends that part to a server, so the invite never reaches a web server. The page offers Open in the app, Watch in this browser and a download link. In Settings you can put invites on a join page of your own instead. The ticket still comes after the #, so your page's server never sees it either."
+    "text": "An invite looks like https://tandem.nitheesh.me/join/#tandem1…. The room's ticket comes after the #, and a browser never sends that part to a server, so the invite never reaches a web server. The page offers to open the room in the app. In Settings you can put invites on a join page of your own instead. The ticket still comes after the #, so your page's server never sees it either."
    }
   },
   {
@@ -212,9 +212,9 @@
       <h1 class="split">Tandem Watch Party</h1>
       <p class="lead strong">A free app for watching videos and movies in sync with friends, each on their own screen.</p>
       <p class="lead">Tandem lets you and your friends watch together from different places. It works peer to peer, so there is no account to make and no server holds your files.</p>
-      <p class="lead">It runs on Linux, Windows, Android phones and tablets and Android TV, and a friend without the app can watch from your invite in a browser.</p>
+      <p class="lead">It runs on Linux, Windows, Android phones and tablets and Android TV.</p>
       <div class="ctas">
-        <a class="btn primary" href="#download">Download Tandem 0.6.0</a>
+        <a class="btn primary" href="#download">Get Tandem 0.6.0</a>
         <a class="btn" href="#how">See how a watch party works</a>
       </div>
     </div>
@@ -235,7 +235,7 @@
     <ol class="steps">
       <li class="frame"><span class="n" aria-hidden="true"></span><h3>Open a room</h3><p>One of you presses <strong>Open room</strong> and adds a film: a file, a folder, a magnet link or a .torrent file.</p></li>
       <li class="frame"><span class="n" aria-hidden="true"></span><h3>Copy the invite</h3><p>They press <strong>Copy invite</strong> and send the link in any chat app, where it shows up as a normal link.</p></li>
-      <li class="frame"><span class="n" aria-hidden="true"></span><h3>Join the room</h3><p>The others open the link and press <strong>Join room</strong>. It opens the app, or the room in a browser on a computer without it.</p></li>
+      <li class="frame"><span class="n" aria-hidden="true"></span><h3>Join the room</h3><p>The others open the link and press <strong>Join room</strong>. It opens the room in their Tandem app.</p></li>
       <li class="frame"><span class="n" aria-hidden="true"></span><h3>Press play</h3><p>Anyone presses play, and every screen starts on the same frame. A pause or a skip happens for everyone too.</p></li>
     </ol>
   </div>
@@ -246,7 +246,7 @@
     <div class="head">
       <p class="label">Sync</p>
       <h2 id="sync-h">Watch videos in sync with friends, even when the host leaves</h2>
-      <p>Every screen plays the film itself at full quality, so nobody watches a blurry screen share. Tandem keeps the players together by nudging each one a touch faster or slower, which nobody notices, and in browsers the screens stay about 10 ms apart.</p>
+      <p>Every screen plays the film itself at full quality, so nobody watches a blurry screen share. Tandem keeps the players together by nudging each one a touch faster or slower, which nobody notices. In tests on one computer, the screens stayed about 10 ms apart.</p>
     </div>
     <figure class="feature">
       <span class="pic"><img src="img/host-still.webp" data-anim="img/host.webp" width="1200" height="600" alt="A real recording of a watch party on a laptop and a phone playing Singularity, an open movie from Blender Studio, while mintylynx, the host, leaves the room. moonmilk.07's phone then says You are the host now, cosmic.crumpet's laptop marks moonmilk.07 as host, and the movie keeps playing on both." decoding="async" loading="lazy"></span>
@@ -320,7 +320,7 @@
   <div class="wrap">
     <div class="head">
       <p class="label">Linux, Windows, Android and TV</p>
-      <h2 id="dev-h">Tandem on Linux, Windows, Android, Android TV and in the browser</h2>
+      <h2 id="dev-h">Tandem on Linux, Windows, Android and Android TV</h2>
       <p>Computers, phones, tablets and TVs can all share one room, in any of twelve languages. On a TV the remote moves around the room, and its play key plays for everyone. Most video formats play as they are, and Tandem converts the rest with FFmpeg as you watch.</p>
     </div>
     <figure class="feature">
@@ -407,18 +407,21 @@
       <p class="label">Get Tandem</p>
       <h2 id="dl-h">Download Tandem 0.6.0 for Linux, Windows and Android</h2>
       <p>The app is the same everywhere, and everyone in a room should use the same release. FFmpeg is included in every package.</p>
-      <p class="note" id="dl-note">Tandem's GitHub project is still private, so the download links below work only for people with access until it is made public. Until then, a friend who has the app can invite you to watch in your browser.</p>
+      <p>Public downloads open soon.</p>
     </div>
+    <!-- On the day the repository is public, each "Opening soon" becomes a link to its file on
+         https://github.com/NitheeshWorks/tandem/releases/download/v0.6.0/ (Tandem_0.6.0_amd64.AppImage,
+         Tandem_0.6.0_amd64.deb, Tandem_0.6.0_x64-setup.exe, Tandem_0.6.0_arm64.apk) as <a class="file" href="...">,
+         and the .get block gets a button to https://github.com/NitheeshWorks/tandem/releases/tag/v0.6.0 and the
+         SHA256SUMS.txt line back (see git history of docs/site/index.html, commit 0fa00c7). -->
     <ul class="plats" id="encore">
-      <li class="frame"><h3>Linux, any distribution</h3><a class="file" href="https://github.com/NitheeshWorks/tandem/releases/download/v0.6.0/Tandem_0.6.0_amd64.AppImage">Tandem_0.6.0_amd64.AppImage</a><p>It is self-contained: make it executable and run it.</p></li>
-      <li class="frame"><h3>Debian and Ubuntu</h3><a class="file" href="https://github.com/NitheeshWorks/tandem/releases/download/v0.6.0/Tandem_0.6.0_amd64.deb">Tandem_0.6.0_amd64.deb</a><p>This is the smaller download. It uses your system's WebKit and GStreamer.</p></li>
-      <li class="frame"><h3>Windows 10 and 11</h3><a class="file" href="https://github.com/NitheeshWorks/tandem/releases/download/v0.6.0/Tandem_0.6.0_x64-setup.exe">Tandem_0.6.0_x64-setup.exe</a><p>The installer is not code-signed yet, so SmartScreen will warn you before it runs.</p></li>
-      <li class="frame"><h3>Android phones, tablets and TV</h3><a class="file" href="https://github.com/NitheeshWorks/tandem/releases/download/v0.6.0/Tandem_0.6.0_arm64.apk">Tandem_0.6.0_arm64.apk</a><p>It needs Android 7 or later on 64-bit ARM. Allow installs from this source when Android asks.</p></li>
-      <li class="frame browser"><h3>Any browser, nothing to install</h3><p>Open an invite on a computer and choose <strong>Watch in this browser</strong>. The browser follows the room's play, pause and seeks. MP4 films play directly, and other formats play when someone in the room has the app.</p></li>
+      <li class="frame"><h3>Linux, any distribution</h3><p class="file">Tandem_0.6.0_amd64.AppImage</p><span class="chip line">Opening soon</span><p>It is self-contained: make it executable and run it.</p></li>
+      <li class="frame"><h3>Debian and Ubuntu</h3><p class="file">Tandem_0.6.0_amd64.deb</p><span class="chip line">Opening soon</span><p>This is the smaller download. It uses your system's WebKit and GStreamer.</p></li>
+      <li class="frame"><h3>Windows 10 and 11</h3><p class="file">Tandem_0.6.0_x64-setup.exe</p><span class="chip line">Opening soon</span><p>The installer is not code-signed yet, so SmartScreen will warn you before it runs.</p></li>
+      <li class="frame"><h3>Android phones, tablets and TV</h3><p class="file">Tandem_0.6.0_arm64.apk</p><span class="chip line">Opening soon</span><p>It needs Android 7 or later on 64-bit ARM. Allow installs from this source when Android asks.</p></li>
     </ul>
     <div class="get">
-      <a class="btn primary" href="https://github.com/NitheeshWorks/tandem/releases/tag/v0.6.0">See the 0.6.0 release on GitHub</a>
-      <p>The release lists SHA-256 checksums in <code>SHA256SUMS.txt</code>. Updates are signed, and the app offers them on the home screen, never during a film.</p>
+      <p>Updates are signed, and the app offers them on the home screen, never during a film.</p>
     </div>
   </div>
 </section>
@@ -456,11 +459,11 @@
       </details>
       <details class="frame">
         <summary>Can friends without the app join?</summary>
-        <div class="a"><p>Yes, from a computer. They open your invite, choose <strong>Watch in this browser</strong>, and need nothing else. The browser follows the room's play, pause and seeks, but it cannot chat, react or control playback. It plays MP4 films directly, and other formats when someone in the room has the app.</p></div>
+        <div class="a"><p>Today everyone in the room needs the Tandem app, on Linux, Windows or Android. Watching from an invite in a browser, with nothing to install, is paused for now and coming back soon.</p></div>
       </details>
       <details class="frame">
         <summary>Which devices does Tandem run on?</summary>
-        <div class="a"><p>Linux, Windows 10 and 11, and Android 7 or later on 64-bit ARM phones, tablets and Android TV. A computer without the app can join from an invite in a browser.</p><p>There is no Mac release yet. A Mac app for Apple silicon is ready and comes with the next release. There is no iPhone or iPad version.</p></div>
+        <div class="a"><p>Linux, Windows 10 and 11, and Android 7 or later on 64-bit ARM phones, tablets and Android TV.</p><p>There is no Mac release yet. A Mac app for Apple silicon is ready and comes with the next release. There is no iPhone or iPad version.</p></div>
       </details>
       <details class="frame">
         <summary>Does everyone need a copy of the film?</summary>
@@ -468,11 +471,11 @@
       </details>
       <details class="frame">
         <summary>Does my film go through a server?</summary>
-        <div class="a"><p>Not in a form anyone can read. Stations connect to each other directly whenever they can, over QUIC, which is encrypted and authenticated, and each Station proves it holds the room's secret before it is let in.</p><p>When two Stations cannot reach each other directly, for example on a strict network, their traffic goes through a <strong>public relay</strong>, and a browser always joins through one. The traffic stays encrypted between the Stations, so the relay passes it on without being able to read it. The relays and the discovery service do see your IP address.</p></div>
+        <div class="a"><p>Not in a form anyone can read. Stations connect to each other directly whenever they can, over QUIC, which is encrypted and authenticated, and each Station proves it holds the room's secret before it is let in.</p><p>When two Stations cannot reach each other directly, for example on a strict network, their traffic goes through a <strong>public relay</strong>. The traffic stays encrypted between the Stations, so the relay passes it on without being able to read it. The relays and the discovery service do see your IP address.</p></div>
       </details>
       <details class="frame">
         <summary>What does the join page see?</summary>
-        <div class="a"><p>An invite looks like <code>https://tandem.nitheesh.me/join/#tandem1…</code>. The room's ticket comes after the <code>#</code>, and a browser never sends that part to a server, so the invite never reaches a web server. The page offers <strong>Open in the app</strong>, <strong>Watch in this browser</strong> and a download link.</p><p>In Settings you can put invites on a join page of your own instead. The ticket still comes after the <code>#</code>, so your page's server never sees it either.</p></div>
+        <div class="a"><p>An invite looks like <code>https://tandem.nitheesh.me/join/#tandem1…</code>. The room's ticket comes after the <code>#</code>, and a browser never sends that part to a server, so the invite never reaches a web server. The page offers to open the room in the app with <strong>Open in the app</strong>.</p><p>In Settings you can put invites on a join page of your own instead. The ticket still comes after the <code>#</code>, so your page's server never sees it either.</p></div>
       </details>
       <details class="frame">
         <summary>Who can join my room?</summary>

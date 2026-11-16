@@ -242,10 +242,8 @@ section { padding-block: clamp(56px, 9vw, 104px); }
 .plats { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap: 16px; margin: 0; padding: 0; list-style: none; }
 .plats li { padding: 22px; display: grid; gap: 8px; align-content: start; }
 .plats code, .plats .file { font: 700 14px/1.4 var(--mono); color: var(--accent); overflow-wrap: anywhere; }
-.plats .file { display: inline-flex; align-items: center; min-height: 44px; }
+.plats .chip { justify-self: start; }
 .plats p { color: var(--muted); font-size: 15px; }
-.plats .browser { grid-column: 1 / -1; }
-.plats .browser p { max-width: 52em; }
 .get { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; margin-top: 28px; }
 .get p { color: var(--muted); font-size: 15px; max-width: 40em; }
 
