@@ -1,0 +1,80 @@
+{
+ "makeup": 0.67,
+ "outroGain": 2.43,
+ "name": "techno",
+ "title": "Phase-locked techno",
+ "description": "124 BPM in D minor: eight parts of one groove, kick, bass, hats, arp, pad, clap, flute and drums, that phase apart and lock on the downbeat",
+ "bpm": 124,
+ "loop": 7.7419375,
+ "loopSamples": 371613,
+ "sampleRate": 48000,
+ "parts": [
+  {
+   "handle": "neonquokka",
+   "role": "bass",
+   "file": "part-0.wav"
+  },
+  {
+   "handle": "velvetkoi",
+   "role": "kick",
+   "file": "part-1.wav"
+  },
+  {
+   "handle": "tofu.rocket",
+   "role": "hats",
+   "file": "part-2.wav"
+  },
+  {
+   "handle": "fizzwhale",
+   "role": "arp",
+   "file": "part-3.wav"
+  },
+  {
+   "handle": "mintylynx",
+   "role": "pad",
+   "file": "part-4.wav"
+  },
+  {
+   "handle": "cosmic.crumpet",
+   "role": "clap",
+   "file": "part-5.wav"
+  },
+  {
+   "handle": "moonmilk.07",
+   "role": "flute",
+   "file": "part-6.wav"
+  },
+  {
+   "handle": "orbitbeans",
+   "role": "drums",
+   "file": "part-7.wav"
+  }
+ ],
+ "shots": {
+  "bed": "bed.wav",
+  "impact": "impact.wav",
+  "cadence": "cadence.wav",
+  "click": "click.wav",
+  "hold": "hold.wav",
+  "tension": "tension.wav",
+  "riser": "riser.wav",
+  "outro": "outro.wav",
+  "ident": "ident.wav",
+  "notes": [
+   "note-0.wav",
+   "note-1.wav",
+   "note-2.wav",
+   "note-3.wav",
+   "note-4.wav"
+  ],
+  "arrive": {
+   "velvetkoi": "arrive-1.wav",
+   "tofu.rocket": "arrive-2.wav",
+   "fizzwhale": "arrive-3.wav",
+   "mintylynx": "arrive-4.wav",
+   "cosmic.crumpet": "arrive-5.wav",
+   "moonmilk.07": "arrive-6.wav",
+   "orbitbeans": "arrive-7.wav"
+  }
+ }
+}

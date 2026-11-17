@@ -1,0 +1,28 @@
+Tandem, the art piece (docs/site/art)
+
+Code: everything in art/js, art.css and build.py is written for this site. It uses WebGL2 and WebAudio from the
+browser and no libraries: nothing from npm or a CDN is shipped, and nothing is loaded from anywhere but this site.
+
+  - js/wall.js      the wall of screens, built from the Wall mark's geometry (img/icon.svg) and cut the same way,
+                    with the order in which the invite and the film reach each screen
+  - js/shaders.js   the film (a flowing contour map with the playhead), the screens, hollow frames, the film's
+                    fragments, the links, the pointer's field of lateness, bloom and the final picture
+  - js/main.js      the nine acts, the camera's path, input, the names, the room clock, the closing words
+  - js/audio.js     the live mix of the score: phase offsets per part, the lock, the fermata, the tape stop
+
+The score (art/score/techno, the default, and art/score/cine, at ?score=cine)
+  Composed for this page and rendered offline by target/team/roster/site-art/sound/render.py. Every sound in it
+  is synthesised there (oscillators, noise, additive plucks, FM bells, a state-variable filter); no samples or
+  recordings by anyone else are used. The files are Ogg Opus (and AAC in MP4 for browsers without Opus),
+  encoded with ffmpeg. The tools used to make them, none of which is shipped with the site:
+    - NumPy 2.3.5 (BSD-3-Clause) and SciPy 1.16.3 (BSD-3-Clause): synthesis and filters
+    - pedalboard 0.9.17 by Spotify (GPL-3.0): reverb, delay, chorus, compression and filters, used offline only;
+      only the rendered audio is in the site, not the library
+    - FFmpeg with libopus (BSD-3-Clause) and its AAC encoder: encoding
+
+Fonts, shared with the rest of the site (../fonts, see ../fonts/LICENSES.txt), all under the SIL Open Font
+License 1.1: JetBrains Mono (as site-mono-*), Iosevka (as site-iosevka-900) and Inter (as site-inter-400). The
+place names in Arabic, Japanese, Korean and Devanagari use the visitor's own system fonts.
+
+The people are made-up handles. No film footage is used; the film every screen plays is drawn by a shader.
+still.webp, shown when WebGL is missing, is a frame of the piece itself.

@@ -1,0 +1,92 @@
+/* Tandem Watch Party, the art piece. One fixed picture; nothing scrolls. */
+@font-face { font-family: "Tandem Mono"; src: url(fonts/site-mono-400.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Tandem Mono"; src: url(fonts/site-mono-700.woff2) format("woff2"); font-weight: 700; font-display: swap; }
+@font-face { font-family: "Tandem Display"; src: url(fonts/site-iosevka-900.woff2) format("woff2"); font-weight: 900; font-display: swap; }
+@font-face { font-family: "Tandem Sans"; src: url(fonts/site-inter-400.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+
+:root {
+  --ground: #07040f; --cyan: #00f0ff; --pink: #ff2a6d; --violet: #b44cff; --lit: #9184bc; --text: #efeaff;
+  --mono: "Tandem Mono", ui-monospace, monospace; --sans: "Tandem Sans", system-ui, sans-serif; --display: "Tandem Display", var(--mono);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: var(--ground); color: var(--text); overscroll-behavior: none; }
+body { font: 16px/1.5 var(--sans); -webkit-font-smoothing: antialiased; touch-action: none; }
+.pointer #stage { cursor: none; }
+
+#stage { position: fixed; inset: 0; outline: none; }
+#stage:focus-visible::after { content: ""; position: absolute; inset: 6px; border: 1px solid var(--cyan); pointer-events: none;
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px)); }
+#gl, #hud { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+#hud { pointer-events: none; }
+.still { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 28% 50%; opacity: 0; }
+.live .still { display: none; }
+
+/* the closing words: each letter arrives at its own moment and locks in */
+#final { position: fixed; z-index: 2; left: 55%; right: 6vw; top: 50%; transform: translateY(-50%); visibility: hidden; opacity: 0; pointer-events: none; --d: 1; }
+#final .name { margin: 0 0 .5em; font: 900 clamp(2.4rem, 5.6vw, 6.2rem)/.9 var(--display); letter-spacing: -.01em; text-transform: uppercase; white-space: normal; }
+#final .wd { display: inline-block; white-space: nowrap; }
+#final .ch { display: inline-block; transform: translate3d(calc((var(--r) - .5) * var(--d) * 9em), 0, 0); opacity: calc(1 - var(--d) * .8);
+  text-shadow: calc(var(--d) * -.35em) 0 0 rgba(255, 42, 109, calc(.9 * var(--d))), calc(var(--d) * .35em) 0 0 rgba(0, 240, 255, calc(.9 * var(--d))); }
+#final .line { margin: .2em 0; max-width: 30em; text-wrap: balance; font: 400 clamp(.95rem, 1.25vw, 1.15rem)/1.5 var(--sans); color: #d9d3ef; transform: translateX(calc(var(--d) * 3em)); }
+#final .plat { margin: 1.4em 0 .5em; font: 700 .78rem/1.4 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--lit); }
+#final .plat span { white-space: nowrap; }
+#final .plat i { font-style: normal; color: var(--cyan); padding: 0 .35em; }
+#final .soon span { display: inline-block; padding: .45em .9em .4em; font: 700 .78rem/1 var(--mono); letter-spacing: .16em; text-transform: uppercase;
+  color: var(--ground); background: var(--cyan); clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px)); }
+#final.on .soon span { animation: soon 2.4s steps(1) infinite; }
+@keyframes soon { 0%, 92% { background: var(--cyan); } 93%, 96% { background: var(--pink); } }
+
+/* the rail is drawn on the canvas; this is its hit area and its focus */
+#rail { position: fixed; z-index: 3; right: 0; top: 16vh; height: 68vh; width: 44px; cursor: ns-resize; outline: none; touch-action: none; }
+#rail:focus-visible { box-shadow: inset -2px 0 0 var(--cyan); }
+
+/* sound: two waves, the room's and the late one's, that meet when the room is in sync and lie flat when muted */
+#sound, #words { position: fixed; z-index: 3; bottom: 18px; height: 34px; border: 0; padding: 0 12px; display: flex; align-items: center; gap: 10px;
+  font: 700 11px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--text); background: rgba(16, 9, 32, .72);
+  clip-path: polygon(0 0, calc(100% - 7px) 0, 100% 7px, 100% 100%, 7px 100%, 0 calc(100% - 7px)); cursor: pointer; }
+#sound { right: 64px; }
+#words { right: 64px; bottom: 58px; color: var(--lit); }
+#sound[hidden] { display: none; }
+#sound:hover, #words:hover, #sound:focus-visible, #words:focus-visible { background: rgba(0, 240, 255, .16); outline: 1px solid var(--cyan); outline-offset: -1px; }
+#sound .wave { display: block; overflow: visible; }
+#sound .wave path { fill: none; stroke-width: 1.6; stroke-linejoin: bevel; }
+#sound .w1 { stroke: var(--cyan); } #sound .w2 { stroke: var(--pink); }
+#sound[aria-pressed="false"] .wave path { stroke: var(--lit); }
+
+/* the words layer: hidden but read by screen readers; open, it covers the picture */
+.skip { position: fixed; z-index: 10; left: 12px; top: -60px; padding: 8px 12px; background: var(--cyan); color: var(--ground); font: 700 13px var(--mono); }
+.skip:focus { top: 12px; }
+#read { position: fixed; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: normal; }
+.reading #read { z-index: 8; inset: 0; width: auto; height: auto; clip: auto; overflow: auto; padding: 10vh max(6vw, 20px) 14vh; background: rgba(7, 4, 15, .94);
+  backdrop-filter: blur(6px); touch-action: pan-y; outline: none; }
+.reading #read > * { max-width: 40rem; }
+#read h1 { font: 900 clamp(2rem, 5vw, 3.6rem)/1 var(--display); text-transform: uppercase; margin: .4em 0; }
+#read h2 { font: 700 .8rem/1.2 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--cyan); margin: 2.4em 0 .6em; }
+#read h3 { font: 600 1rem/1.4 var(--sans); margin: 1.6em 0 .3em; color: var(--text); }
+#read p, #read li { margin: .5em 0; color: #d9d3ef; }
+#read ol { padding-left: 1.4em; }
+#read .credits { margin-top: 3em; color: var(--lit); font-size: .85rem; }
+#read-close { font: 700 11px var(--mono); letter-spacing: .14em; text-transform: uppercase; background: none; color: var(--cyan); border: 1px solid var(--cyan); padding: 8px 12px; cursor: pointer; }
+.reading #words, .reading #sound, .reading #rail { visibility: hidden; }
+
+/* without WebGL (or if the picture fails): the still, the closing words, and the words one press away */
+.nogl #gl, .nogl #hud, .nogl #rail { display: none; }
+.nogl .still { opacity: 1; display: block; }
+.nogl #final { visibility: visible; opacity: 1; --d: 0; }
+.nogl #final .wd { display: inline-block; white-space: nowrap; }
+#final .ch { --r: 0; }
+
+@media (max-width: 760px), (max-aspect-ratio: 9/10) {
+  #final { left: 22px; right: 22px; top: auto; bottom: 92px; transform: none; }
+  #final .name { font-size: clamp(2rem, 10.5vw, 3.2rem); }
+  #final .line { font-size: .9rem; }
+  #sound, #words { top: 12px; bottom: auto; height: 30px; }
+  #sound { right: 12px; }
+  #words { right: auto; left: 12px; }
+  #rail { width: 30px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #final .ch, #final .line { transform: none; text-shadow: none; }
+  #final.on .soon span { animation: none; }
+}

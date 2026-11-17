@@ -2,19 +2,22 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<script>
+  // A pass made on the old show page (tandem.nitheesh.me/#show=...&invite=...) still opens that page, kept as show.html.
+  try { const h = new URLSearchParams(location.hash.slice(1)); if (['show', 'invite', 'date', 'time', 'seat', 'venue', 'trailer'].some((k) => h.has(k))) location.replace('show.html' + location.hash); } catch {}
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="referrer" content="no-referrer">
-<title>Tandem Watch Party: watch videos in sync with friends</title>
-<meta name="description" content="Tandem Watch Party is a free app to watch videos in sync with friends, peer to peer and with no account, on Linux, Windows, Android and Android TV.">
+<title>Tandem: watch videos in sync with friends, a free watch party app</title>
+<meta name="description" content="Tandem is a free watch party app (Tandem Watch Party) to watch videos in sync with friends, peer to peer and with no account, on Linux, Windows, Android and Android TV.">
 <link rel="canonical" href="https://tandem.nitheesh.me/">
 <meta name="robots" content="index, follow, max-image-preview:large">
-<meta name="color-scheme" content="dark light">
+<meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#07040f" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f5f2fb" media="(prefers-color-scheme: light)">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="Tandem Watch Party">
+<meta property="og:site_name" content="Tandem">
 <meta property="og:url" content="https://tandem.nitheesh.me/">
-<meta property="og:title" content="Tandem Watch Party: watch videos in sync with friends">
+<meta property="og:title" content="Tandem: watch videos in sync with friends, a free watch party app">
 <meta property="og:description" content="Watch videos and movies in sync with friends, each on their own screen. Tandem is free, works peer to peer with no account, and runs on Linux, Windows, Android and Android TV.">
 <meta property="og:image" content="https://tandem.nitheesh.me/img/social.jpg">
 <meta property="og:image:width" content="1200">
@@ -22,20 +25,11 @@
 <meta property="og:image:alt" content="The Tandem wordmark beside one watch party playing Sprite Fright on a laptop, a TV and a phone at the same moment.">
 <meta property="og:locale" content="en_GB">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Tandem Watch Party: watch videos in sync with friends">
+<meta name="twitter:title" content="Tandem: watch videos in sync with friends, a free watch party app">
 <meta name="twitter:description" content="Watch videos and movies in sync with friends, each on their own screen. Free, peer to peer, with no account, on Linux, Windows, Android and Android TV.">
 <meta name="twitter:image" content="https://tandem.nitheesh.me/img/social.jpg">
 <meta name="twitter:image:alt" content="The Tandem wordmark beside one watch party playing Sprite Fright on a laptop, a TV and a phone at the same moment.">
 <link rel="icon" href="img/icon.svg" type="image/svg+xml">
-<link rel="preload" href="img/hero-still.webp" as="image" type="image/webp" fetchpriority="high">
-<link rel="preload" href="fonts/inter-Regular.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="site.css">
-<script>
-  // A pass made on the old show page (tandem.nitheesh.me/#show=...&invite=...) still opens that page, kept as show.html.
-  try { const h = new URLSearchParams(location.hash.slice(1)); if (['show', 'invite', 'date', 'time', 'seat', 'venue', 'trailer'].some((k) => h.has(k))) location.replace('show.html' + location.hash); } catch {}
-  // The theme before the first paint: the visitor's choice if they made one, else the system's.
-  try { const t = localStorage.getItem('tandem-site-theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch {}
-</script>
 <script type="application/ld+json">
 {
  "@context": "https://schema.org",
@@ -74,6 +68,7 @@
  }
 }
 </script>
+<!-- faq:jsonld -->
 <script type="application/ld+json">
 {
  "@context": "https://schema.org",
@@ -132,7 +127,7 @@
    "name": "What does the join page see?",
    "acceptedAnswer": {
     "@type": "Answer",
-    "text": "An invite looks like https://tandem.nitheesh.me/join/#tandem1…. The room's ticket comes after the #, and a browser never sends that part to a server, so the invite never reaches a web server. The page offers to open the room in the app. In Settings you can put invites on a join page of your own instead. The ticket still comes after the #, so your page's server never sees it either."
+    "text": "An invite looks like https://tandem.nitheesh.me/join/#tandem1…. The room's ticket comes after the #, and a browser never sends that part to a server, so the invite never reaches a web server. The page offers to open the room in the app with Open in the app. In Settings you can put invites on a join page of your own instead. The ticket still comes after the #, so your page's server never sees it either."
    }
   },
   {
@@ -178,365 +173,75 @@
  ]
 }
 </script>
+<link rel="preload" href="fonts/site-mono-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/site-mono-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="art.css">
+<script>addEventListener('error', (e) => { if (e instanceof ErrorEvent && !document.documentElement.classList.contains('live')) document.documentElement.classList.add('nogl'); }, true);</script>
+<script type="module" src="js/main.js"></script>
 </head>
 <body>
-<a class="skip" href="#main">Skip to content</a>
-
-<header class="top">
-  <div class="wrap">
-    <a class="brand" href="#top" aria-label="Tandem, back to the top"><svg class="mark" viewBox="0 0 60 60" width="32" height="32" aria-hidden="true" focusable="false"><path d="M0,0L60,0L60,60L0,60Z" fill="var(--bg)"/><path d="M0,0L33.75,0L35.625,1.875L35.625,7.5L1.875,7.5L0,5.625Z" fill="color-mix(in srgb, var(--muted) 38%, var(--bg))"/><path d="M37.5,0L58.125,0L60,1.875L60,7.5L39.375,7.5L37.5,5.625Z" fill="color-mix(in srgb, var(--muted) 38%, var(--bg))"/><path d="M0,9.375L5.625,9.375L7.5,11.25L7.5,60L1.875,60L0,58.125Z" fill="color-mix(in srgb, var(--muted) 38%, var(--bg))"/><path d="M50.625,9.375L58.125,9.375L60,11.25L60,60L52.5,60L50.625,58.125Z" fill="color-mix(in srgb, var(--muted) 38%, var(--bg))"/><path d="M9.375,18.75L20.625,18.75L22.5,20.625L22.5,28.125L11.25,28.125L9.375,26.25Z" fill="color-mix(in srgb, var(--muted) 38%, var(--bg))"/><path d="M9.375,30L20.625,30L22.5,31.875L22.5,50.625L11.25,50.625L9.375,48.75Z" fill="color-mix(in srgb, var(--muted) 38%, var(--bg))"/><path d="M35.625,18.75L46.875,18.75L48.75,20.625L48.75,41.25L37.5,41.25L35.625,39.375Z" fill="color-mix(in srgb, var(--muted) 38%, var(--bg))"/><path d="M35.625,43.125L37.5,43.125L39.375,45L39.375,50.625L37.5,50.625L35.625,48.75Z" fill="color-mix(in srgb, var(--muted) 38%, var(--bg))"/><path d="M9.375,52.5L46.875,52.5L48.75,54.375L48.75,60L11.25,60L9.375,58.125Z" fill="color-mix(in srgb, var(--muted) 38%, var(--bg))"/><path d="M9.375,9.375L18.75,9.375L20.625,11.25L20.625,16.875L11.25,16.875L9.375,15Z" fill="var(--muted)"/><path d="M22.5,9.375L27.5,9.375L27.5,16.875L24.375,16.875L22.5,15Z" fill="var(--muted)"/><path d="M30.625,9.375L37.5,9.375L39.375,11.25L39.375,16.875L30.625,16.875Z" fill="var(--muted)"/><path d="M28.125,9.375L30,9.375L30,16.875L28.125,16.875Z" fill="var(--accent)"/><path d="M41.25,9.375L46.875,9.375L48.75,11.25L48.75,16.875L43.125,16.875L41.25,15Z" fill="var(--muted)"/><path d="M24.375,18.75L27.5,18.75L27.5,35.625L26.25,35.625L24.375,33.75Z" fill="var(--muted)"/><path d="M30.625,18.75L31.875,18.75L33.75,20.625L33.75,35.625L30.625,35.625Z" fill="var(--muted)"/><path d="M28.125,18.75L30,18.75L30,35.625L28.125,35.625Z" fill="var(--accent)"/><path d="M24.375,37.5L27.5,37.5L27.5,50.625L26.25,50.625L24.375,48.75Z" fill="var(--muted)"/><path d="M30.625,37.5L31.875,37.5L33.75,39.375L33.75,50.625L30.625,50.625Z" fill="var(--muted)"/><path d="M28.125,37.5L30,37.5L30,50.625L28.125,50.625Z" fill="var(--accent)"/><path d="M41.25,43.125L41.788,43.125L41.788,49.288L41.25,48.75Z" fill="var(--danger)"/><path d="M44.913,43.125L46.875,43.125L48.75,45L48.75,50.625L44.913,50.625Z" fill="var(--danger)"/><path d="M42.413,43.125L44.288,43.125L44.288,50.625L43.125,50.625L42.413,49.913Z" fill="var(--accent)"/></svg>
-      <span aria-hidden="true">TANDEM</span></a>
-    <nav aria-label="Sections">
-      <ul class="nav">
-        <li><a href="#how">How it works</a></li>
-        <li><a href="#features">Features</a></li>
-        <li><a href="#download">Download</a></li>
-        <li><a href="#faq">Questions</a></li>
-        <li><a href="compare/">Compare</a></li>
-      </ul>
-    </nav>
-    <div class="theme" role="group" aria-label="Colour theme">
-      <button type="button" data-set="auto" aria-pressed="true">Auto</button>
-      <button type="button" data-set="light" aria-pressed="false">Light</button>
-      <button type="button" data-set="dark" aria-pressed="false">Dark</button>
-    </div>
-  </div>
-</header>
-
-<main id="main" tabindex="-1">
-
-<div class="hero" id="top">
-  <div class="wrap">
-    <div class="hero-text">
-      <p class="label">Version 0.6.0, free to use</p>
-      <h1 class="split">Tandem Watch Party</h1>
-      <p class="lead strong">A free app for watching videos and movies in sync with friends, each on their own screen.</p>
-      <p class="lead">Tandem lets you and your friends watch together from different places. It works peer to peer, so there is no account to make and no server holds your files.</p>
-      <p class="lead">It runs on Linux, Windows, Android phones and tablets and Android TV.</p>
-      <div class="ctas">
-        <a class="btn primary" href="#download">Get Tandem 0.6.0</a>
-        <a class="btn" href="#how">See how a watch party works</a>
-      </div>
-    </div>
-    <figure class="hero-shot">
-      <span class="pic"><img src="img/hero-still.webp" data-anim="img/hero.webp" width="1600" height="800" alt="The Tandem wordmark above one watch party playing Sprite Fright, an open movie from Blender Studio, on a laptop, a TV and a phone. It is a real recording of three devices in one room, and their timecodes tick together." decoding="async" fetchpriority="high"></span>
-      <figcaption>A real recording of neonquokka's room on a laptop, a TV and a phone. All three show the same frame of Sprite Fright.</figcaption>
-    </figure>
-  </div>
+<a class="skip" href="#read" id="skip">Read about Tandem as words</a>
+<div id="stage" tabindex="0" aria-roledescription="moving picture" aria-label="Tandem, a moving picture" aria-describedby="how">
+  <img class="still" src="still.webp" alt="" width="1600" height="900">
+  <canvas id="gl" aria-hidden="true"></canvas>
+  <canvas id="hud" aria-hidden="true"></canvas>
 </div>
-
-<section class="band" id="how" aria-labelledby="how-h">
-  <div class="wrap">
-    <div class="head">
-      <p class="label">How a watch goes</p>
-      <h2 id="how-h">Start a watch party in four steps</h2>
-      <p>Each person's device is called a <strong>Station</strong>. The Stations in a room agree on one timeline and keep to it, so nobody has to count down to three and press play together.</p>
-    </div>
-    <ol class="steps">
-      <li class="frame"><span class="n" aria-hidden="true"></span><h3>Open a room</h3><p>One of you presses <strong>Open room</strong> and adds a film: a file, a folder, a magnet link or a .torrent file.</p></li>
-      <li class="frame"><span class="n" aria-hidden="true"></span><h3>Copy the invite</h3><p>They press <strong>Copy invite</strong> and send the link in any chat app, where it shows up as a normal link.</p></li>
-      <li class="frame"><span class="n" aria-hidden="true"></span><h3>Join the room</h3><p>The others open the link and press <strong>Join room</strong>. It opens the room in their Tandem app.</p></li>
-      <li class="frame"><span class="n" aria-hidden="true"></span><h3>Press play</h3><p>Anyone presses play, and every screen starts on the same frame. A pause or a skip happens for everyone too.</p></li>
-    </ol>
-  </div>
-</section>
-
-<section id="sync" aria-labelledby="sync-h">
-  <div class="wrap">
-    <div class="head">
-      <p class="label">Sync</p>
-      <h2 id="sync-h">Watch videos in sync with friends, even when the host leaves</h2>
-      <p>Every screen plays the film itself at full quality, so nobody watches a blurry screen share. Tandem keeps the players together by nudging each one a touch faster or slower, which nobody notices. In tests on one computer, the screens stayed about 10 ms apart.</p>
-    </div>
-    <figure class="feature">
-      <span class="pic"><img src="img/host-still.webp" data-anim="img/host.webp" width="1200" height="600" alt="A real recording of a watch party on a laptop and a phone playing Singularity, an open movie from Blender Studio, while mintylynx, the host, leaves the room. moonmilk.07's phone then says You are the host now, cosmic.crumpet's laptop marks moonmilk.07 as host, and the movie keeps playing on both." decoding="async" loading="lazy"></span>
-      <figcaption>In this recording mintylynx, who started the room, leaves. moonmilk.07 becomes the host and the movie keeps playing on both screens.</figcaption>
-    </figure>
-    <div class="pair">
-      <p>The Stations choose a host among themselves. If the host leaves, crashes or loses its connection, another Station takes over and the film carries on. People who join late start at the right moment, and if someone's picture stalls, the room waits for them for up to 20 seconds, or less if you press <strong>Continue without them</strong>.</p>
-      <p>The host can also set a <strong>Showtime</strong> countdown, a few minutes ahead or at a time of day, so everyone counts down together and starts on the same frame. It runs on the room's clock, so a computer whose clock is wrong still starts with everyone.</p>
-    </div>
-    <figure class="feature narrow">
-      <img src="img/measured.webp" width="1600" height="620" alt="Measured in the 0.6.0 release run on 2026-11-16: the desktop window kept 31 ms and Chrome 5 ms from the room on average; 140 of 140 quick specs, 25 of 25 serial specs and 26 of 26 probabilistic tests passed; 278 Rust unit tests passed; and 4 packages were built." decoding="async" loading="lazy">
-      <figcaption>These numbers come from the logs of the 0.6.0 release run.</figcaption>
-    </figure>
-  </div>
-</section>
-
-<section class="band" id="film" aria-labelledby="film-h">
-  <div class="wrap">
-    <div class="head">
-      <p class="label">Files, folders, magnets</p>
-      <h2 id="film-h">Bring the film as a file, a folder, a magnet link or a torrent</h2>
-      <p>Only one person needs the video. Tandem streams it peer to peer to the friends who do not have it, checks every piece as it arrives, and starts playing as soon as there is enough.</p>
-    </div>
-    <figure class="feature">
-      <img src="img/film.webp" width="1600" height="840" alt="Two real screens from Tandem. On the left, fizzwhale, who joined without the video, is told they need Sprite.Fright.2021.mp4 and offered I have a copy or Stream from stations. On the right, the list of devices marks the copies of neonquokka, velvetkoi and tofu.rocket Same file and fizzwhale's No file." decoding="async" loading="lazy">
-      <figcaption>fizzwhale joined without the film and can stream it from the others, whose copies Tandem has checked.</figcaption>
-    </figure>
-    <div class="pair">
-      <p>When friends bring their own copies, Tandem compares them and marks each one <span class="chip good">Same file</span> <span class="chip line">Probably same</span> <span class="chip line">Same length</span> or <span class="chip line">Different file</span>, so a wrong download shows up before the film starts.</p>
-      <p>A magnet link fetches nothing until each person chooses how to get it. BitTorrent starts only when you pick it, and someone in the room who is already getting the film can pass it on to you instead, even on a network that blocks BitTorrent.</p>
-    </div>
-  </div>
-</section>
-
-<section id="you" aria-labelledby="you-h">
-  <div class="wrap">
-    <div class="head">
-      <p class="label">Only you see the change</p>
-      <h2 id="you-h">Choose your own subtitles, audio and picture</h2>
-      <p>Each of these choices is yours alone. Nobody else in the room sees a change, and the room stays in sync while you make it.</p>
-    </div>
-    <figure class="feature">
-      <img src="img/you.webp" width="1600" height="1660" alt="Eight real screens from Tandem: the Tracks panel choosing an English audio track; subtitle look with sizes from 75% to 200%, Outline, Box or Solid, Bottom or Top; a 3D film for red and cyan glasses; a 360 video of a launch pad; Settings with Filter strong language and Hide those words in subtitles turned on; a room showing Playing in picture in picture with Bring it back; the eight colour presets with Ember chosen; and the room in Japanese." decoding="async" loading="lazy">
-    </figure>
-    <ul class="list">
-      <li><strong>Sound and subtitles.</strong> Pick your own audio track and subtitles, add your own subtitle file, change how subtitles look and fix their timing, and set your own volume.</li>
-      <li><strong>Picture.</strong> Choose Fit or Fill, a smaller picture size for a device that stutters, how to watch a 3D film (one eye, both eyes or red and cyan glasses), and where you look in a 360 video.</li>
-      <li><strong>Language filter.</strong> Turn your own sound down on strong language in subtitles and lyrics, and hide those words with asterisks.</li>
-      <li><strong>Picture in picture.</strong> Keep watching in a small window in Chrome, Edge, Firefox and on Android, or in the desktop app's mini player, while you do something else.</li>
-      <li><strong>Look and feel.</strong> Choose the interface language (there are twelve), the colour (eight presets or your own), the logo, the boot animation and interface sounds.</li>
-    </ul>
-  </div>
-</section>
-
-<section class="band" id="groups" aria-labelledby="groups-h">
-  <div class="wrap">
-    <div class="head">
-      <p class="label">New in 0.6.0</p>
-      <h2 id="groups-h">Friend groups for regular movie nights</h2>
-      <p>Keep the people you watch with as a friend group. Any member can set a schedule, such as every Friday at 9 PM, and everyone sees it in their own time zone and gets a reminder ten minutes before. You can suggest films and vote on them, answer yes, maybe or no, and jump into the group's room while the others are already watching.</p>
-    </div>
-    <figure class="feature">
-      <img src="img/groups.webp" width="1600" height="760" alt="A friend group called Friday film club. Its page shows the next movie night with 3 coming, 1 maybe and 0 not coming, and its card on the home screen says 3 watching now with a Join button." decoding="async" loading="lazy">
-      <figcaption>The Friday film club's page and its card on the home screen, where three members are watching now.</figcaption>
-    </figure>
-    <p class="note">A group lives only on its members' devices. There is no server for it: its schedule, votes, chat and memory of what you watched pass from member to member.</p>
-  </div>
-</section>
-
-<section id="devices" aria-labelledby="dev-h">
-  <div class="wrap">
-    <div class="head">
-      <p class="label">Linux, Windows, Android and TV</p>
-      <h2 id="dev-h">Tandem on Linux, Windows, Android and Android TV</h2>
-      <p>Computers, phones, tablets and TVs can all share one room, in any of twelve languages. On a TV the remote moves around the room, and its play key plays for everyone. Most video formats play as they are, and Tandem converts the rest with FFmpeg as you watch.</p>
-    </div>
-    <figure class="feature">
-      <img src="img/screens.webp" width="1600" height="760" alt="Tandem on a TV showing neonquokka's room, where the remote's play key plays for the whole room; on a phone held sideways; and on a laptop in Arabic, one of its twelve languages." decoding="async" loading="lazy">
-    </figure>
-  </div>
-</section>
-
-<section class="band" id="features" aria-labelledby="feat-h">
-  <div class="wrap">
-    <div class="head">
-      <p class="label">Everything else</p>
-      <h2 id="feat-h">More of what Tandem 0.6.0 does</h2>
-    </div>
-    <ul class="feats">
-      <li class="frame"><div class="k"><b>01</b></div><h3>Chat and reactions over the film</h3>
-        <p>The chat sits beside the picture, and six reactions rise over it with the sender's name. Someone who joins late can read what they missed.</p></li>
-      <li class="frame"><div class="k"><b>02</b></div><h3>Slow internet or a small disk still works</h3>
-        <p>A Station on a slow connection gets a smaller stream instead of holding everyone up. You can download a film before the watch, or watch without saving it when your disk is nearly full.</p></li>
-      <li class="frame"><div class="k"><b>03</b></div><h3>Almost any file plays</h3>
-        <p>What a screen cannot play, Tandem converts by itself, on the graphics chip when one works. HDR films are adjusted for ordinary screens, and surround sound is mixed to stereo.</p></li>
-      <li class="frame"><div class="k"><b>04</b></div><h3>Several versions of one film</h3>
-        <p>Add a film's 3D file beside its 2D one, and each person watches the version their screen suits, on one shared timeline.</p></li>
-      <li class="frame"><div class="k"><b>05</b></div><h3>A queue for films and songs</h3>
-        <p>Line up films and songs to play one after another. Songs show their cover, a visualiser and their lyrics as they are sung.</p></li>
-      <li class="frame"><div class="k"><b>06</b></div><h3>Rules for the room</h3>
-        <p>The host can keep the controls or let anyone pause and skip. For a big screening, new people can join as observers who watch along without voting.</p></li>
-    </ul>
-    <div class="more">
-      <p class="label">And there is more</p>
-      <ul>
-        <li><strong>The home screen</strong> shows the rooms you were in that are live now, and you can jump back in without a new invite.</li>
-        <li><strong>Cover art</strong> comes from the film itself, or from TMDB if you add your own key.</li>
-        <li><strong>The Monitor</strong> shows the whole watch: who is in sync, the network and who did what.</li>
-        <li><strong>A share picture</strong> sums up your watch as a square image, and you choose what goes in.</li>
-        <li><strong>Android</strong> lets you share videos, music, invites and magnet links to Tandem from any app.</li>
-        <li><strong>Updates are signed</strong> and offered on the home screen, never during a film.</li>
-        <li><strong>A keyboard, a screen reader,</strong> media keys and a TV remote all work.</li>
-        <li><strong>Arabic</strong> mirrors the whole interface, which reads right to left.</li>
-      </ul>
-    </div>
-  </div>
-</section>
-
-<section id="pictures" aria-labelledby="pic-h">
-  <div class="wrap">
-    <div class="head">
-      <p class="label">Pictures</p>
-      <h2 id="pic-h">More pictures of Tandem</h2>
-      <p>Every picture is the real app, playing open movies from Blender Studio. The names in them are made-up handles.</p>
-    </div>
-    <div class="shots">
-      <figure class="shot">
-        <img src="img/reactions.webp" width="1000" height="676" alt="neonquokka's room playing Sprite Fright, with the chat open beside the picture and reactions rising over it, each with its sender's name." decoding="async" loading="lazy">
-        <figcaption><b>Chat and reactions</b> while Sprite Fright plays.</figcaption>
-      </figure>
-      <figure class="shot">
-        <img src="img/showtime.webp" width="1000" height="676" alt="The host has set a start: the stage counts down 4:59 to Sprite.Fright.2021.1080p, and the Stations panel shows the Showtime controls." decoding="async" loading="lazy">
-        <figcaption><b>Showtime,</b> a countdown the whole room shares.</figcaption>
-      </figure>
-      <figure class="shot">
-        <img src="img/live-rooms.webp" width="1000" height="676" alt="The home screen with a live room: Sprite.Fright.2021.1080p in neonquokka's room, 3 Stations, with Jump in and Remove from home." decoding="async" loading="lazy">
-        <figcaption><b>The home screen</b> shows the rooms that are live now.</figcaption>
-      </figure>
-      <figure class="shot">
-        <img src="img/magnet.webp" width="1000" height="676" alt="The stage for a film from a magnet link, Sprite.Fright.2021.1080p.mkv: Download with BitTorrent, Stream from stations and I have a copy." decoding="async" loading="lazy">
-        <figcaption><b>A magnet link</b> waits until you choose how to get the film.</figcaption>
-      </figure>
-      <figure class="shot">
-        <img src="img/monitor.webp" width="1000" height="676" alt="The Monitor for neonquokka's room: time together, 3 of 3 Stations, the sync spread, reactions, the sync chart and a card for each Station." decoding="async" loading="lazy">
-        <figcaption><b>The Monitor</b> shows the whole watch.</figcaption>
-      </figure>
-      <figure class="shot">
-        <img src="img/share.webp" width="1000" height="698" alt="The Share picture sheet: a square of the watch of Sprite Fright with what, who and how close the screens stayed, and checkboxes for what to include." decoding="async" loading="lazy">
-        <figcaption><b>A share picture</b> of the watch, to post wherever you like.</figcaption>
-      </figure>
-    </div>
-  </div>
-</section>
-
-<section class="band" id="download" aria-labelledby="dl-h">
-  <div class="wrap">
-    <div class="head">
-      <p class="label">Get Tandem</p>
-      <h2 id="dl-h">Download Tandem 0.6.0 for Linux, Windows and Android</h2>
-      <p>The app is the same everywhere, and everyone in a room should use the same release. FFmpeg is included in every package.</p>
-      <p>Public downloads open soon.</p>
-    </div>
-    <!-- On the day the repository is public, each "Opening soon" becomes a link to its file on
-         https://github.com/NitheeshWorks/tandem/releases/download/v0.6.0/ (Tandem_0.6.0_amd64.AppImage,
-         Tandem_0.6.0_amd64.deb, Tandem_0.6.0_x64-setup.exe, Tandem_0.6.0_arm64.apk) as <a class="file" href="...">,
-         and the .get block gets a button to https://github.com/NitheeshWorks/tandem/releases/tag/v0.6.0 and the
-         SHA256SUMS.txt line back (see git history of docs/site/index.html, commit 0fa00c7). -->
-    <ul class="plats" id="encore">
-      <li class="frame"><h3>Linux, any distribution</h3><p class="file">Tandem_0.6.0_amd64.AppImage</p><span class="chip line">Opening soon</span><p>It is self-contained: make it executable and run it.</p></li>
-      <li class="frame"><h3>Debian and Ubuntu</h3><p class="file">Tandem_0.6.0_amd64.deb</p><span class="chip line">Opening soon</span><p>This is the smaller download. It uses your system's WebKit and GStreamer.</p></li>
-      <li class="frame"><h3>Windows 10 and 11</h3><p class="file">Tandem_0.6.0_x64-setup.exe</p><span class="chip line">Opening soon</span><p>The installer is not code-signed yet, so SmartScreen will warn you before it runs.</p></li>
-      <li class="frame"><h3>Android phones, tablets and TV</h3><p class="file">Tandem_0.6.0_arm64.apk</p><span class="chip line">Opening soon</span><p>It needs Android 7 or later on 64-bit ARM. Allow installs from this source when Android asks.</p></li>
-    </ul>
-    <div class="get">
-      <p>Updates are signed, and the app offers them on the home screen, never during a film.</p>
-    </div>
-  </div>
-</section>
-
-<section id="compare" aria-labelledby="cmp-h">
-  <div class="wrap">
-    <div class="head">
-      <p class="label">Comparison</p>
-      <h2 id="cmp-h">How Tandem compares with other ways to watch together</h2>
-      <p>Tandem is for videos you already have as files. If you want to watch Netflix or another streaming service together, Teleparty is the tool for that, and if you want to talk while you watch or share anything on your screen, Discord does more. The comparison says where each one is better, with sources.</p>
-    </div>
-    <ul class="links">
-      <li><a class="frame" href="compare/"><b>Tandem compared with Teleparty, Syncplay, Discord, Plex and Jellyfin</b><span>A table of what each plays, who needs the film, accounts, servers, cost and sync, and where the others do better.</span></a></li>
-      <li><a class="frame" href="alternatives/teleparty/"><b>A free Teleparty alternative for your own videos</b><span>What changes when the film is a file you have rather than a streaming service.</span></a></li>
-      <li><a class="frame" href="alternatives/syncplay/"><b>A Syncplay alternative that needs no server</b><span>Watch in sync when only one person has the file, with no Syncplay server to pick or run.</span></a></li>
-      <li><a class="frame" href="how-to/watch-a-movie-together-online/"><b>How to watch a movie together online</b><span>The steps from opening a room to pressing play, with pictures of each one.</span></a></li>
-    </ul>
-  </div>
-</section>
-
-<section class="band" id="faq" aria-labelledby="faq-h">
-  <div class="wrap">
-    <div class="head">
-      <p class="label">Questions</p>
-      <h2 id="faq-h">Questions people ask about Tandem</h2>
-    </div>
-    <div class="faq">
-      <details class="frame">
-        <summary>Is Tandem free?</summary>
-        <div class="a"><p>Yes. Tandem is free to download and use. There are no ads, no paid tier and no account.</p></div>
-      </details>
-      <details class="frame">
-        <summary>Do I need an account?</summary>
-        <div class="a"><p>No. There is no sign-up and no login. You choose a name for your Station, and that is all.</p></div>
-      </details>
-      <details class="frame">
-        <summary>Can friends without the app join?</summary>
-        <div class="a"><p>Today everyone in the room needs the Tandem app, on Linux, Windows or Android. Watching from an invite in a browser, with nothing to install, is paused for now and coming back soon.</p></div>
-      </details>
-      <details class="frame">
-        <summary>Which devices does Tandem run on?</summary>
-        <div class="a"><p>Linux, Windows 10 and 11, and Android 7 or later on 64-bit ARM phones, tablets and Android TV.</p><p>There is no Mac release yet. A Mac app for Apple silicon is ready and comes with the next release. There is no iPhone or iPad version.</p></div>
-      </details>
-      <details class="frame">
-        <summary>Does everyone need a copy of the film?</summary>
-        <div class="a"><p>No. One copy in the room is enough, because the others can stream it from the Stations that have it. Anyone can also bring their own copy, and Tandem checks that it is the same file.</p></div>
-      </details>
-      <details class="frame">
-        <summary>Does my film go through a server?</summary>
-        <div class="a"><p>Not in a form anyone can read. Stations connect to each other directly whenever they can, over QUIC, which is encrypted and authenticated, and each Station proves it holds the room's secret before it is let in.</p><p>When two Stations cannot reach each other directly, for example on a strict network, their traffic goes through a <strong>public relay</strong>. The traffic stays encrypted between the Stations, so the relay passes it on without being able to read it. The relays and the discovery service do see your IP address.</p></div>
-      </details>
-      <details class="frame">
-        <summary>What does the join page see?</summary>
-        <div class="a"><p>An invite looks like <code>https://tandem.nitheesh.me/join/#tandem1…</code>. The room's ticket comes after the <code>#</code>, and a browser never sends that part to a server, so the invite never reaches a web server. The page offers to open the room in the app with <strong>Open in the app</strong>.</p><p>In Settings you can put invites on a join page of your own instead. The ticket still comes after the <code>#</code>, so your page's server never sees it either.</p></div>
-      </details>
-      <details class="frame">
-        <summary>Who can join my room?</summary>
-        <div class="a"><p>Anyone who has the invite can join, so treat it like a password and share it only with the people you are watching with. Opening a link in the app always asks before joining.</p><p>Everyone in the room is trusted: they can control playback unless the host keeps the controls, and they can fetch any file the room shares.</p></div>
-      </details>
-      <details class="frame">
-        <summary>How many people can watch together?</summary>
-        <div class="a"><p>Every Station connects to every other one, so Tandem suits a group of friends rather than hundreds of people. For a bigger screening, new people can join as observers, who watch along without slowing the room.</p></div>
-      </details>
-      <details class="frame">
-        <summary>Where is a friend group kept?</summary>
-        <div class="a"><p>Only on its members' devices. Nothing about a group is kept on a server: its schedule, its votes and what you watched together travel between the members themselves.</p></div>
-      </details>
-      <details class="frame">
-        <summary>What else does Tandem connect to?</summary>
-        <div class="a"><p><strong>Updates:</strong> Tandem asks GitHub for a small version file when it starts and every six hours. Computers install only updates signed with the release key, and Android only accepts an APK signed with the app's key.</p><p><strong>Magnet links:</strong> BitTorrent starts only when you choose it for a film, and it shows your IP address to the other people sharing that file. Someone in the room who is getting the film can pass it on to you instead.</p><p><strong>The home screen:</strong> while you look at it, Tandem checks on the rooms you were in, and a Station answers only someone who holds that room's ticket.</p><p><strong>Cover art:</strong> Tandem looks up posters on TMDB only if you add your own key. Your place on the Monitor's globe stays off until you choose to show it.</p></div>
-      </details>
-      <details class="frame">
-        <summary>What may I watch?</summary>
-        <div class="a"><p>Please share and download only media you have the right to.</p></div>
-      </details>
-    </div>
-  </div>
-</section>
-
-<div class="rail" aria-hidden="true">
-  <span lang="en">Tandem</span><span lang="ja">タンデム</span><span lang="ru">Тандем</span><span lang="hi">टैंडम</span><span lang="ar">تاندم</span><span lang="ko">탠덤</span><span lang="el">Τάντεμ</span><span lang="bn">ট্যান্ডেম</span><span lang="he">טנדם</span><span lang="zh-CN">串联</span><span lang="es">Tándem</span><span lang="ka">ტანდემი</span><span lang="ta">டேண்டம்</span><span lang="th">แทนเดม</span><span lang="hy">Տանդեմ</span><span lang="te">టాండెమ్</span><span lang="am">ታንደም</span><span lang="ml">ടാൻഡം</span>
+<div id="final" aria-hidden="true">
+  <p class="name"><span class="wd"><span class="ch">T</span><span class="ch">a</span><span class="ch">n</span><span class="ch">d</span><span class="ch">e</span><span class="ch">m</span></span></p>
+  <p class="line">Watch films together with friends, each on your own screen, in sync.</p>
+  <p class="line">Peer to peer, with no account. If the host leaves, the room plays on.</p>
+  <p class="plat"><span>Linux</span> <i>/</i> <span>Windows</span> <i>/</i> <span>Android</span> <i>/</i> <span>Android TV</span></p>
+  <p class="soon"><span>Opening soon</span></p>
 </div>
-
-<section id="credits" aria-labelledby="cr-h">
-  <div class="wrap">
-    <div class="head">
-      <p class="label">Credits</p>
-      <h2 id="cr-h">The films, frames and type on this page</h2>
-    </div>
-    <div class="credits">
-      <div class="frame"><h3>Blender Studio's open movies</h3><p>The pictures show short excerpts of <a href="https://studio.blender.org/films/sprite-fright/">Sprite Fright</a> (2021), (CC) Blender Foundation | studio.blender.org, Creative Commons Attribution; <a href="https://studio.blender.org/films/singularity/">Singularity</a> (2026), (CC) Blender Foundation | studio.blender.org, CC BY 4.0; <a href="https://mango.blender.org/">Tears of Steel</a> (2012), (CC) Blender Foundation | mango.blender.org, CC BY 3.0; and <a href="https://peach.blender.org/">Big Buck Bunny</a> (2008), (c) copyright 2008 Blender Foundation | peach.blender.org, CC BY 3.0, in the stereoscopic version by Janus B. Kristensen, CC BY 3.0. A group card names <a href="https://studio.blender.org/films/spring/">Spring</a> (2019), (CC) Blender Foundation | studio.blender.org, CC BY 4.0.</p></div>
-      <div class="frame"><h3>Other pictures</h3><p>The 360 video is of the Artemis II launch, by NASA. The device frames are drawn with <a href="https://github.com/picturepan2/devices.css">devices.css</a> by Yan Zhu. The station names are made-up handles. Please share and download only media you have the right to.</p></div>
-      <div class="frame"><h3>Type</h3><p>The page uses the app's own fonts: Iosevka and JetBrains Mono as Nerd Fonts, Inter, and Noto Sans. Their notices are in <a href="fonts/LICENSES.txt">the font notes</a>.</p></div>
-    </div>
-  </div>
-</section>
-
+<div id="rail" role="slider" tabindex="0" aria-label="Where you are in the piece" aria-orientation="vertical" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="signal, 0 per cent"></div>
+<button id="sound" type="button" aria-pressed="false" hidden><svg class="wave" viewBox="0 0 44 16" width="44" height="16" aria-hidden="true" focusable="false"><path class="w1" d="M0 8H44"/><path class="w2" d="M0 8H44"/></svg><span class="say">Sound off</span></button>
+<button id="words" type="button" aria-expanded="false" aria-controls="read">Words</button>
+<main id="read" aria-labelledby="read-title">
+  <button id="read-close" type="button">Back to the picture</button>
+  <h1 id="read-title">Tandem</h1>
+  <p>Tandem is a free watch party app for watching videos and movies in sync with friends, each on their own screen. It works peer to peer, so there is no account to make and no server holds your files.</p>
+  <p>It runs on Linux, Windows, Android phones and tablets and Android TV. It is opening soon: there is nothing to download from this page yet.</p>
+  <h2>What this page shows</h2>
+  <p id="how">This page is a moving picture in nine parts rather than a document. Every screen in it plays the same film, the app's contour map with its cyan playhead running across, and each of eight friends is one part of the music.</p>
+  <ol>
+    <li>Signal: the room clock runs while one screen, the host's, lights up in the dark.</li>
+    <li>The invite: a pink spark leaves the host's screen and travels screen to screen, peer to peer, with no server in the middle. Each screen it touches joins.</li>
+    <li>Arrivals: seven friends fly in from far away, each with their own local time in their own script, in Dubai, Tokyo, São Paulo, Seoul, London, Reykjavík and Mumbai. Each lands a little late, and shows by how much.</li>
+    <li>One has the film: only the host's screen plays; the others are empty frames. Pieces of the picture stream out from it until every screen is filled, because one copy in the room is enough.</li>
+    <li>Apart: every screen plays, each at its own moment, so the picture breaks at every edge and the music is out of time.</li>
+    <li>Together: the screens fly into one wall and slide into phase, and the music locks on the downbeat.</li>
+    <li>Waiting: one friend is buffering. The whole wall pauses with them, the music holds one chord, and everyone starts again together.</li>
+    <li>The host leaves: their screen comes off the wall and their part of the music stops, and the film plays on for everyone else.</li>
+    <li>One frame: the wall becomes Tandem's mark, the Wall.</li>
+  </ol>
+  <p>Scroll, swipe, drag the line on the right edge, or use the arrow keys, Page Up and Page Down, Home and End, or the keys 1 to 9 to move through it. Press and hold the picture, or hold the space bar, to pull the room into sync. The pointer is a late friend: the screens it passes slip out of time and fall back into step behind it, with a note on the beat. A click sends a signal across the wall. The sound starts after your first press, and M turns it on or off. W opens and closes these words.</p>
+  <h2>Questions</h2>
+      <h3>Is Tandem free?</h3>
+      <p>Yes. Tandem is free to download and use. There are no ads, no paid tier and no account.</p>
+      <h3>Do I need an account?</h3>
+      <p>No. There is no sign-up and no login. You choose a name for your Station, and that is all.</p>
+      <h3>Can friends without the app join?</h3>
+      <p>Today everyone in the room needs the Tandem app, on Linux, Windows or Android. Watching from an invite in a browser, with nothing to install, is paused for now and coming back soon.</p>
+      <h3>Which devices does Tandem run on?</h3>
+      <p>Linux, Windows 10 and 11, and Android 7 or later on 64-bit ARM phones, tablets and Android TV. There is no Mac release yet. A Mac app for Apple silicon is ready and comes with the next release. There is no iPhone or iPad version.</p>
+      <h3>Does everyone need a copy of the film?</h3>
+      <p>No. One copy in the room is enough, because the others can stream it from the Stations that have it. Anyone can also bring their own copy, and Tandem checks that it is the same file.</p>
+      <h3>Does my film go through a server?</h3>
+      <p>Not in a form anyone can read. Stations connect to each other directly whenever they can, over QUIC, which is encrypted and authenticated, and each Station proves it holds the room&#x27;s secret before it is let in. When two Stations cannot reach each other directly, for example on a strict network, their traffic goes through a public relay. The traffic stays encrypted between the Stations, so the relay passes it on without being able to read it. The relays and the discovery service do see your IP address.</p>
+      <h3>What does the join page see?</h3>
+      <p>An invite looks like https://tandem.nitheesh.me/join/#tandem1…. The room&#x27;s ticket comes after the #, and a browser never sends that part to a server, so the invite never reaches a web server. The page offers to open the room in the app with Open in the app. In Settings you can put invites on a join page of your own instead. The ticket still comes after the #, so your page&#x27;s server never sees it either.</p>
+      <h3>Who can join my room?</h3>
+      <p>Anyone who has the invite can join, so treat it like a password and share it only with the people you are watching with. Opening a link in the app always asks before joining. Everyone in the room is trusted: they can control playback unless the host keeps the controls, and they can fetch any file the room shares.</p>
+      <h3>How many people can watch together?</h3>
+      <p>Every Station connects to every other one, so Tandem suits a group of friends rather than hundreds of people. For a bigger screening, new people can join as observers, who watch along without slowing the room.</p>
+      <h3>Where is a friend group kept?</h3>
+      <p>Only on its members&#x27; devices. Nothing about a group is kept on a server: its schedule, its votes and what you watched together travel between the members themselves.</p>
+      <h3>What else does Tandem connect to?</h3>
+      <p>Updates: Tandem asks GitHub for a small version file when it starts and every six hours. Computers install only updates signed with the release key, and Android only accepts an APK signed with the app&#x27;s key. Magnet links: BitTorrent starts only when you choose it for a film, and it shows your IP address to the other people sharing that file. Someone in the room who is getting the film can pass it on to you instead. The home screen: while you look at it, Tandem checks on the rooms you were in, and a Station answers only someone who holds that room&#x27;s ticket. Cover art: Tandem looks up posters on TMDB only if you add your own key. Your place on the Monitor&#x27;s globe stays off until you choose to show it.</p>
+      <h3>What may I watch?</h3>
+      <p>Please share and download only media you have the right to.</p>
+  <p class="credits">Every name here is made up. The picture is drawn live in your browser; the music was made for this page and is mixed live as you move.</p>
 </main>
-
-<footer>
-  <div class="wrap">
-    <a class="brand" href="#top" aria-label="Tandem, back to the top"><svg class="mark" viewBox="0 0 60 60" width="32" height="32" aria-hidden="true" focusable="false"><path d="M0,0L60,0L60,60L0,60Z" fill="var(--bg)"/><path d="M0,0L33.75,0L35.625,1.875L35.625,7.5L1.875,7.5L0,5.625Z" fill="color-mix(in srgb, var(--muted) 38%, var(--bg))"/><path d="M37.5,0L58.125,0L60,1.875L60,7.5L39.375,7.5L37.5,5.625Z" fill="color-mix(in srgb, var(--muted) 38%, var(--bg))"/><path d="M0,9.375L5.625,9.375L7.5,11.25L7.5,60L1.875,60L0,58.125Z" fill="color-mix(in srgb, var(--muted) 38%, var(--bg))"/><path d="M50.625,9.375L58.125,9.375L60,11.25L60,60L52.5,60L50.625,58.125Z" fill="color-mix(in srgb, var(--muted) 38%, var(--bg))"/><path d="M9.375,18.75L20.625,18.75L22.5,20.625L22.5,28.125L11.25,28.125L9.375,26.25Z" fill="color-mix(in srgb, var(--muted) 38%, var(--bg))"/><path d="M9.375,30L20.625,30L22.5,31.875L22.5,50.625L11.25,50.625L9.375,48.75Z" fill="color-mix(in srgb, var(--muted) 38%, var(--bg))"/><path d="M35.625,18.75L46.875,18.75L48.75,20.625L48.75,41.25L37.5,41.25L35.625,39.375Z" fill="color-mix(in srgb, var(--muted) 38%, var(--bg))"/><path d="M35.625,43.125L37.5,43.125L39.375,45L39.375,50.625L37.5,50.625L35.625,48.75Z" fill="color-mix(in srgb, var(--muted) 38%, var(--bg))"/><path d="M9.375,52.5L46.875,52.5L48.75,54.375L48.75,60L11.25,60L9.375,58.125Z" fill="color-mix(in srgb, var(--muted) 38%, var(--bg))"/><path d="M9.375,9.375L18.75,9.375L20.625,11.25L20.625,16.875L11.25,16.875L9.375,15Z" fill="var(--muted)"/><path d="M22.5,9.375L27.5,9.375L27.5,16.875L24.375,16.875L22.5,15Z" fill="var(--muted)"/><path d="M30.625,9.375L37.5,9.375L39.375,11.25L39.375,16.875L30.625,16.875Z" fill="var(--muted)"/><path d="M28.125,9.375L30,9.375L30,16.875L28.125,16.875Z" fill="var(--accent)"/><path d="M41.25,9.375L46.875,9.375L48.75,11.25L48.75,16.875L43.125,16.875L41.25,15Z" fill="var(--muted)"/><path d="M24.375,18.75L27.5,18.75L27.5,35.625L26.25,35.625L24.375,33.75Z" fill="var(--muted)"/><path d="M30.625,18.75L31.875,18.75L33.75,20.625L33.75,35.625L30.625,35.625Z" fill="var(--muted)"/><path d="M28.125,18.75L30,18.75L30,35.625L28.125,35.625Z" fill="var(--accent)"/><path d="M24.375,37.5L27.5,37.5L27.5,50.625L26.25,50.625L24.375,48.75Z" fill="var(--muted)"/><path d="M30.625,37.5L31.875,37.5L33.75,39.375L33.75,50.625L30.625,50.625Z" fill="var(--muted)"/><path d="M28.125,37.5L30,37.5L30,50.625L28.125,50.625Z" fill="var(--accent)"/><path d="M41.25,43.125L41.788,43.125L41.788,49.288L41.25,48.75Z" fill="var(--danger)"/><path d="M44.913,43.125L46.875,43.125L48.75,45L48.75,50.625L44.913,50.625Z" fill="var(--danger)"/><path d="M42.413,43.125L44.288,43.125L44.288,50.625L43.125,50.625L42.413,49.913Z" fill="var(--accent)"/></svg>
-      <span aria-hidden="true">TANDEM</span></a>
-    <nav aria-label="Footer">
-      <ul>
-        <li><a href="compare/">Tandem compared</a></li>
-        <li><a href="alternatives/teleparty/">Teleparty alternative</a></li>
-        <li><a href="alternatives/syncplay/">Syncplay alternative</a></li>
-        <li><a href="how-to/watch-a-movie-together-online/">How to watch a movie together</a></li>
-      </ul>
-    </nav>
-    <p>This page has no trackers and loads nothing from other sites.</p>
-  </div>
-</footer>
-
-<script src="site.js" defer></script>
+<noscript><style>#read{position:static!important;clip:auto!important;width:auto!important;height:auto!important}#final,#rail,#words{display:none}</style></noscript>
 </body>
 </html>

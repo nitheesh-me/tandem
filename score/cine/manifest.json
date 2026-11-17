@@ -1,0 +1,80 @@
+{
+ "makeup": 0.95,
+ "outroGain": 3.88,
+ "name": "cine",
+ "title": "Cinematic synth score",
+ "description": "90 BPM in D minor: taiko, a low ostinato, a ticking clock, string arpeggio, string pad, big hits, a flute call and drums, phasing into one pulse",
+ "bpm": 90,
+ "loop": 10.666666666666666,
+ "loopSamples": 512000,
+ "sampleRate": 48000,
+ "parts": [
+  {
+   "handle": "neonquokka",
+   "role": "ostinato",
+   "file": "part-0.wav"
+  },
+  {
+   "handle": "velvetkoi",
+   "role": "taiko",
+   "file": "part-1.wav"
+  },
+  {
+   "handle": "tofu.rocket",
+   "role": "clock",
+   "file": "part-2.wav"
+  },
+  {
+   "handle": "fizzwhale",
+   "role": "strings",
+   "file": "part-3.wav"
+  },
+  {
+   "handle": "mintylynx",
+   "role": "string pad",
+   "file": "part-4.wav"
+  },
+  {
+   "handle": "cosmic.crumpet",
+   "role": "hits",
+   "file": "part-5.wav"
+  },
+  {
+   "handle": "moonmilk.07",
+   "role": "flute",
+   "file": "part-6.wav"
+  },
+  {
+   "handle": "orbitbeans",
+   "role": "drums",
+   "file": "part-7.wav"
+  }
+ ],
+ "shots": {
+  "bed": "bed.wav",
+  "impact": "impact.wav",
+  "cadence": "cadence.wav",
+  "click": "click.wav",
+  "hold": "hold.wav",
+  "tension": "tension.wav",
+  "riser": "riser.wav",
+  "outro": "outro.wav",
+  "ident": "ident.wav",
+  "notes": [
+   "note-0.wav",
+   "note-1.wav",
+   "note-2.wav",
+   "note-3.wav",
+   "note-4.wav"
+  ],
+  "arrive": {
+   "velvetkoi": "arrive-1.wav",
+   "tofu.rocket": "arrive-2.wav",
+   "fizzwhale": "arrive-3.wav",
+   "mintylynx": "arrive-4.wav",
+   "cosmic.crumpet": "arrive-5.wav",
+   "moonmilk.07": "arrive-6.wav",
+   "orbitbeans": "arrive-7.wav"
+  }
+ }
+}
