@@ -122,7 +122,8 @@ export function buildWall(target = 1200, seed = 7) {
   const jraw = new Float32Array(N0); let jmax = 1;
   for (let i = 0; i < N0; i++) { const q = sp(i); let j = 1e9; hops.forEach((hi, h) => { j = Math.min(j, h + dist3(q, sp(hi)) / 60); }); jraw[i] = j; jmax = Math.max(jmax, j); }
   for (let i = 0; i < N0; i++) {
-    const q = sp(i); let jt = jraw[i] / jmax;
+    // the room's screens join in a ripple out from the host's screen as the invite passes through on its way out
+    const q = sp(i); let jt = Math.min(1, dist3(q, hostP) / far) * 0.85 + rand() * 0.08;
     let ft = Math.min(1, dist3(q, hostP) / far) * 0.82 + rand() * 0.15;
     const k = peers.indexOf(i);
     if (k === 0) { jt = 0; ft = 0; } else if (k > 0) ft = 0.12 + k * 0.1;

@@ -2,10 +2,6 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<script>
-  // A pass made on the old show page (tandem.nitheesh.me/#show=...&invite=...) still opens that page, kept as show.html.
-  try { const h = new URLSearchParams(location.hash.slice(1)); if (['show', 'invite', 'date', 'time', 'seat', 'venue', 'trailer'].some((k) => h.has(k))) location.replace('show.html' + location.hash); } catch {}
-</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="referrer" content="no-referrer">
 <title>Tandem: watch videos in sync with friends, a free watch party app</title>
@@ -29,7 +25,7 @@
 <meta name="twitter:description" content="Watch videos and movies in sync with friends, each on their own screen. Free, peer to peer, with no account, on Linux, Windows, Android and Android TV.">
 <meta name="twitter:image" content="https://tandem.nitheesh.me/img/social.jpg">
 <meta name="twitter:image:alt" content="The Tandem wordmark beside one watch party playing Sprite Fright on a laptop, a TV and a phone at the same moment.">
-<link rel="icon" href="img/icon.svg" type="image/svg+xml">
+<link rel="icon" href="../img/icon.svg" type="image/svg+xml">
 <script type="application/ld+json">
 {
  "@context": "https://schema.org",
@@ -173,17 +169,19 @@
  ]
 }
 </script>
-<link rel="preload" href="fonts/site-mono-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="fonts/site-mono-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../fonts/site-mono-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../fonts/site-mono-700.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="art.css">
 <script>addEventListener('error', (e) => { if (e instanceof ErrorEvent && !document.documentElement.classList.contains('live')) document.documentElement.classList.add('nogl'); }, true);</script>
 <script type="module" src="js/main.js"></script>
 </head>
 <body>
-<a class="skip" href="#read" id="skip">Read about Tandem as words</a>
+<a class="skip" href="#read" id="skip">Read the liner notes</a>
 <div id="stage" tabindex="0" aria-roledescription="moving picture" aria-label="Tandem, a moving picture" aria-describedby="how">
   <img class="still" src="still.webp" alt="" width="1600" height="900">
   <canvas id="gl" aria-hidden="true"></canvas>
+  <video id="film" aria-hidden="true" muted playsinline preload="auto" disablepictureinpicture disableremoteplayback></video>
+  <img id="filmstill" alt="" aria-hidden="true" hidden>
   <canvas id="hud" aria-hidden="true"></canvas>
 </div>
 <div id="final" aria-hidden="true">
@@ -195,7 +193,7 @@
 </div>
 <div id="rail" role="slider" tabindex="0" aria-label="Where you are in the piece" aria-orientation="vertical" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="signal, 0 per cent"></div>
 <button id="sound" type="button" aria-pressed="false" hidden><svg class="wave" viewBox="0 0 44 16" width="44" height="16" aria-hidden="true" focusable="false"><path class="w1" d="M0 8H44"/><path class="w2" d="M0 8H44"/></svg><span class="say">Sound off</span></button>
-<button id="words" type="button" aria-expanded="false" aria-controls="read">Words</button>
+<button id="words" type="button" aria-expanded="false" aria-controls="read" aria-keyshortcuts="N">Liner notes</button>
 <main id="read" aria-labelledby="read-title">
   <button id="read-close" type="button">Back to the picture</button>
   <h1 id="read-title">Tandem</h1>
@@ -204,17 +202,18 @@
   <h2>What this page shows</h2>
   <p id="how">This page is a moving picture in nine parts rather than a document. Every screen in it plays the same film, the app's contour map with its cyan playhead running across, and each of eight friends is one part of the music.</p>
   <ol>
-    <li>Signal: the room clock runs while one screen, the host's, lights up in the dark.</li>
-    <li>The invite: a pink spark leaves the host's screen and travels screen to screen, peer to peer, with no server in the middle. Each screen it touches joins.</li>
-    <li>Arrivals: seven friends fly in from far away, each with their own local time in their own script, in Dubai, Tokyo, São Paulo, Seoul, London, Reykjavík and Mumbai. Each lands a little late, and shows by how much.</li>
+    <li>The opening: Tandem's tune, four notes on a kalimba, plays twice at once. The second voice starts late and catches up a little each time, until both land on the last note together, and the mark breaks apart into a dark room.</li>
+    <li>Signal: one screen, the host's, lights up in the dark, and the film's clock starts: the place in the film that everyone in the room will share.</li>
+    <li>The invite: pink sparks leave the host's screen, one for each friend, and fly out of the picture toward Dubai, Tokyo, São Paulo, Seoul, London, Reykjavík and Mumbai, peer to peer, with no server in the middle. Each spark plays the next note of the tune.</li>
+    <li>Arrivals: the seven friends fly back in from those same directions, each with their own local time in their own script. Each lands a little late, shows by how much, and answers with the tune on an instrument from home.</li>
     <li>One has the film: only the host's screen plays; the others are empty frames. Pieces of the picture stream out from it until every screen is filled, because one copy in the room is enough.</li>
-    <li>Apart: every screen plays, each at its own moment, so the picture breaks at every edge and the music is out of time.</li>
-    <li>Together: the screens fly into one wall and slide into phase, and the music locks on the downbeat.</li>
-    <li>Waiting: one friend is buffering. The whole wall pauses with them, the music holds one chord, and everyone starts again together.</li>
-    <li>The host leaves: their screen comes off the wall and their part of the music stops, and the film plays on for everyone else.</li>
-    <li>One frame: the wall becomes Tandem's mark, the Wall.</li>
+    <li>Apart: every screen plays, each at its own moment, so the picture breaks at every edge and the music is out of time, with the tune chasing itself a beat behind.</li>
+    <li>Together: the screens fly into one wall and slide into phase, and the music locks on the downbeat, the tune in unison.</li>
+    <li>Waiting: one friend is buffering. The whole wall pauses with them, the music holds on the tune's third note, one step short of home, and everyone starts again together.</li>
+    <li>The host leaves: their screen comes off the wall and their part of the music stops, and the film plays on for everyone else. Only the echo of the tune is left.</li>
+    <li>One frame: the wall becomes Tandem's mark, the Wall, and breathes with a quiet ending, where the tune comes back slowly, in a major key. Left alone for a while, the room starts again.</li>
   </ol>
-  <p>Scroll, swipe, drag the line on the right edge, or use the arrow keys, Page Up and Page Down, Home and End, or the keys 1 to 9 to move through it. Press and hold the picture, or hold the space bar, to pull the room into sync. The pointer is a late friend: the screens it passes slip out of time and fall back into step behind it, with a note on the beat. A click sends a signal across the wall. The sound starts after your first press, and M turns it on or off. W opens and closes these words.</p>
+  <p>Scroll, swipe, drag the line on the right edge, or use the arrow keys, Page Up and Page Down, Home and End, or the keys 1 to 9 to move through it. Every part of it has its own sound, on the beat. Press and hold the picture, or hold the space bar, to pull the room into sync. The pointer is a late friend: the screens it passes slip out of time and fall back into step behind it. The music follows you: left and right, higher and lower, and a little echo when you move fast. A click sends a signal across the wall. The sound starts after your first press, and M turns it on or off. N opens and closes these liner notes.</p>
   <h2>Questions</h2>
       <h3>Is Tandem free?</h3>
       <p>Yes. Tandem is free to download and use. There are no ads, no paid tier and no account.</p>

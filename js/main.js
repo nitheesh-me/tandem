@@ -6,10 +6,11 @@
 // Scroll, drag, use the arrow keys or 1 to 9 to move along; press and hold to pull the room into sync. The
 // pointer is a late station: the screens it passes slip out of time and pull back into phase behind it.
 // Written for this site: WebGL2 and WebAudio with no libraries.
-import { buildWall, tileCentre, HANDLES, STRIDE } from './wall.js';
+import { buildWall, tileCentre, HANDLES, STRIDE, ARRIVE_DIR } from './wall.js';
 import * as S from './shaders.js';
 import { program, target, pair, fullscreen, perspective, lookAt, mul, project } from './gl.js';
 import { Sound, loadScore, progress } from './audio.js';
+import { Film, LEAD as FILM_LEAD } from './film.js';
 
 const $ = (s) => document.querySelector(s);
 const root = document.documentElement;
@@ -130,8 +131,32 @@ const st = {
   flash: 0, pings: [], intro: reduced ? 0 : 1, wait: 0, waitT: 0, buffer: 0, hopsDone: 0, arrived: 0,
   // the opening: 'wait' (dark, the loading line, then the prompt), 'play' (the ident), 'done'
   ident: reduced ? 'done' : 'wait', identAsked: -1, identT: 0, loadShown: 0,
+  lastAct: 0, pspeed: 0, endT: -1, bridgeT: 0, bridgeHit: 2.5, shock: -1, sparks: 0,
 };
-const IDENT = 4.2; // seconds: the playhead draws (0 to 0.6), tan (0.6), the mark lights, DEM (1.4), it breaks apart (2.4 on)
+const RESTART = 40; // seconds at the end, untouched, before the room starts again
+// the invite's sparks: when (in the invite's progress) the one for friend k leaves, and how long it takes to go
+const sparkAt = (k) => 0.08 + (k - 1) * 0.105;
+const SPARK = 0.22;
+// The opening follows its sound, the kalimba canon (score/*/ident): the hook D5 F5 E5 A5 in four passes at 132
+// BPM, the late voice a dotted 8th behind, then a 16th and a half, a 32nd, then together; the last note lands at
+// LAND, and the mark breaks into the room at 0.57 of IDENT.
+const IDENT = 6.0;
+const S16 = 60 / 132 / 4, PASS0 = 0.2, PASS = 6 * S16, LAGS = [3, 1.5, 0.75, 0], HOOKT = [0, 1, 2, 4];
+const LAND = PASS0 + 3 * PASS + 4 * S16; // 2.70 s
+// the two marks, one per voice: how far apart (world units) on each pass, in proportion to the late voice's lag
+const identSplit = (t) => {
+  if (t < PASS0 || t >= PASS0 + 3 * PASS) return 0;
+  return 22 * LAGS[Math.min(3, Math.floor((t - PASS0) / PASS))] / 3;
+};
+// how freshly a voice has just played a note (1 on the note, fading in a tenth of a second): the marks pulse with them
+const notePulse = (t, late) => {
+  let v = 0;
+  for (let r = 0; r < 4; r++) for (const b of HOOKT) {
+    const on = PASS0 + r * PASS + (b + (late ? LAGS[r] : 0)) * S16;
+    if (t >= on) v = Math.max(v, Math.exp(-(t - on) / 0.1));
+  }
+  return v;
+};
 // The score starts loading as soon as the page opens, so the opening is ready, even on a slow network, by the time
 // someone presses.
 if (!reduced) loadScore(SCORE).catch(() => {});
@@ -169,7 +194,7 @@ function identActs(A, q) {
   A.out = 1 - ss(0.62, 0.92, q); A.fill = 1 - ss(0.7, 0.98, q); A.join = 1 - ss(0.8, 1, q);
   A.mesh = 0; A.words = 0; A.hostGone = 0; A.newHost = 0; A.desync = 0; A.together = 1;
   A.arrive = A.arrive.map((v, k) => (k === 0 ? 1 : 1 - ss(0.62, 0.9, q)));
-  A.identOn = Math.min(1, Math.max(0, (q * IDENT - 0.55) / 0.85)); // 0 at 0.55 s, the dot (0.97) at 1.4 s
+  A.identOn = Math.min(1, Math.max(0, (q * IDENT - PASS0) / ((LAND - PASS0) / 0.97))); // from the first note; the dot (0.97) on the landing
   A.identMode = 1 - ss(0.57, 0.66, q);
   A.identBreak = brk;
   return A;
@@ -215,7 +240,7 @@ function camera(p, aspect) {
 const askIdent = () => { if (st.ident === 'wait' && st.identAsked < 0) st.identAsked = st.time; };
 const setTarget = (v) => {
   if (st.ident !== 'done') { askIdent(); return; } // the opening plays first; scrolling starts it too
-  st.target = Math.min(1, Math.max(0, v)); st.idle = 0;
+  st.target = Math.min(1, Math.max(0, v)); st.idle = 0; st.endT = -1;
   if (reduced) { st.p = st.target; requestAnimationFrame(frame); } // the calm version: a cut to the next still, no motion
 };
 const begin = () => {
@@ -258,7 +283,7 @@ addEventListener('keydown', (e) => {
   else if (k === 'ArrowUp' || k === 'ArrowLeft' || k === 'PageUp') { e.preventDefault(); setTarget(st.target - (k === 'PageUp' ? 0.1 : step)); st.started = true; }
   else if (k === 'Home') { e.preventDefault(); setTarget(0); } else if (k === 'End') { e.preventDefault(); setTarget(1); st.started = true; }
   else if (k === 'm' || k === 'M') toggleSound();
-  else if (k === 'w' || k === 'W') toggleWords();
+  else if (k === 'n' || k === 'N' || k === 'w' || k === 'W') toggleWords();
   else if (k >= '1' && k <= '9') { const a = ACTS[+k - 1], nx = ACTS[+k] ? ACTS[+k][2] : 1; setTarget(k === '1' ? 0 : a[2] + (nx - a[2]) * 0.55); st.started = true; }
 });
 addEventListener('keyup', (e) => { if (e.key === ' ' || e.key === 'Enter') st.holding = false; });
@@ -304,6 +329,7 @@ function pointerStep(dt) {
   st.vx += ((st.mx - st.smx) * k - st.vx * c) * dt; st.vy += ((st.my - st.smy) * k - st.vy * c) * dt;
   st.smx += st.vx * dt; st.smy += st.vy * dt;
   const sp = Math.hypot(st.vx * innerWidth, st.vy * innerHeight); // px per second
+  st.pspeed = st.touch ? 0 : sp / Math.hypot(innerWidth, innerHeight); // screens a second, for the sound
   st.lag += (Math.min(1, sp / 1400) - st.lag) * (1 - Math.exp(-dt * 6));
   // a note now and then as the pointer crosses the wall: by how far it travels against the screen's size (so a big
   // screen plays no more than a small one), only while moving briskly, and never over the mark at the end
@@ -348,9 +374,9 @@ function drawHud(A, u) {
     hx.globalAlpha = a * flick; hx.fillRect(lx - 1, 0, 2, h); hx.globalAlpha = a * 0.12; hx.fillRect(lx - 9, 0, 18, h);
     hx.globalAlpha = a; hx.fillStyle = '#ff2a6d'; hx.fillRect(lx - 12, h * 0.5 - 40, 3, 80);
     hx.fillStyle = '#efeaff'; hx.font = `700 ${small ? 22 : 34}px ${MONO}`; hx.textAlign = 'left'; hx.textBaseline = 'middle';
-    hx.fillText(tc(st.film), lx + 18, h * 0.5);
+    hx.fillText(`${String(Math.floor(st.film / 60)).padStart(2, '0')}:${(st.film % 60).toFixed(1).padStart(4, '0')}`, lx + 18, h * 0.5);
     hx.font = `400 ${small ? 11 : 12}px ${MONO}`; hx.fillStyle = '#9184bc';
-    hx.fillText('TANDEM', lx + 20, h * 0.5 - (small ? 26 : 34));
+    hx.fillText('THE FILM, FOR EVERYONE IN THE ROOM', lx + 20, h * 0.5 - (small ? 26 : 34));
     const blink = (Math.sin(st.time * 3.2) > -0.3) ? 1 : 0.35;
     hx.globalAlpha = a * blink; hx.fillStyle = '#00f0ff';
     hx.fillText(st.started ? 'SCROLL, OR HOLD' : (mobile ? 'PRESS AND HOLD, THEN SWIPE' : 'PRESS AND HOLD ANYWHERE'), lx + 20, h * 0.5 + (small ? 26 : 36));
@@ -364,22 +390,30 @@ function drawHud(A, u) {
     });
     hx.textBaseline = 'alphabetic'; hx.globalAlpha = 1;
   }
-  // the invite: one pink spark leaves the host's screen and hops screen to screen
-  const inv = ss(0.0, 0.08, A.join) * (1 - ss(0.95, 1, A.join));
-  if (inv > 0.01) {
-    const T = wall.hopT, J = A.join * 1.02; let hI = 0; while (hI < T.length - 2 && J > T[hI + 1]) hI++;
-    const pts = wall.hops.map((ti) => { tileCentre(D, ti, u, cpos); return toScreen(cpos[0], cpos[1], cpos[2], w, h); });
-    const f = Math.min(1, Math.max(0, (J - T[hI]) / (T[hI + 1] - T[hI])));
-    const e = f * f * (3 - 2 * f);
-    const sx = pts[hI][0] + (pts[hI + 1][0] - pts[hI][0]) * e, sy = pts[hI][1] + (pts[hI + 1][1] - pts[hI][1]) * e;
-    hx.globalAlpha = inv;
-    hx.strokeStyle = 'rgba(255,42,109,.35)'; hx.lineWidth = 1; hx.beginPath(); hx.moveTo(pts[0][0], pts[0][1]);
-    for (let i = 1; i <= hI; i++) hx.lineTo(pts[i][0], pts[i][1]);
-    hx.lineTo(sx, sy); hx.stroke();
-    // the spark: a small cut diamond and a soft glow
-    const g = hx.createRadialGradient(sx, sy, 0, sx, sy, 22); g.addColorStop(0, 'rgba(255,42,109,.55)'); g.addColorStop(1, 'rgba(255,42,109,0)');
-    hx.fillStyle = g; hx.fillRect(sx - 22, sy - 22, 44, 44);
-    hx.fillStyle = '#ffd1df'; hx.beginPath(); hx.moveTo(sx, sy - 5); hx.lineTo(sx + 4, sy); hx.lineTo(sx, sy + 5); hx.lineTo(sx - 4, sy); hx.closePath(); hx.fill();
+  // the invite: from the host's screen, one pink spark for each friend leaves the frame toward where they are
+  // (the same direction each friend flies back in from); the room's screens light in a ripple as it passes
+  if (A.join > 0.001 && A.join < 0.999 && st.ident === 'done') {
+    tileCentre(D, wall.host, u, cpos);
+    const [hx0, hy0] = toScreen(cpos[0], cpos[1], cpos[2], w, h);
+    for (let kk = 1; kk < 8; kk++) {
+      const f = (A.join - sparkAt(kk)) / SPARK; if (f <= 0) continue;
+      const d = ARRIVE_DIR[kk]; const [ex, ey] = toScreen(cpos[0] + d[0] * 600, cpos[1] + d[1] * 600, cpos[2] + d[2] * 300, w, h);
+      let dx = ex - hx0, dy = ey - hy0; const l = Math.hypot(dx, dy) || 1; dx /= l; dy /= l;
+      const reach = Math.hypot(w, h) * 0.75, e = Math.min(1, f) ** 1.6, sx = hx0 + dx * reach * e, sy = hy0 + dy * reach * e;
+      const fade = 1 - ss(1, 1.6, f);
+      if (fade <= 0.01) continue;
+      hx.globalAlpha = fade * 0.5; hx.strokeStyle = '#ff2a6d'; hx.lineWidth = 1; hx.beginPath();
+      hx.moveTo(hx0 + dx * reach * Math.max(0, e - 0.25), hy0 + dy * reach * Math.max(0, e - 0.25)); hx.lineTo(sx, sy); hx.stroke();
+      if (f < 1) {
+        hx.globalAlpha = fade; const g = hx.createRadialGradient(sx, sy, 0, sx, sy, 18); g.addColorStop(0, 'rgba(255,42,109,.6)'); g.addColorStop(1, 'rgba(255,42,109,0)');
+        hx.fillStyle = g; hx.fillRect(sx - 18, sy - 18, 36, 36);
+        hx.fillStyle = '#ffd1df'; hx.beginPath(); hx.moveTo(sx, sy - 4); hx.lineTo(sx + 3, sy); hx.lineTo(sx, sy + 4); hx.lineTo(sx - 3, sy); hx.closePath(); hx.fill();
+      }
+      // where it went: the city, at the edge of the frame, in a plain line
+      const bx = Math.max(16, Math.min(w - 120, hx0 + dx * Math.min(reach, 4000) * 0.62)), by = Math.max(28, Math.min(h - 40, hy0 + dy * reach * 0.62));
+      hx.globalAlpha = ss(0.6, 1, f) * fade; hx.font = `400 ${small ? 10 : 11}px ${MONO}`; hx.fillStyle = '#ff2a6d';
+      hx.fillText(`INVITE TO ${PLACES[kk][0].toUpperCase()}`, bx, by);
+    }
     hx.globalAlpha = 1;
   }
   // the people: each name beside its screen, and what this act says about them
@@ -418,7 +452,7 @@ function drawHud(A, u) {
       else if (st.p < 0.16) { if (i === 0) { line = 'SENT AN INVITE'; col = '#ff2a6d'; } }
       else if (st.p < 0.265) {
         const [city, local] = PLACES[i]; const tm = fmt[i] ? fmt[i].format(now) : '';
-        line = `${local} ${tm}`; line2 = i === 0 ? '' : `+${Math.round(Math.abs(D[ti * STRIDE + 14]) * 1000)} ms`;
+        line = `${local} ${tm}`; line2 = i === 0 ? '' : `${Math.round(Math.abs(D[ti * STRIDE + 14]) * 1000)} ms late`;
         void city;
       } else if (st.p < 0.36) {
         if (i === 0) { line = 'HAS THE FILM'; col = '#00f0ff'; }
@@ -428,9 +462,9 @@ function drawHud(A, u) {
       } else {
         const late = Math.abs(ms) > 40;
         hx.fillStyle = late ? '#ff2a6d' : '#9184bc';
-        hx.fillText(`${ms >= 0 ? '+' : '-'}${Math.abs(ms).toFixed(1)} ms`, lx, ly + 14);
+        hx.fillText(late ? `${Math.round(Math.abs(ms))} ms ${ms >= 0 ? 'behind' : 'ahead'}` : `${Math.abs(ms).toFixed(1)} ms`, lx, ly + 14);
         hx.fillStyle = late ? '#ff2a6d' : '#00f0ff';
-        hx.fillText(late ? 'CATCHING UP' : 'IN SYNC', lx + 82, ly + 14);
+        hx.fillText(late ? 'CATCHING UP' : 'IN STEP', lx + 104, ly + 14);
       }
       if (line) {
         hx.font = `400 ${small ? 10 : 11}px ${/[^\x00-ɏ]/.test(line) ? SANS : MONO}`;
@@ -442,24 +476,39 @@ function drawHud(A, u) {
     hx.globalAlpha = 1;
     if (near && !near.left) stationCard(near, lab);
   }
-  // the room clock, bottom left
+  // where the film is, bottom left, in plain words: the film's time, and how far apart everyone is
   const clockA = ss(0.65, 1, 1 - st.intro) * (1 - A.words);
   if (clockA > 0.01) {
     hx.globalAlpha = clockA; hx.font = `700 ${small ? 10 : 11}px ${MONO}`;
     const x = small ? 16 : 28, y = h - (small ? 22 : 28);
-    hx.fillStyle = st.wait === 1 ? '#ff2a6d' : '#00f0ff'; cutRect(x, y - 13, 96, 18, 4); hx.fill();
-    hx.fillStyle = '#07040f'; hx.fillText('ROOM CLOCK', x + 8, y);
-    hx.fillStyle = '#efeaff'; hx.font = `400 ${small ? 11 : 12}px ${MONO}`; hx.fillText(tc(st.film), x + 106, y);
-    if (!small) {
-      const here = A.arrive.reduce((s, v) => s + (v > 0.5 ? 1 : 0), 0) - (A.hostGone > 0.5 ? 1 : 0);
-      let t2 = '', c2 = '#9184bc';
-      if (st.wait === 1) { t2 = `paused  ·  waiting for ${HANDLES[SLOW]}`; c2 = '#ff2a6d'; }
-      else if (st.p < 0.16) t2 = 'invite sent  ·  peer to peer, no server in the middle';
-      else if (st.p < 0.36) t2 = `${here} of 8 here  ·  one copy of the film is enough`;
-      else { const spread = Math.round(A.desync * 2400); t2 = `spread ${spread} ms  ·  ${here} stations, each linked to every other`; c2 = spread > 40 ? '#ff2a6d' : '#9184bc'; }
-      hx.fillStyle = c2; hx.fillText(t2, x + 220, y);
-    }
+    hx.fillStyle = st.wait === 1 ? '#ff2a6d' : '#00f0ff'; cutRect(x, y - 13, 76, 18, 4); hx.fill();
+    hx.fillStyle = '#07040f'; hx.fillText('THE FILM', x + 8, y);
+    const fm = Math.floor(st.film / 60), fs = st.film % 60;
+    hx.fillStyle = '#efeaff'; hx.font = `400 ${small ? 11 : 12}px ${MONO}`; hx.fillText(`${String(fm).padStart(2, '0')}:${fs.toFixed(1).padStart(4, '0')}`, x + 86, y);
+    const here = A.arrive.reduce((a2, v) => a2 + (v > 0.5 ? 1 : 0), 0) - (A.hostGone > 0.5 ? 1 : 0);
+    let t2 = '', c2 = '#9184bc';
+    const spread = A.desync * 2.4;
+    if (st.wait === 1) { t2 = `paused for ${HANDLES[SLOW]}, who is buffering`; c2 = '#ff2a6d'; }
+    else if (st.p < 0.16) t2 = 'the invite goes out, peer to peer, with no server in the middle';
+    else if (st.p < 0.26) t2 = `${here} of 8 friends here`;
+    else if (st.p < 0.36) t2 = 'only one of them has the film; it streams to the others';
+    else if (A.hostGone > 0.5) t2 = 'the host left; the film plays on for everyone';
+    else if (spread > 0.04) { t2 = `everyone is ${spread.toFixed(1)} s apart`; c2 = '#ff2a6d'; }
+    else t2 = 'everyone at the same moment';
+    if (!small || st.wait === 1) { hx.fillStyle = c2; hx.fillText(small ? t2.slice(0, 34) : t2, small ? x : x + 160, small ? y - 22 : y); }
     hx.globalAlpha = 1;
+  }
+  // the end: left alone, the room starts again: a countdown in plain words and a thin line running out
+  if (st.endT >= 0 && st.ident === 'done' && !reduced) {
+    const left = Math.max(0, RESTART - (st.time - st.endT));
+    if (st.time - st.endT > 6) {
+      const a3 = ss(6, 8, st.time - st.endT);
+      hx.globalAlpha = a3 * 0.85; hx.font = `400 ${small ? 10 : 11}px ${MONO}`; hx.fillStyle = '#9184bc'; hx.textAlign = 'center';
+      hx.fillText(`THE ROOM STARTS AGAIN IN ${Math.ceil(left)} S  ·  SCROLL UP TO GO BACK`, w / 2, h - (small ? 22 : 28));
+      hx.fillStyle = '#00f0ff'; const bw = Math.min(260, w * 0.5); hx.globalAlpha = a3 * 0.6;
+      hx.fillRect(w / 2 - bw / 2, h - (small ? 16 : 20), bw * (left / RESTART), 1);
+      hx.textAlign = 'left'; hx.globalAlpha = 1;
+    }
   }
   // the rail
   const rx = w - (small ? 14 : 26), r0 = h * 0.14, r1 = h * 0.86;
@@ -507,10 +556,19 @@ function drawOpening(w, h, small) {
   const q = st.ident === 'play' ? (st.time - st.identT) / IDENT : 0;
   const grow = st.ident === 'play' ? 1 : 0.15 + 0.85 * st.loadShown;
   const len = full * (st.ident === 'play' ? Math.min(1, st.loadShown + ss(0, 0.14, q)) : grow);
-  const fade = st.ident === 'play' ? 1 - ss(0.12, 0.2, q) : 1;
-  if (fade > 0.01) {
+  const fade = st.ident === 'play' ? 1 - ss(0.12, 0.2, q) : st.ident === 'bridge' ? 0 : 1;
+  if (fade > 0.01 && !(film && film.active)) {
     hx.globalAlpha = fade * 0.18; hx.fillStyle = '#00f0ff'; hx.fillRect(x - 6, cy - len / 2, 12, len);
     hx.globalAlpha = fade; hx.fillRect(x - 1, cy - len / 2, 2, len);
+  }
+  // DEM: a shockwave in the mark's own shape (a cut-corner square) expands from it and fades
+  if (st.shock >= 0 && st.time - st.shock < 1.1) {
+    const a = st.time - st.shock, k = 1 + a * 2.2;
+    const [x0, y0] = toScreen(-48 * k, 48 * k, 0, w, h), [x1, y1] = toScreen(48 * k, -48 * k, 0, w, h);
+    const c = Math.min(Math.abs(x1 - x0), Math.abs(y1 - y0)) * 0.06;
+    hx.globalAlpha = (1 - a / 1.1) * 0.8; hx.strokeStyle = '#efeaff'; hx.lineWidth = 2 * (1 - a / 1.1) + 0.5;
+    hx.beginPath(); hx.moveTo(x0, y0); hx.lineTo(x1 - c, y0); hx.lineTo(x1, y0 + c); hx.lineTo(x1, y1); hx.lineTo(x0 + c, y1); hx.lineTo(x0, y1 - c); hx.closePath(); hx.stroke();
+    hx.globalAlpha = 1;
   }
   if (st.ident === 'wait') {
     hx.font = `400 ${small ? 10 : 11}px ${MONO}`; hx.textAlign = 'center'; hx.textBaseline = 'alphabetic';
@@ -584,6 +642,18 @@ const CAP = Q.get('capture');
 const NODRAW = Q.has('nodraw');
 const MANUAL = Q.has('manual'); // a recording steps the page one frame at a time (__art.step), so it is exact
 const capLog = [], soundLog = []; let capPings = [];
+// the opening's film (js/film.js): not for the still version, the sound-only render or a page without WebGL;
+// recordings seek it frame by frame so they stay exact
+const FILM_FADE = 0.3; // the handover flash's fall, seconds
+const T_WORLD = 66.8; // the mark's T, top to foot, in world units (measured on the live wall at 1280x720 and 390x844)
+const film = (() => { try { return !reduced && !NODRAW && !Q.has('nofilm') && !root.classList.contains('nogl') ? new Film(document.getElementById('film'), { exact: !!CAP }) : null; } catch { return null; } })();
+// the still version: the film's last frame, the sharp Wall on the screen, then straight to the wall
+if (reduced) {
+  const im = document.getElementById('filmstill');
+  im.src = new URL(innerHeight > innerWidth ? '../film/d1-last-portrait.webp' : '../film/d1-last.webp', import.meta.url).href;
+  im.hidden = false; im.style.opacity = '1';
+  setTimeout(() => { im.style.opacity = '0'; setTimeout(() => { im.hidden = true; }, 1000); }, 2200);
+}
 if (CAP === 'play') {
   for (const k of Object.getOwnPropertyNames(Sound.prototype)) {
     if (k === 'constructor' || typeof sound[k] !== 'function' || ['restart', 'nextGrid', 'shot', 'begin'].includes(k)) continue;
@@ -615,14 +685,50 @@ function frame(now) {
   st.intro = reduced ? 0 : 1 - ss(0.0, 0.07, st.p);
   // the opening: wait for a press (and for the ident's sound, briefly), play it, then let the piece begin
   if (st.ident === 'wait' && st.identAsked >= 0 && (progress.ident || CAP || st.time - st.identAsked > 6)) {
-    st.ident = 'play'; st.identT = st.time; safe(() => sound.ident());
+    st.ident = 'play'; st.identT = st.time; st.identAt = null; safe(() => { sound.identAt = null; sound.ident(); st.identAt = sound.identAt; });
+    safe(() => film && film.start()); // the rendered opening, if it is ready; otherwise the live one shows
   }
-  if (st.ident === 'play' && st.time - st.identT >= IDENT) { st.ident = 'done'; st.started = true; st.idle = 0; st.hopsDone = 0; st.arrived = 0; }
-  if (st.ident !== 'done') { st.p = 0; st.target = 0; st.intro = 1; }
-  const q = st.ident === 'wait' ? 0 : st.ident === 'play' ? (st.time - st.identT) / IDENT : 1;
+  if (st.ident === 'play' && st.time - st.identT >= IDENT) { st.ident = 'done'; st.started = true; st.idle = 0; st.hopsDone = 0; st.arrived = 0; st.sparks = 0; st.lastAct = 0; }
+  // the end: left alone for a while, the room starts again: a countdown, the bridge, and the mark breaking apart
+  if (st.ident === 'done' && !reduced && st.p > 0.985) {
+    if (st.endT < 0) st.endT = st.time;
+    if (st.time - st.endT > RESTART) {
+      st.ident = 'bridge'; st.bridgeT = st.time; st.endT = -1; st.bridgeHit = 2.5;
+      safe(() => { st.bridgeHit = sound.bridge() || 2.5; });
+    }
+  } else if (st.p < 0.98) st.endT = -1;
+  if (st.ident === 'bridge' && st.time - st.bridgeT >= st.bridgeHit) {
+    safe(() => film && film.reset()); // the loop starts mid-opening, live
+    st.identAt = null; // and the ident's sound is not playing, so nothing to follow
+    st.ident = 'play'; st.identT = st.time - 0.57 * IDENT; st.p = 0; st.target = 0;
+    st.wait = 0; st.hopsDone = 0; st.arrived = 0; st.sparks = 0; st.lastAct = 0; st.hold = 0; lastHostGone = 0; st.started = true;
+  }
+  if (st.ident !== 'done' && st.ident !== 'bridge') { st.p = 0; st.target = 0; st.intro = 1; }
+  const q = st.ident === 'wait' ? 0 : st.ident === 'play' ? (st.time - st.identT) / IDENT : st.ident === 'bridge' ? 0.5 : 1;
   const A = acts(st.p);
   A.identOn = 1; A.identMode = 0; A.identBreak = 1;
   if (st.ident !== 'done') identActs(A, q);
+  // a slow page's frame clock falls behind real time; the ident's sound does not, so the opening catches up with it
+  // (forward only, and not in recordings, which step the clock exactly)
+  if (st.ident === 'play' && !CAP && sound.ctx && sound.ctx.state === 'running' && st.identAt != null && st.time - st.identT < LAND + 1) {
+    const ahead = sound.ctx.currentTime - st.identAt + 0.03 - (st.time - st.identT);
+    if (ahead > 0.1) st.identT -= ahead;
+  }
+  const it = st.ident === 'play' ? st.time - st.identT : -1; // seconds into the opening
+  // the film follows the ident as it is heard: the sound is scheduled 30 ms after the press (audio.js ident), the
+  // speakers add their latency, and the picture leads the sound by the approved clip's offset (film.js LEAD); on the
+  // landing boom it crossfades into the live wall (lit, flashing), which breaks into grains at 0.57 of IDENT
+  if (film && film.active) safe(() => {
+    const ctx = sound.ctx, lat = CAP ? 0 : ctx ? (ctx.outputLatency || 0) + (ctx.baseLatency || 0) : 0;
+    // the sound's own clock when it is playing (a slow page's frame clock falls behind real time; the sound does
+    // not), else the page's; recordings step the page's clock, so they keep it
+    const heard = !CAP && ctx && ctx.state === 'running' && st.identAt != null ? ctx.currentTime - st.identAt - lat : it - 0.03 - lat;
+    // the live T's height on screen while the opening frames the mark (camera(): the eye at 1.08 Dm on the axis)
+    const ar = innerWidth / innerHeight, pr = ar < 0.9, Dt = Math.max((pr ? 96 / 0.5 : 96 / 0.6) / 2, (pr ? 64 : 0) / ar);
+    film.update(it >= 0 ? heard + FILM_LEAD : 0, LAND, FILM_FADE, innerHeight * T_WORLD / (2 * 1.08 * Dt));
+  });
+  if (it >= LAND && st.shock < 0) { st.shock = st.time; st.flash = 1; } // the landing: the flash, the shockwave, the punch
+  if (st.ident === 'wait' || (st.ident === 'play' && it < LAND)) st.shock = -1;
   if (reduced) { A.desync = 0; A.mesh = 0.35; }
   // waiting for the slowest: once the room is together, one friend buffers for three seconds and everyone waits
   if (!reduced) {
@@ -641,10 +747,14 @@ function frame(now) {
   // camera
   const aspect = innerWidth / innerHeight;
   const cam = camera(st.p, aspect);
-  if (st.ident !== 'done') { // the opening frames the mark in the middle, then pulls back into the room
+  if (st.ident === 'bridge') { // from the end screen to the mark in the middle, ready to break apart again
+    const e = [0, 0, cam.Dm * 1.08], k = ss(0, 1, (st.time - st.bridgeT) / st.bridgeHit);
+    cam.eye = cam.eye.map((v, i) => v + (e[i] - v) * k); cam.look = cam.look.map((v) => v * (1 - k)); cam.roll *= 1 - k;
+  } else if (st.ident !== 'done') { // the opening frames the mark in the middle, then pulls back into the room
     const k = ss(0.57, 1, q), e = [0, 0, cam.Dm * 1.08];
     cam.eye = cam.eye.map((v, i) => e[i] + (v - e[i]) * k); cam.look = cam.look.map((v) => v * k); cam.roll *= k;
   }
+  if (st.shock >= 0 && !reduced) cam.eye[2] *= 1 - 0.07 * Math.exp(-(st.time - st.shock) * 7) * Math.sin(Math.min(Math.PI, (st.time - st.shock) * 30)); // the punch
   camNow = cam;
   pointerStep(dt);
   const par = reduced ? [0, 0] : [(st.smx - 0.5) * 2, (st.smy - 0.5) * 2];
@@ -659,9 +769,14 @@ function frame(now) {
 
   // the invite reaching each screen, and the friends landing: on the beat, in the sound
   if (!reduced && st.ident === 'done') {
-    const J = A.join * 1.02; let reached = 0; while (reached < wall.hopT.length && J >= wall.hopT[reached] && A.join > 0) reached++;
-    if (reached > st.hopsDone && st.vel >= 0) { tileCentre(D, wall.hops[reached - 1], u, cpos); const [sx] = project(VP, cpos[0], cpos[1], cpos[2]); safe(() => sound.hop(reached - 1, Math.max(-1, Math.min(1, sx)))); }
-    st.hopsDone = reached;
+    // each act begins with its own transition sound, on the beat (forward only)
+    let act = 0; while (act < ACTS.length - 1 && st.p >= ACTS[act + 1][2]) act++;
+    if (act > st.lastAct && st.vel >= 0) safe(() => sound.transition(act));
+    st.lastAct = act;
+    // the invite leaves for each friend in turn: a pink note panned toward where that friend is
+    let sent = 0; for (let k = 1; k < 8; k++) if (A.join >= sparkAt(k)) sent = k;
+    if (sent > st.sparks && st.vel >= 0) safe(() => sound.hop(sent - 1, Math.max(-1, Math.min(1, ARRIVE_DIR[sent][0]))));
+    st.sparks = sent;
     let arrived = 0; A.arrive.forEach((v, k) => { if (k && v > 0.97) arrived |= 1 << k; });
     for (let k = 1; k < 8; k++) if ((arrived & (1 << k)) && !(st.arrived & (1 << k)) && st.vel >= 0) {
       tileCentre(D, wall.peers[k], u, cpos); const [sx] = project(VP, cpos[0], cpos[1], cpos[2]); safe(() => sound.arrive(k, Math.max(-1, Math.min(1, sx))));
@@ -673,7 +788,7 @@ function frame(now) {
     // scene
     gl.bindFramebuffer(gl.FRAMEBUFFER, scene.fb); gl.viewport(0, 0, W, H);
     gl.disable(gl.BLEND); gl.disable(gl.DEPTH_TEST);
-    P.ground.use().f('uRes', W, H).f('uPar', eye[0] * 0.002, eye[1] * 0.002 + eye[2] * 0.0004).f('uTime', st.time).f('uGlow', A.together);
+    P.ground.use().f('uRes', W, H).f('uPar', eye[0] * 0.002, eye[1] * 0.002 + eye[2] * 0.0004).f('uTime', st.time).f('uGlow', A.together * (1 + 1.5 * sound.breath * A.mark));
     gl.bindVertexArray(null); blit(scene.fb, W, H);
     gl.enable(gl.DEPTH_TEST); gl.depthFunc(gl.LEQUAL); gl.clear(gl.DEPTH_BUFFER_BIT);
     gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
@@ -684,8 +799,16 @@ function frame(now) {
     tileCentre(D, wall.host, u, cpos);
     common(P.tile.use()).tex('uFluid', fieldTex).f('uDesync', A.desync).f('uFluidK', 1 - A.mark).f('uBuffer', st.buffer).f('uHostPos', cpos[0], cpos[1], cpos[2])
       .f('uMark', A.mark).f('uFilmT', st.film).f('uFog', 0.0006).f('uNewHost', A.newHost).f('uFilmHue', 1).f('uLock', st.flash).f('uFrag', 0)
-      .f('uIdent', A.identOn).f('uIdentMode', A.identMode).f('uCalm', Math.max(A.mark * (st.ident === 'done' ? 1 : 0), A.identMode));
+      .f('uIdent', A.identOn).f('uIdentMode', A.identMode).f('uCalm', Math.max(A.mark * (st.ident === 'done' ? 1 : 0), A.identMode))
+      .f('uBreath', reduced ? 0 : sound.breath * A.mark).f('uShift', 0, 0, 0).f('uTint', 0, 0, 0, 0);
+    const split = st.ident === 'play' ? identSplit(it) : 0;
+    if (split > 0) P.tile.f('uShift', -split, 0, 0).f('uTint', 0, 0.94, 1, 1.4 * (0.55 + 0.6 * notePulse(it, false))); // the leading voice's mark, cyan, left
     gl.bindVertexArray(tileVao); gl.drawArraysInstanced(gl.TRIANGLES, 0, 6, N);
+    if (split > 0) { // and the pink one, right, not yet together
+      gl.depthMask(false); gl.blendFunc(gl.ONE, gl.ONE);
+      P.tile.f('uShift', split, 0, 0).f('uTint', 1, 0.16, 0.43, 1.1 * (0.55 + 0.6 * notePulse(it, true))); gl.drawArraysInstanced(gl.TRIANGLES, 0, 6, N);
+      P.tile.f('uShift', 0, 0, 0).f('uTint', 0, 0, 0, 0); gl.depthMask(true); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+    }
     if (A.fill > 0 && A.fill < 1) { // the film streaming out from the one screen that has it
       gl.depthMask(false); gl.blendFunc(gl.ONE, gl.ONE);
       P.tile.f('uFrag', 1); gl.drawArraysInstanced(gl.TRIANGLES, 0, 6, N);
@@ -707,7 +830,8 @@ function frame(now) {
     gl.disable(gl.BLEND);
 
     // composite
-    const aberr = 0.0012 + A.desync * 0.0035 * ss(0.3, 0.4, st.p) + Math.min(0.012, Math.abs(st.vel) * 0.03);
+    const aberr = 0.0012 + A.desync * 0.0035 * ss(0.3, 0.4, st.p) + Math.min(0.012, Math.abs(st.vel) * 0.03)
+      + (st.ident === 'play' && it > PASS0 && it < LAND ? 0.006 : 0) + (st.shock >= 0 ? 0.02 * Math.exp(-(st.time - st.shock) * 6) : 0);
     P.comp.use().tex('uScene', scene.t).tex('uBloom', bloom[0].t).tex('uFluid', black).tex('uStreakSrc', bloom[Math.min(2, bloom.length - 1)].t).f('uStreak', tier === 'low' ? 0 : 0.07).f('uRes', W, H).f('uTime', st.time)
       .f('uAberr', reduced ? 0.002 : aberr).f('uBloomK', 0.9).f('uGrain', 0.03 * (1 - 0.6 * A.mark)).f('uFade', reduced ? 1 : Math.min(1, st.time * 0.6)).f('uFluidK', 0).f('uFlash', st.flash);
     blit(null, W, H);
@@ -717,9 +841,11 @@ function frame(now) {
   }
   // sound
   const offs = wall.peers.map((ti) => D[ti * STRIDE + 14] * Math.min(1, Math.max(0, A.desync * 1.25 - D[ti * STRIDE + 13] * 0.25)));
-  const present = A.arrive.map((v, k) => (k === 0 ? ss(0.07, 0.1, st.p) : v));
+  const opening = st.ident !== 'done'; // during the opening and the bridge the room is empty, and it is not the end
+  const present = A.arrive.map((v, k) => (opening ? 0 : k === 0 ? ss(0.07, 0.1, st.p) : v));
   const filled = wall.peers.map((_, k) => (k === 0 ? 1 : Math.min(1, Math.max(0, (A.fill - peerFillT[k]) / 0.07))));
-  safe(() => sound.update({ offsets: offs, present, filled, together: 1 - A.desync, hold: st.hold, p: st.p, intro: st.intro, mark: A.mark, dt }));
+  safe(() => sound.update({ offsets: offs, present, filled, together: 1 - A.desync, hold: st.hold, p: opening ? 0 : st.p, intro: opening ? 1 : st.intro, mark: opening ? 0 : A.mark, dt,
+    px: st.smx, py: st.smy, pspeed: st.pspeed, scroll: st.vel }));
   if (!NODRAW) drawWave(A);
   // the rail's slider value
   const pct = Math.round(st.p * 100);
@@ -754,7 +880,8 @@ async function renderAudio(n) {
   return btoa(bin);
 }
 Object.assign(window.__art, {
-  capLog, soundLog, renderAudio,
+  capLog, soundLog, renderAudio, film,
+  filmSettled: () => (film && film.seeking) || Promise.resolve(),
   playFrame(f) {
     Object.assign(st, { target: f.target, holding: f.holding, mx: f.mx, my: f.my, started: f.started, idle: f.idle });
     if (f.ask && st.identAsked < 0) st.identAsked = st.time; // the press that starts the opening

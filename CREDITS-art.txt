@@ -12,12 +12,17 @@ browser and no libraries: nothing from npm or a CDN is shipped, and nothing is l
 
 The score (art/score/techno, the default, and art/score/cine, at ?score=cine)
   Composed for this page and rendered offline by target/team/roster/site-art/sound/render.py. Every sound in it
-  is synthesised there (oscillators, noise, additive plucks, FM bells, a state-variable filter); no samples or
+  is synthesised there or by the synthesisers below (oscillators, noise, additive plucks, FM voices, filters); no samples or
   recordings by anyone else are used. The files are Ogg Opus (and AAC in MP4 for browsers without Opus),
   encoded with ffmpeg. The tools used to make them, none of which is shipped with the site:
     - NumPy 2.3.5 (BSD-3-Clause) and SciPy 1.16.3 (BSD-3-Clause): synthesis and filters
     - pedalboard 0.9.17 by Spotify (GPL-3.0): reverb, delay, chorus, compression and filters, used offline only;
       only the rendered audio is in the site, not the library
+    - Dexed 1.1.0 by Pascal Gauthier and contributors (GPL-3.0), a DX7 FM synthesiser, loaded as a VST3 through
+      pedalboard: the kalimba that plays Tandem's hook (D F E A) in the opening, the parts, the transitions, the
+      pointer's notes and the outro, on voices programmed for this page; used offline only, not shipped
+    - Surge XT 1.3.4 by the Surge Synth Team (GPL-3.0), loaded as a VST3 through pedalboard: a supersaw used in
+      the ident candidates; used offline only, not shipped
     - FFmpeg with libopus (BSD-3-Clause) and its AAC encoder: encoding
 
 Fonts, shared with the rest of the site (../fonts, see ../fonts/LICENSES.txt), all under the SIL Open Font

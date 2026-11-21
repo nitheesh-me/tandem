@@ -1,6 +1,6 @@
 {
  "makeup": 0.95,
- "outroGain": 3.88,
+ "outroGain": 3.08,
  "name": "cine",
  "title": "Cinematic synth score",
  "description": "90 BPM in D minor: taiko, a low ostinato, a ticking clock, string arpeggio, string pad, big hits, a flute call and drums, phasing into one pulse",
@@ -11,7 +11,7 @@
  "parts": [
   {
    "handle": "neonquokka",
-   "role": "ostinato",
+   "role": "ostinato and the hook",
    "file": "part-0.wav"
   },
   {
@@ -26,7 +26,7 @@
   },
   {
    "handle": "fizzwhale",
-   "role": "strings",
+   "role": "strings and the hook's echo",
    "file": "part-3.wav"
   },
   {
@@ -60,6 +60,8 @@
   "riser": "riser.wav",
   "outro": "outro.wav",
   "ident": "ident.wav",
+  "buffer": "buffer.wav",
+  "bridge": "bridge.wav",
   "notes": [
    "note-0.wav",
    "note-1.wav",
@@ -67,6 +69,41 @@
    "note-3.wav",
    "note-4.wav"
   ],
+  "transitions": [
+   {
+    "file": "tr-1.wav",
+    "hit": 0.3
+   },
+   {
+    "file": "tr-2.wav",
+    "hit": 1.3
+   },
+   {
+    "file": "tr-3.wav",
+    "hit": 0.1
+   },
+   {
+    "file": "tr-4.wav",
+    "hit": 0.2
+   },
+   {
+    "file": "tr-5.wav",
+    "hit": 1.2
+   },
+   {
+    "file": "tr-6.wav",
+    "hit": 0.1
+   },
+   {
+    "file": "tr-7.wav",
+    "hit": 0.4
+   },
+   {
+    "file": "tr-8.wav",
+    "hit": 0.0
+   }
+  ],
+  "bridgeHit": 3.1667,
   "arrive": {
    "velvetkoi": "arrive-1.wav",
    "tofu.rocket": "arrive-2.wav",

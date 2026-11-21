@@ -15,7 +15,7 @@ const vec3 GROUND = vec3(.027, .016, .059);
 const vec3 CYAN = vec3(0., .94, 1.);
 const vec3 PINK = vec3(1., .165, .427);
 const vec3 VIOLET = vec3(.706, .298, 1.);
-uniform float uFilmHue, uCalm;
+uniform float uFilmHue, uCalm, uBreath;
 vec3 ramp(float x){
   x = clamp(x, 0., 1.);
   vec3 a = mix(GROUND, vec3(.13, .04, .27), smoothstep(.0, .3, x));
@@ -43,7 +43,7 @@ vec3 film(vec2 w, float t){
   float line = 1. - smoothstep(0., 1.3 * fw, abs(fract(k + .5) - .5));
   float major = 1. - smoothstep(0., 2. * fw, abs(fract(k * .25 + .5) - .5) * 4.);
   // calm (at the end, under the mark): the lines fade to a whisper and the playhead stops sweeping
-  float lk = 1. - .85 * uCalm;
+  float lk = 1. - .85 * uCalm + .25 * uCalm * uBreath;
   c = mix(c, vec3(.82, .9, 1.) * 1.25, line * (.35 + .4 * smoothstep(.3, .7, f)) * lk);
   c += mix(CYAN, vec3(1.), .25) * major * .7 * lk;
   // a slow light travelling over the map
@@ -136,8 +136,8 @@ precision highp float;
 ${TILE_COMMON}
 uniform mat4 uVP;
 uniform sampler2D uFluid;
-uniform float uDesync, uFluidK, uFrag, uBuffer;
-uniform vec3 uHostPos;
+uniform float uDesync, uFluidK, uFrag, uBuffer, uBreath;
+uniform vec3 uHostPos, uShift;
 layout(location = 0) in vec2 aCorner;
 out vec2 vLocal; out vec2 vWall; out vec2 vHs;
 flat out float vOff; flat out float vRole; flat out float vFlags; flat out float vCut; flat out float vA; flat out float vWave;
@@ -168,7 +168,8 @@ void main(){
   // a screen about to pass the viewer shrinks away instead of filling the frame with one dark slab
   float nearK = .08 + .92 * smoothstep(14., 75., pc.w);
   vec2 p = aCorner * t.hs * t.scale * (t.flags == 3. ? 1. : nearK);
-  vec3 wp = c + t.R * vec3(p, 0.);
+  // the end screen breathes with the outro: the mark swells a hair on each breath
+  vec3 wp = c * (1. + .012 * uBreath) + t.R * vec3(p * (1. + .02 * uBreath), 0.) + uShift;
   gl_Position = uVP * vec4(wp, 1.);
   vLocal = aCorner * t.hs; vHs = t.hs; vWall = t.rect.xy + aCorner * t.hs;
   float late = clamp(uDesync * 1.25 - t.delay * .25, 0., 1.);
@@ -187,6 +188,7 @@ precision highp float;
 ${NOISE}
 ${FILM}
 uniform float uTime, uMark, uFilmT, uFog, uHostGone, uNewHost, uLock, uBuffer, uIdent, uIdentMode;
+uniform vec4 uTint;
 in vec2 vLocal; in vec2 vWall; in vec2 vHs;
 flat in float vOff; flat in float vRole; flat in float vFlags; flat in float vCut; flat in float vA; flat in float vWave;
 flat in float vJoin; flat in float vFill; flat in float vLate; flat in float vFragU;
@@ -259,6 +261,10 @@ void main(){
     float flash = vRole > 3.5 ? exp(-max(0., uIdent - .97) * 18.) * step(.97, uIdent) : 0.;
     c = mix(c, c * on + PINK * flash * 2., uIdentMode);
   }
+  // at the end the mark glows with the outro's breath
+  c *= 1. + .45 * uBreath * uMark;
+  // the opening's two marks that miss: one cyan, one pink, until they meet
+  if (uTint.a > 0.) c = uTint.rgb * (.05 + .45 * min(dot(c, vec3(.3, .5, .2)), .7)) * uTint.a; // a ghost in one colour, capped so two never blow out
   c = mix(GROUND, c, exp(-max(vDepth - 260., 0.) * uFog));
   o = vec4(c * cov, cov);
 }`;
